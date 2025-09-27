@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // event creator
             $table->string('title');
             $table->text('description');
-            $table->enum('type', ['workshop', 'webinar', 'exchange', 'meetup', 'cleanup', 'other'])->default('workshop');
+            $table->string('type')->check("type IN ('workshop','cleanup','exhibition','seminar','other')")->default('workshop');
             $table->datetime('starts_at');
             $table->datetime('ends_at');
             $table->text('location_address')->nullable();

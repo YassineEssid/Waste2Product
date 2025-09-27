@@ -11,10 +11,7 @@ use App\Http\Controllers\DashboardController;
 
 // Home page - Smart redirection
 Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('dashboard');
-    }
-    return view('welcome');
+    return redirect()->route('login');
 })->name('home');
 
 // Authentication routes
@@ -31,7 +28,7 @@ Route::get('/waste-items/{wasteItem}', [WasteItemController::class, 'show'])->na
 // Protected routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Waste Items (authenticated actions only)
     Route::get('/waste-items/create', [WasteItemController::class, 'create'])->name('waste-items.create');
     Route::post('/waste-items', [WasteItemController::class, 'store'])->name('waste-items.store');
@@ -41,22 +38,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-items', [WasteItemController::class, 'my'])->name('waste-items.my');
     Route::patch('/waste-items/{wasteItem}/claim', [WasteItemController::class, 'claim'])->name('waste-items.claim');
     Route::patch('/waste-items/{wasteItem}/toggle-availability', [WasteItemController::class, 'toggleAvailability'])->name('waste-items.toggle-availability');
-    
+
     // Repair Requests
     Route::resource('repairs', RepairRequestController::class);
     Route::post('/repairs/{repair}/assign', [RepairRequestController::class, 'assign'])->name('repairs.assign');
     Route::post('/repairs/{repair}/start', [RepairRequestController::class, 'start'])->name('repairs.start');
     Route::post('/repairs/{repair}/complete', [RepairRequestController::class, 'complete'])->name('repairs.complete');
-    
+
     // Transformations
     Route::resource('transformations', TransformationController::class);
     Route::post('/transformations/{transformation}/publish', [TransformationController::class, 'publish'])->name('transformations.publish');
-    
+
     // Community Events
     Route::resource('events', CommunityEventController::class);
     Route::post('/events/{event}/register', [CommunityEventController::class, 'register'])->name('events.register');
     Route::delete('/events/{event}/unregister', [CommunityEventController::class, 'unregister'])->name('events.unregister');
-    
+
     // Marketplace
     Route::resource('marketplace', MarketplaceItemController::class);
     Route::get('/marketplace/category/{category}', [MarketplaceItemController::class, 'byCategory'])->name('marketplace.category');
@@ -68,3 +65,5 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/statistics', [App\Http\Controllers\Admin\StatisticsController::class, 'index'])->name('statistics');
 });
+
+

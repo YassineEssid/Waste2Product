@@ -20,20 +20,20 @@
                 <form method="POST" action="{{ route('events.update', $event) }}" enctype="multipart/form-data" id="eventForm">
                     @csrf
                     @method('PUT')
-                    
+
                     <!-- Basic Information -->
                     <div class="form-section">
                         <h4 class="section-title">
                             <i class="fas fa-info-circle me-2"></i>Basic Information
                         </h4>
-                        
+
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label required">Event Title</label>
-                                <input type="text" 
-                                       class="form-control @error('title') is-invalid @enderror" 
-                                       name="title" 
-                                       value="{{ old('title', $event->title) }}" 
+                                <input type="text"
+                                       class="form-control @error('title') is-invalid @enderror"
+                                       name="title"
+                                       value="{{ old('title', $event->title) }}"
                                        required>
                                 @error('title')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -57,10 +57,10 @@
 
                             <div class="col-md-6">
                                 <label class="form-label">Maximum Participants</label>
-                                <input type="number" 
-                                       class="form-control @error('max_participants') is-invalid @enderror" 
-                                       name="max_participants" 
-                                       value="{{ old('max_participants', $event->max_participants) }}" 
+                                <input type="number"
+                                       class="form-control @error('max_participants') is-invalid @enderror"
+                                       name="max_participants"
+                                       value="{{ old('max_participants', $event->max_participants) }}"
                                        min="1"
                                        placeholder="Leave empty for unlimited">
                                 @error('max_participants')
@@ -70,9 +70,9 @@
 
                             <div class="col-12">
                                 <label class="form-label required">Description</label>
-                                <textarea class="form-control @error('description') is-invalid @enderror" 
-                                          name="description" 
-                                          rows="4" 
+                                <textarea class="form-control @error('description') is-invalid @enderror"
+                                          name="description"
+                                          rows="4"
                                           required>{{ old('description', $event->description) }}</textarea>
                                 @error('description')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -86,14 +86,14 @@
                         <h4 class="section-title">
                             <i class="fas fa-calendar-clock me-2"></i>Date & Location
                         </h4>
-                        
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label required">Start Date & Time</label>
-                                <input type="datetime-local" 
-                                       class="form-control @error('event_date') is-invalid @enderror" 
-                                       name="event_date" 
-                                       value="{{ old('event_date', $event->event_date->format('Y-m-d\TH:i')) }}" 
+                                <input type="datetime-local"
+                                       class="form-control @error('event_date') is-invalid @enderror"
+                                       name="event_date"
+                                       value="{{ old('event_date', $event->starts_at ? $event->starts_at->format('Y-m-d\TH:i') : '') }}"
                                        required>
                                 @error('event_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -102,10 +102,10 @@
 
                             <div class="col-md-6">
                                 <label class="form-label required">End Date & Time</label>
-                                <input type="datetime-local" 
-                                       class="form-control @error('end_date') is-invalid @enderror" 
-                                       name="end_date" 
-                                       value="{{ old('end_date', $event->end_date->format('Y-m-d\TH:i')) }}" 
+                                <input type="datetime-local"
+                                       class="form-control @error('end_date') is-invalid @enderror"
+                                       name="end_date"
+                                       value="{{ old('end_date', $event->ends_at ? $event->ends_at->format('Y-m-d\TH:i') : '') }}"
                                        required>
                                 @error('end_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -114,11 +114,11 @@
 
                             <div class="col-12">
                                 <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           name="is_virtual" 
-                                           id="is_virtual" 
-                                           value="1" 
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="is_virtual"
+                                           id="is_virtual"
+                                           value="1"
                                            {{ old('is_virtual', $event->is_virtual) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_virtual">
                                         <i class="fas fa-video me-2"></i>This is a virtual event
@@ -128,10 +128,10 @@
 
                             <div class="col-12" id="locationField">
                                 <label class="form-label required">Location</label>
-                                <input type="text" 
-                                       class="form-control @error('location') is-invalid @enderror" 
-                                       name="location" 
-                                       value="{{ old('location', $event->location) }}" 
+                                <input type="text"
+                                       class="form-control @error('location') is-invalid @enderror"
+                                       name="location"
+                                       value="{{ old('location', $event->location_address) }}"
                                        required>
                                 @error('location')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -145,37 +145,37 @@
                         <h4 class="section-title">
                             <i class="fas fa-image me-2"></i>Event Image
                         </h4>
-                        
+
                         <!-- Current Image -->
-                        @if($event->image)
+                        @if($event->firstImage)
                             <div class="current-image-section mb-3">
                                 <label class="form-label">Current Image</label>
                                 <div class="current-image">
-                                    <img src="{{ Storage::url($event->image) }}" alt="Current event image" class="img-fluid rounded">
+                                    <img src="{{ Storage::url($event->firstImage) }}" alt="Current event image" class="img-fluid rounded">
                                     <div class="image-overlay">
                                         <span class="badge bg-primary">Current Image</span>
                                     </div>
                                 </div>
                             </div>
                         @endif
-                        
+
                         <div class="image-upload-area" id="imageUploadArea">
-                            <input type="file" 
-                                   class="form-control @error('image') is-invalid @enderror" 
-                                   name="image" 
-                                   id="image" 
+                            <input type="file"
+                                   class="form-control @error('image') is-invalid @enderror"
+                                   name="image"
+                                   id="image"
                                    accept="image/*"
                                    hidden>
-                            
+
                             <div class="upload-placeholder" id="uploadPlaceholder">
                                 <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
-                                <h5>{{ $event->image ? 'Upload New Image' : 'Upload Event Image' }}</h5>
+                                <h5>{{ $event->firstImage ? 'Upload New Image' : 'Upload Event Image' }}</h5>
                                 <p class="text-muted mb-3">Click to browse or drag and drop your image here</p>
                                 <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('image').click()">
-                                    Choose {{ $event->image ? 'New ' : '' }}Image
+                                    Choose {{ $event->firstImage ? 'New ' : '' }}Image
                                 </button>
                             </div>
-                            
+
                             <div class="image-preview" id="imagePreview" style="display: none;">
                                 <img id="previewImg" src="" alt="Preview">
                                 <div class="image-overlay">
@@ -185,11 +185,11 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         @error('image')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
-                        
+
                         <div class="form-text">
                             <i class="fas fa-info-circle me-1"></i>
                             Leave empty to keep current image. Upload new image to replace.
@@ -240,7 +240,7 @@
                 <div class="event-preview">
                     <h6>{{ $event->title }}</h6>
                     <small class="text-muted">
-                        {{ $event->event_date->format('M j, Y • g:i A') }} • {{ $event->attendees->count() }} participants
+                        {{ $event->starts_at ? $event->starts_at->format('M j, Y • g:i A') : 'Date not set' }} • {{ $event->attendees->count() }} participants
                     </small>
                 </div>
             </div>
@@ -405,17 +405,17 @@
         padding: 1.5rem;
         border-radius: 15px;
     }
-    
+
     .edit-header {
         border-radius: 15px;
         padding: 1.5rem;
     }
-    
+
     .form-actions .d-flex {
         flex-direction: column;
         gap: 1rem;
     }
-    
+
     .form-actions .d-flex:first-child {
         flex-direction: row;
     }
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadPlaceholder = document.getElementById('uploadPlaceholder');
     const imagePreview = document.getElementById('imagePreview');
     const previewImg = document.getElementById('previewImg');
-    
+
     imageInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -442,11 +442,11 @@ document.addEventListener('DOMContentLoaded', function() {
             reader.readAsDataURL(file);
         }
     });
-    
+
     // Virtual event toggle
     const isVirtualCheckbox = document.getElementById('is_virtual');
     const locationInput = document.querySelector('input[name="location"]');
-    
+
     function updateLocationPlaceholder() {
         if (isVirtualCheckbox.checked) {
             locationInput.placeholder = 'e.g., Zoom Meeting, Google Meet link, etc.';
@@ -454,15 +454,15 @@ document.addEventListener('DOMContentLoaded', function() {
             locationInput.placeholder = 'e.g., Central Park Community Center, 123 Main St';
         }
     }
-    
+
     isVirtualCheckbox.addEventListener('change', updateLocationPlaceholder);
     updateLocationPlaceholder(); // Set initial placeholder
-    
+
     // Form validation
     document.getElementById('eventForm').addEventListener('submit', function(e) {
         const startDate = new Date(document.querySelector('input[name="event_date"]').value);
         const endDate = new Date(document.querySelector('input[name="end_date"]').value);
-        
+
         if (endDate <= startDate) {
             e.preventDefault();
             alert('End date must be after start date');
@@ -496,7 +496,7 @@ uploadArea.addEventListener('drop', function(e) {
     e.preventDefault();
     uploadArea.style.borderColor = '#dee2e6';
     uploadArea.style.backgroundColor = '';
-    
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
         document.getElementById('image').files = files;
