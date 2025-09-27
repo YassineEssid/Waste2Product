@@ -1,40 +1,40 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Item: ' . $marketplaceItem->title)
-
 @section('content')
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <!-- Header -->
-            <div class="edit-header text-center mb-5">
-                <div class="edit-icon mb-3">
+            <div class="create-header text-center mb-5">
+                <div class="create-icon mb-3">
                     <i class="fas fa-edit fa-3x text-success"></i>
                 </div>
                 <h1 class="display-5 fw-bold mb-3">Edit Your Item</h1>
-                <p class="text-muted">Update your marketplace listing details and manage your item.</p>
+                <p class="text-muted">Share your eco-friendly creations and sustainable products with the community.</p>
             </div>
 
             <!-- Form Card -->
             <div class="form-card">
-                <form method="POST" action="{{ route('marketplace.update', $marketplaceItem) }}" enctype="multipart/form-data" id="itemForm">
+                <form method="POST" action="{{ route('marketplace.update', ['marketplace' => $marketplace->id]) }}" enctype="multipart/form-data" id="itemForm">
                     @csrf
                     @method('PUT')
-                    
+
                     <!-- Basic Information -->
                     <div class="form-section">
                         <h4 class="section-title">
                             <i class="fas fa-info-circle me-2"></i>Item Information
                         </h4>
-                        
+
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label required">Item Title</label>
-                                <input type="text" 
-                                       class="form-control @error('title') is-invalid @enderror" 
-                                       name="title" 
-                                       value="{{ old('title', $marketplaceItem->title) }}" 
-                                       required>
+                    <input type="text"
+                        class="form-control @error('title') is-invalid @enderror"
+                        name="title"
+                        value="{{ old('title', $marketplace->title) }}"
+                        placeholder="e.g., Handcrafted Wooden Coffee Table"
+                        required>
                                 @error('title')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -45,7 +45,7 @@
                                 <select class="form-select @error('category') is-invalid @enderror" name="category" required>
                                     <option value="">Choose category</option>
                                     @foreach($categories as $category)
-                                        <option value="{{ $category }}" {{ old('category', $marketplaceItem->category) == $category ? 'selected' : '' }}>
+                                        <option value="{{ $category }}" {{ old('category', $marketplace->category) == $category ? 'selected' : '' }}>
                                             {{ ucfirst($category) }}
                                         </option>
                                     @endforeach
@@ -60,7 +60,7 @@
                                 <select class="form-select @error('condition') is-invalid @enderror" name="condition" required>
                                     <option value="">Select condition</option>
                                     @foreach($conditions as $condition)
-                                        <option value="{{ $condition }}" {{ old('condition', $marketplaceItem->condition) == $condition ? 'selected' : '' }}>
+                                        <option value="{{ $condition }}" {{ old('condition', $marketplace->condition) == $condition ? 'selected' : '' }}>
                                             {{ ucfirst(str_replace('_', ' ', $condition)) }}
                                         </option>
                                     @endforeach
@@ -72,13 +72,18 @@
 
                             <div class="col-12">
                                 <label class="form-label required">Description</label>
-                                <textarea class="form-control @error('description') is-invalid @enderror" 
-                                          name="description" 
-                                          rows="4" 
-                                          required>{{ old('description', $marketplaceItem->description) }}</textarea>
+                                <textarea class="form-control @error('description') is-invalid @enderror"
+                                          name="description"
+                                          rows="4"
+                                          placeholder="Describe your item, its story, materials used, dimensions, special features..."
+                                          required>{{ old('description', $marketplace->description) }}</textarea>
                                 @error('description')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                <div class="form-text">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Tell the story of your item. What makes it special? How was it made?
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -88,19 +93,20 @@
                         <h4 class="section-title">
                             <i class="fas fa-dollar-sign me-2"></i>Pricing & Location
                         </h4>
-                        
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label required">Price (USD)</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" 
-                                           class="form-control @error('price') is-invalid @enderror" 
-                                           name="price" 
-                                           value="{{ old('price', $marketplaceItem->price) }}" 
-                                           min="0" 
-                                           step="0.01"
-                                           required>
+                        <input type="number"
+                            class="form-control @error('price') is-invalid @enderror"
+                            name="price"
+                            value="{{ old('price', $marketplace->price) }}"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            required>
                                 </div>
                                 @error('price')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -109,11 +115,12 @@
 
                             <div class="col-md-6">
                                 <label class="form-label required">Location</label>
-                                <input type="text" 
-                                       class="form-control @error('location') is-invalid @enderror" 
-                                       name="location" 
-                                       value="{{ old('location', $marketplaceItem->location) }}" 
-                                       required>
+                    <input type="text"
+                        class="form-control @error('location') is-invalid @enderror"
+                        name="location"
+                        value="{{ old('location', $marketplace->location) }}"
+                        placeholder="e.g., Downtown Seattle, WA"
+                        required>
                                 @error('location')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -121,56 +128,55 @@
 
                             <div class="col-12">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           name="is_available" 
-                                           id="is_available" 
-                                           value="1" 
-                                           {{ old('is_available', $marketplaceItem->is_available) ? 'checked' : '' }}>
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="is_available"
+                                           id="is_available"
+                                           value="1"
+                                           {{ old('is_available', $marketplace->is_available) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_available">
                                         <i class="fas fa-eye me-2"></i>Item is available for purchase
                                     </label>
                                 </div>
                                 <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Uncheck this if your item has been sold or is temporarily unavailable
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    General area for pickup/delivery coordination
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Current Images -->
-                    @if($marketplaceItem->images->count() > 0)
+                    @if($marketplace->images && $marketplace->images->count() > 0)
                         <div class="form-section">
                             <h4 class="section-title">
-                                <i class="fas fa-images me-2"></i>Current Images
+                                <i class="fas fa-images me-2"></i>Item Photos
                             </h4>
-                            
-                            <div class="current-images-grid">
-                                @foreach($marketplaceItem->images as $image)
-                                    <div class="current-image-item" data-image-id="{{ $image->id }}">
-                                        <img src="{{ Storage::url($image->path) }}" alt="Current image">
-                                        <div class="image-overlay">
-                                            <div class="form-check">
-                                                <input class="form-check-input" 
-                                                       type="checkbox" 
-                                                       name="delete_images[]" 
-                                                       value="{{ $image->id }}"
-                                                       id="delete_{{ $image->id }}">
-                                                <label class="form-check-label text-white" for="delete_{{ $image->id }}">
-                                                    <i class="fas fa-trash"></i> Delete
-                                                </label>
+                            @if($marketplace->images && $marketplace->images->count() > 0)
+                                <div class="current-images-grid mb-3">
+                                    @foreach($marketplace->images as $image)
+                                        <div class="current-image-item" data-image-id="{{ $image->id }}">
+                                            <img src="{{ Storage::url($image->path) }}" alt="Current image">
+                                            <div class="image-overlay">
+                                                <div class="form-check">
+                                                    <input class="form-check-input"
+                                                           type="checkbox"
+                                                           name="delete_images[]"
+                                                           value="{{ $image->id }}"
+                                                           id="delete_{{ $image->id }}">
+                                                    <label class="form-check-label text-white" for="delete_{{ $image->id }}">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                            
-                            <div class="form-text">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Check the boxes above to delete images. Add new images below to replace them.
-                            </div>
-                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="form-text mb-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Check the boxes above to delete images. Add new images below to replace them.
+                                </div>
+                            @endif
                     @endif
 
                     <!-- Add New Images -->
@@ -178,32 +184,31 @@
                         <h4 class="section-title">
                             <i class="fas fa-plus me-2"></i>Add New Images
                         </h4>
-                        
+
                         <div class="image-upload-container">
-                            <input type="file" 
-                                   class="form-control @error('images.*') is-invalid @enderror" 
-                                   name="images[]" 
-                                   id="images" 
+                            <input type="file"
+                                   class="form-control @error('images.*') is-invalid @enderror"
+                                   name="images[]"
+                                   id="images"
                                    accept="image/*"
                                    multiple
                                    hidden>
-                            
                             <div class="upload-area" id="uploadArea">
                                 <div class="upload-placeholder text-center" id="uploadPlaceholder">
-                                    <i class="fas fa-cloud-upload-alt fa-4x mb-3 text-success"></i>
-                                    <h5>Add New Photos</h5>
-                                    <p class="text-muted mb-3">Upload additional images or replace existing ones</p>
-                                    <button type="button" class="btn btn-outline-success" onclick="document.getElementById('images').click()">
+                                    <i class="fas fa-cloud-upload-alt fa-4x mb-3 text-primary"></i>
+                                    <h5>Upload Item Photos</h5>
+                                    <p class="text-muted mb-3">Drag and drop images here, or click to browse</p>
+                                    <p class="text-muted small mb-3">You can upload multiple images (Max 5 images, 2MB each)</p>
+                                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('images').click()">
                                         <i class="fas fa-image me-2"></i>Choose Images
                                     </button>
                                 </div>
-                                
                                 <div class="image-previews" id="imagePreviews" style="display: none;">
                                     <div class="previews-grid" id="previewsGrid">
                                         <!-- New image previews will be inserted here -->
                                     </div>
                                     <div class="upload-actions text-center mt-3">
-                                        <button type="button" class="btn btn-outline-success me-2" onclick="document.getElementById('images').click()">
+                                        <button type="button" class="btn btn-outline-primary me-2" onclick="document.getElementById('images').click()">
                                             <i class="fas fa-plus me-1"></i>Add More
                                         </button>
                                         <button type="button" class="btn btn-outline-danger" onclick="clearAllImages()">
@@ -213,7 +218,14 @@
                                 </div>
                             </div>
                         </div>
-                        
+                        @error('images.*')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            High-quality photos help sell your item. Include different angles and details.
+                        </div>
+
                         @error('images.*')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
@@ -222,16 +234,9 @@
                     <!-- Form Actions -->
                     <div class="form-actions">
                         <div class="d-flex justify-content-between">
-                            <div class="d-flex gap-2">
-                                <a href="{{ route('marketplace.show', $marketplaceItem) }}" class="btn btn-outline-secondary btn-lg">
-                                    <i class="fas fa-arrow-left me-2"></i>Back to Item
-                                </a>
-                                @can('delete', $marketplaceItem)
-                                    <button type="button" class="btn btn-outline-danger btn-lg" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                        <i class="fas fa-trash me-2"></i>Delete
-                                    </button>
-                                @endcan
-                            </div>
+                            <a href="{{ route('marketplace.show', ['marketplace' => $marketplace->id]) }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
                             <button type="submit" class="btn btn-success btn-lg">
                                 <i class="fas fa-save me-2"></i>Save Changes
                             </button>
@@ -244,7 +249,7 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-@can('delete', $marketplaceItem)
+@can('delete', $marketplace)
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -261,15 +266,15 @@
                     <strong>Warning:</strong> This action cannot be undone. Your listing and all associated images will be permanently deleted.
                 </div>
                 <div class="item-preview">
-                    <h6>{{ $marketplaceItem->title }}</h6>
+                    <h6>{{ $marketplace->title }}</h6>
                     <small class="text-muted">
-                        ${{ number_format($marketplaceItem->price, 0) }} • {{ $marketplaceItem->category }}
+                        ${{ number_format($marketplace->price, 0) }} • {{ $marketplace->category }}
                     </small>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="POST" action="{{ route('marketplace.destroy', $marketplaceItem) }}" class="d-inline">
+                <form method="POST" action="{{ route('marketplace.destroy', ['marketplace' => $marketplace->id]) }}" class="d-inline">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">
@@ -283,14 +288,14 @@
 @endcan
 
 <style>
-.edit-header {
+.create-header {
     padding: 2rem 0;
     background: linear-gradient(135deg, #f0fff4 0%, #e6ffef 100%);
     border-radius: 20px;
     margin: 2rem 0;
 }
 
-.edit-icon {
+.create-icon {
     background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -337,50 +342,6 @@
 .form-control:focus, .form-select:focus {
     border-color: #28a745;
     box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-}
-
-.form-check-input:checked {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-
-.current-images-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.current-image-item {
-    position: relative;
-    aspect-ratio: 1;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.current-image-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.image-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.current-image-item:hover .image-overlay {
-    opacity: 1;
 }
 
 .upload-area {
@@ -464,34 +425,22 @@
     box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
 }
 
-.item-preview {
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-top: 1rem;
-}
-
 @media (max-width: 768px) {
     .form-card {
         padding: 1.5rem;
         border-radius: 15px;
     }
-    
-    .edit-header {
+
+    .create-header {
         border-radius: 15px;
         padding: 1.5rem;
     }
-    
+
     .form-actions .d-flex {
         flex-direction: column;
         gap: 1rem;
     }
-    
-    .form-actions .d-flex:first-child {
-        flex-direction: row;
-    }
-    
-    .current-images-grid,
+
     .previews-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
@@ -507,121 +456,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadPlaceholder = document.getElementById('uploadPlaceholder');
     const imagePreviews = document.getElementById('imagePreviews');
     const previewsGrid = document.getElementById('previewsGrid');
-    
+
     // File input change handler
     imageInput.addEventListener('change', function(e) {
         handleFiles(e.target.files);
     });
-    
+
     // Drag and drop handlers
     uploadArea.addEventListener('dragover', function(e) {
         e.preventDefault();
         uploadArea.classList.add('dragover');
     });
-    
+
     uploadArea.addEventListener('dragleave', function(e) {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
     });
-    
+
     uploadArea.addEventListener('drop', function(e) {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
         handleFiles(e.dataTransfer.files);
     });
-    
+
     // Handle file selection
     function handleFiles(files) {
         const maxFiles = 5;
         const maxSize = 2 * 1024 * 1024; // 2MB
-        
+
         // Convert FileList to Array and filter
         const newFiles = Array.from(files).filter(file => {
             if (!file.type.startsWith('image/')) {
                 alert('Please select only image files');
                 return false;
             }
-            if (file.size > maxSize) {
-                alert(`File ${file.name} is too large. Max size is 2MB`);
-                return false;
-            }
-            return true;
-        });
-        
-        // Check total file count
-        if (selectedFiles.length + newFiles.length > maxFiles) {
-            alert(`You can only upload up to ${maxFiles} new images`);
-            return;
-        }
-        
-        // Add new files to selection
-        selectedFiles = [...selectedFiles, ...newFiles];
-        updateImagePreviews();
-        updateFileInput();
-    }
-    
-    // Update preview display
-    function updateImagePreviews() {
-        previewsGrid.innerHTML = '';
-        
-        if (selectedFiles.length === 0) {
-            uploadPlaceholder.style.display = 'block';
-            imagePreviews.style.display = 'none';
-            return;
-        }
-        
-        uploadPlaceholder.style.display = 'none';
-        imagePreviews.style.display = 'block';
-        
-        selectedFiles.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const previewItem = document.createElement('div');
-                previewItem.className = 'preview-item';
-                previewItem.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <div class="preview-overlay">
-                        <button type="button" class="remove-image" onclick="removeImage(${index})">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `;
-                previewsGrid.appendChild(previewItem);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-    
-    // Update file input with selected files
-    function updateFileInput() {
-        const dt = new DataTransfer();
-        selectedFiles.forEach(file => dt.items.add(file));
-        imageInput.files = dt.files;
-    }
-    
-    // Global functions
-    window.removeImage = function(index) {
-        selectedFiles.splice(index, 1);
-        updateImagePreviews();
-        updateFileInput();
-    };
-    
-    window.clearAllImages = function() {
-        selectedFiles = [];
-        updateImagePreviews();
-        updateFileInput();
-    };
-    
-    // Form validation
-    document.getElementById('itemForm').addEventListener('submit', function(e) {
-        const price = parseFloat(document.querySelector('input[name="price"]').value);
-        
-        if (price < 0) {
-            e.preventDefault();
-            alert('Price cannot be negative');
-            return false;
-        }
-    });
-});
-</script>
+            if
 @endsection

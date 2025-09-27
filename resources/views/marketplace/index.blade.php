@@ -14,12 +14,13 @@
                     </h1>
                     <p class="lead mb-4">Discover unique upcycled products, sustainable crafts, and eco-friendly items from our community of makers.</p>
                     <div class="d-flex flex-wrap gap-3">
-                        <button type="button" class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#createItemModal">
-                            <i class="fas fa-plus me-2"></i>List Item
-                        </button>
-                        <button class="btn btn-outline-light btn-lg" data-bs-toggle="modal" data-bs-target="#filterModal">
-                            <i class="fas fa-filter me-2"></i>Filters
-                        </button>
+                        <a href="{{ route('marketplace.create') }}" class="btn btn-lg btn-list-item shadow-sm px-4 py-2 d-flex align-items-center">
+                            <span class="icon-circle bg-white text-success d-flex align-items-center justify-content-center me-2" style="width:2.5rem;height:2.5rem;border-radius:50%;">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                            <span class="fw-bold">List Item</span>
+                        </a>
+
                     </div>
                 </div>
                 <div class="col-lg-4">
@@ -50,6 +51,23 @@
         </div>
     </div>
 
+    <style>
+        .btn-list-item, .btn-filters {
+            border: none;
+            border-radius: 1.5rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+            font-size: 1.15rem;
+            pointer-events: auto !important;
+            z-index: 10;
+        }
+        .btn-list-item:hover, .btn-filters:hover {
+            box-shadow: 0 0 0 0.2rem rgba(40,167,69,0.15);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .icon-circle {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+    </style>
     <div class="container">
         <!-- Search Bar -->
         <div class="row mb-4">
@@ -59,10 +77,10 @@
                         <span class="input-group-text bg-white border-end-0">
                             <i class="fas fa-search text-muted"></i>
                         </span>
-                        <input type="text" 
-                               class="form-control border-start-0 border-end-0" 
-                               name="search" 
-                               value="{{ request('search') }}" 
+                        <input type="text"
+                               class="form-control border-start-0 border-end-0"
+                               name="search"
+                               value="{{ request('search') }}"
                                placeholder="Search for eco-friendly products, crafts, upcycled items...">
                         <button class="btn btn-success" type="submit">
                             <i class="fas fa-search"></i>
@@ -76,12 +94,12 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="category-filters d-flex flex-wrap gap-2">
-                    <a href="{{ route('marketplace.index') }}" 
+                    <a href="{{ route('marketplace.index') }}"
                        class="btn btn-outline-success {{ !request()->hasAny(['category', 'condition']) ? 'active' : '' }}">
                         <i class="fas fa-globe me-1"></i>All Items
                     </a>
                     @foreach($categories as $category)
-                        <a href="{{ route('marketplace.index', ['category' => $category]) }}" 
+                        <a href="{{ route('marketplace.index', ['category' => $category]) }}"
                            class="btn btn-outline-success {{ request('category') == $category ? 'active' : '' }}">
                             @switch($category)
                                 @case('furniture')
@@ -162,7 +180,7 @@
                         <div class="marketplace-card h-100">
                             <!-- Item Image -->
                             <div class="item-image">
-                                @if($item->images->count() > 0)
+                                @if(optional($item->images)->count() > 0)
                                     <div id="carousel{{ $item->id }}" class="carousel slide item-carousel">
                                         <div class="carousel-inner">
                                             @foreach($item->images as $index => $image)
@@ -185,14 +203,14 @@
                                         <i class="fas fa-image fa-3x text-muted"></i>
                                     </div>
                                 @endif
-                                
+
                                 <!-- Price Badge -->
                                 <div class="price-badge">
                                     <span class="badge bg-success">
                                         ${{ number_format($item->price, 0) }}
                                     </span>
                                 </div>
-                                
+
                                 <!-- Condition Badge -->
                                 <div class="condition-badge">
                                     <span class="badge {{ $item->condition === 'excellent' ? 'bg-success' : ($item->condition === 'good' ? 'bg-primary' : ($item->condition === 'fair' ? 'bg-warning' : 'bg-danger')) }}">
@@ -269,6 +287,13 @@
                                         <a href="{{ route('marketplace.edit', $item) }}" class="btn btn-outline-secondary btn-sm">
                                             <i class="fas fa-edit me-1"></i>Edit
                                         </a>
+                                        <form method="POST" action="{{ route('marketplace.destroy', $item) }}" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger btn-sm ms-1">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        </form>
                                     @endif
                                 </div>
                             </div>
@@ -514,15 +539,15 @@
     .hero-section {
         border-radius: 0 0 20px 20px;
     }
-    
+
     .category-filters {
         justify-content: center;
     }
-    
+
     .marketplace-card {
         border-radius: 15px;
     }
-    
+
     .sort-options {
         margin-top: 1rem;
     }
@@ -541,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
     carousels.forEach(carousel => {
         const card = carousel.closest('.marketplace-card');
         let isPlaying = false;
-        
+
         card.addEventListener('mouseenter', () => {
             if (!isPlaying) {
                 const carouselInstance = new bootstrap.Carousel(carousel, {
@@ -551,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 isPlaying = true;
             }
         });
-        
+
         card.addEventListener('mouseleave', () => {
             const carouselInstance = bootstrap.Carousel.getInstance(carousel);
             if (carouselInstance) {

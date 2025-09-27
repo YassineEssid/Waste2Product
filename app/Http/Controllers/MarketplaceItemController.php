@@ -20,7 +20,7 @@ class MarketplaceItemController extends Controller
      */
     public function index(Request $request)
     {
-        $query = MarketplaceItem::with('seller', 'images')->where('is_available', true);
+    $query = MarketplaceItem::with('seller', 'images')->where('status', 'available');
 
         // Search functionality
         if ($request->filled('search')) {
@@ -62,9 +62,9 @@ class MarketplaceItemController extends Controller
 
         // Get statistics
         $stats = [
-            'total_items' => MarketplaceItem::where('is_available', true)->count(),
+            'total_items' => MarketplaceItem::where('status', 'available')->count(),
             'total_sellers' => MarketplaceItem::distinct('seller_id')->count(),
-            'avg_price' => MarketplaceItem::where('is_available', true)->avg('price'),
+            'avg_price' => MarketplaceItem::where('status', 'available')->avg('price'),
         ];
 
         return view('marketplace.index', compact('items', 'categories', 'conditions', 'stats'));
@@ -76,11 +76,11 @@ class MarketplaceItemController extends Controller
     public function create()
     {
         $categories = [
-            'furniture', 'electronics', 'clothing', 'books', 
+            'furniture', 'electronics', 'clothing', 'books',
             'toys', 'tools', 'decorative', 'appliances', 'other'
         ];
         $conditions = ['excellent', 'good', 'fair', 'needs_repair'];
-        
+
         return view('marketplace.create', compact('categories', 'conditions'));
     }
 
@@ -99,9 +99,18 @@ class MarketplaceItemController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $item = new MarketplaceItem($request->all());
-        $item->seller_id = Auth::id();
-        $item->save();
+        $data = [
+            'title' => $request->title,
+            'description' => $request->description,
+            'category' => $request->category,
+            'condition' => $request->condition,
+            'price' => $request->price,
+            'location' => $request->location,
+            'seller_id' => Auth::id(),
+            // add other fields as needed, e.g. 'quantity', 'status', etc.
+        ];
+
+        $item = MarketplaceItem::create($data);
 
         // Handle multiple image uploads
         if ($request->hasFile('images')) {
@@ -117,16 +126,16 @@ class MarketplaceItemController extends Controller
     /**
      * Display the specified marketplace item.
      */
-    public function show(MarketplaceItem $marketplaceItem)
+    public function show($id)
     {
-        $marketplaceItem->load('seller', 'images');
-        
+        $marketplaceItem = MarketplaceItem::with('seller', 'images')->findOrFail($id);
+
         // Get related items
-        $relatedItems = MarketplaceItem::where('category', $marketplaceItem->category)
-                                    ->where('id', '!=', $marketplaceItem->id)
-                                    ->where('is_available', true)
-                                    ->limit(4)
-                                    ->get();
+    $relatedItems = MarketplaceItem::where('category', $marketplaceItem->category)
+                    ->where('id', '!=', $marketplaceItem->id)
+                    ->where('status', 'available')
+                    ->limit(4)
+                    ->get();
 
         return view('marketplace.show', compact('marketplaceItem', 'relatedItems'));
     }
@@ -134,27 +143,25 @@ class MarketplaceItemController extends Controller
     /**
      * Show the form for editing the specified marketplace item.
      */
-    public function edit(MarketplaceItem $marketplaceItem)
+    public function edit(MarketplaceItem $marketplace)
     {
-        $this->authorize('update', $marketplaceItem);
-        
         $categories = [
-            'furniture', 'electronics', 'clothing', 'books', 
+            'furniture', 'electronics', 'clothing', 'books',
             'toys', 'tools', 'decorative', 'appliances', 'other'
         ];
         $conditions = ['excellent', 'good', 'fair', 'needs_repair'];
-        
-        $marketplaceItem->load('images');
-        
-        return view('marketplace.edit', compact('marketplaceItem', 'categories', 'conditions'));
+
+        $marketplace->load('images');
+
+        return view('marketplace.edit', compact('marketplace', 'categories', 'conditions'));
     }
 
     /**
      * Update the specified marketplace item in storage.
      */
-    public function update(Request $request, MarketplaceItem $marketplaceItem)
+    public function update(Request $request, MarketplaceItem $marketplace)
     {
-        $this->authorize('update', $marketplaceItem);
+        $this->authorize('update', $marketplace);
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -163,24 +170,24 @@ class MarketplaceItemController extends Controller
             'condition' => 'required|in:excellent,good,fair,needs_repair',
             'price' => 'required|numeric|min:0',
             'location' => 'required|string|max:255',
-            'is_available' => 'boolean',
+            'status' => 'string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $marketplaceItem->update($request->all());
+        $marketplace->update($request->all());
 
         // Handle image uploads
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('marketplace', 'public');
-                $marketplaceItem->images()->create(['path' => $path]);
+                $marketplace->images()->create(['path' => $path]);
             }
         }
 
         // Handle image deletions
         if ($request->has('delete_images')) {
             foreach ($request->delete_images as $imageId) {
-                $image = $marketplaceItem->images()->find($imageId);
+                $image = $marketplace->images()->find($imageId);
                 if ($image) {
                     Storage::disk('public')->delete($image->path);
                     $image->delete();
@@ -188,22 +195,23 @@ class MarketplaceItemController extends Controller
             }
         }
 
-        return redirect()->route('marketplace.show', $marketplaceItem)->with('success', 'Item updated successfully!');
+        return redirect()->route('marketplace.show', ['marketplace' => $marketplace->id])->with('success', 'Item updated successfully!');
     }
 
     /**
      * Remove the specified marketplace item from storage.
      */
-    public function destroy(MarketplaceItem $marketplaceItem)
+    public function destroy(MarketplaceItem $marketplace)
     {
-        $this->authorize('delete', $marketplaceItem);
 
         // Delete all images
-        foreach ($marketplaceItem->images as $image) {
-            Storage::disk('public')->delete($image->path);
+        if ($marketplace->images) {
+            foreach ($marketplace->images as $image) {
+                Storage::disk('public')->delete($image->path);
+            }
         }
 
-        $marketplaceItem->delete();
+        $marketplace->delete();
 
         return redirect()->route('marketplace.index')->with('success', 'Item deleted successfully!');
     }
@@ -213,10 +221,10 @@ class MarketplaceItemController extends Controller
      */
     public function byCategory($category)
     {
-        $items = MarketplaceItem::with('seller', 'images')
-                               ->where('category', $category)
-                               ->where('is_available', true)
-                               ->paginate(12);
+    $items = MarketplaceItem::with('seller', 'images')
+                   ->where('category', $category)
+                   ->where('status', 'available')
+                   ->paginate(12);
 
         return view('marketplace.category', compact('items', 'category'));
     }

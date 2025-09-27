@@ -26,6 +26,16 @@ class TestUsersSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+            // Add requested test user
+            User::create([
+                'name' => 'Test Example User',
+                'email' => 'test@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'user',
+                'address' => 'Paris, France',
+                'email_verified_at' => now(),
+            ]);
+
         User::create([
             'name' => 'Expert Repairer',
             'email' => 'repairer@test.com',

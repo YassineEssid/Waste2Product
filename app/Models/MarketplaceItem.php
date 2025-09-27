@@ -10,14 +10,13 @@ class MarketplaceItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'seller_id',
         'transformation_id',
         'title',
         'description',
         'price',
         'category',
         'condition',
-        'images',
         'quantity',
         'is_negotiable',
         'delivery_method',
@@ -30,21 +29,25 @@ class MarketplaceItem extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
-        'images' => 'array',
         'is_negotiable' => 'boolean',
         'is_featured' => 'boolean',
         'promoted_until' => 'datetime',
     ];
 
     // Relationships
-    public function user()
+    public function seller()
     {
-        return $this->belongsTo(User::class); // seller
+        return $this->belongsTo(User::class, 'seller_id');
     }
 
     public function transformation()
     {
         return $this->belongsTo(Transformation::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(MarketplaceItemImage::class, 'marketplace_item_id');
     }
 
     // Scopes
@@ -137,3 +140,4 @@ class MarketplaceItem extends Model
         ]);
     }
 }
+

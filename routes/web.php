@@ -54,9 +54,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/events/{event}/register', [CommunityEventController::class, 'register'])->name('events.register');
     Route::delete('/events/{event}/unregister', [CommunityEventController::class, 'unregister'])->name('events.unregister');
 
-    // Marketplace
-    Route::resource('marketplace', MarketplaceItemController::class);
-    Route::get('/marketplace/category/{category}', [MarketplaceItemController::class, 'byCategory'])->name('marketplace.category');
+    // Marketplace create (public, en dehors du groupe auth)
+Route::get('/marketplace/create', [MarketplaceItemController::class, 'create'])->name('marketplace.create');
+
+    // Marketplace (protected)
+    Route::resource('marketplace', MarketplaceItemController::class)->except(['create']);
 });
 
 // Admin routes
