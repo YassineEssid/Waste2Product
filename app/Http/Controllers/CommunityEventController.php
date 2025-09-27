@@ -30,7 +30,7 @@ class CommunityEventController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%");
+                  ->orWhere('location_address', 'like', "%{$search}%");
             });
         }
 
@@ -38,17 +38,17 @@ class CommunityEventController extends Controller
         if ($request->filled('status')) {
             $status = $request->status;
             $now = Carbon::now();
-            
+
             switch ($status) {
                 case 'upcoming':
-                    $query->where('event_date', '>', $now);
+                    $query->where('starts_at', '>', $now);
                     break;
                 case 'ongoing':
-                    $query->where('event_date', '<=', $now)
-                          ->where('end_date', '>', $now);
+                    $query->where('starts_at', '<=', $now)
+                          ->where('ends_at', '>', $now);
                     break;
                 case 'completed':
-                    $query->where('end_date', '<=', $now);
+                    $query->where('ends_at', '<=', $now);
                     break;
             }
         }
@@ -59,14 +59,14 @@ class CommunityEventController extends Controller
         }
 
         // Sort by date
-        $query->orderBy('event_date', 'asc');
+        $query->orderBy('starts_at', 'asc');
 
         $events = $query->paginate(12);
 
         // Get statistics
         $stats = [
             'total' => CommunityEvent::count(),
-            'upcoming' => CommunityEvent::where('event_date', '>', Carbon::now())->count(),
+            'upcoming' => CommunityEvent::where('starts_at', '>', Carbon::now())->count(),
             'participants' => DB::table('community_event_user')->count(),
         ];
 
@@ -78,7 +78,7 @@ class CommunityEventController extends Controller
      */
     public function create()
     {
-        $types = ['workshop', 'cleanup', 'exhibition', 'seminar', 'competition', 'other'];
+        $types = ['workshop', 'cleanup', 'exhibition', 'seminar', 'other']; // Only allowed types
         return view('events.create', compact('types'));
     }
 
@@ -90,22 +90,28 @@ class CommunityEventController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'type' => 'required|in:workshop,cleanup,exhibition,seminar,competition,other',
+            'type' => 'required|in:workshop,cleanup,exhibition,seminar,other', // Only allowed types
             'event_date' => 'required|date|after:now',
             'end_date' => 'required|date|after:event_date',
             'location' => 'required|string|max:255',
             'max_participants' => 'nullable|integer|min:1',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_virtual' => 'boolean',
         ]);
 
-        $event = new CommunityEvent($request->all());
-        $event->creator_id = Auth::id();
+        $event = new CommunityEvent();
+        $event->title = $request->title;
+        $event->description = $request->description;
+        $event->type = $request->type;
+        $event->starts_at = $request->event_date;
+        $event->ends_at = $request->end_date;
+        $event->location_address = $request->location;
+        $event->max_participants = $request->max_participants;
+        $event->user_id = Auth::id();
 
         // Handle image upload
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('events', 'public');
-            $event->image = $path;
+            $event->images = json_encode([$path]);
         }
 
         $event->save();
@@ -120,14 +126,14 @@ class CommunityEventController extends Controller
     {
         $event->load('creator', 'attendees');
         $isAttending = Auth::check() && $event->attendees->contains(Auth::id());
-        $canRegister = !$isAttending && 
+        $canRegister = !$isAttending &&
                       ($event->max_participants === null || $event->attendees->count() < $event->max_participants) &&
-                      $event->event_date > Carbon::now();
+                      $event->starts_at > Carbon::now();
 
         // Get related events
         $relatedEvents = CommunityEvent::where('type', $event->type)
                                      ->where('id', '!=', $event->id)
-                                     ->where('event_date', '>', Carbon::now())
+                                     ->where('starts_at', '>', Carbon::now())
                                      ->limit(3)
                                      ->get();
 
@@ -140,7 +146,7 @@ class CommunityEventController extends Controller
     public function edit(CommunityEvent $event)
     {
         $this->authorize('update', $event);
-        $types = ['workshop', 'cleanup', 'exhibition', 'seminar', 'competition', 'other'];
+        $types = ['workshop', 'cleanup', 'exhibition', 'seminar', 'other'];
         return view('events.edit', compact('event', 'types'));
     }
 
@@ -154,25 +160,32 @@ class CommunityEventController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'type' => 'required|in:workshop,cleanup,exhibition,seminar,competition,other',
+            'type' => 'required|in:workshop,cleanup,exhibition,seminar,other',
             'event_date' => 'required|date',
             'end_date' => 'required|date|after:event_date',
             'location' => 'required|string|max:255',
             'max_participants' => 'nullable|integer|min:1',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_virtual' => 'boolean',
         ]);
 
-        $event->fill($request->all());
+        // Map form fields to model attributes
+        $data = $request->except(['image']);
+        $data['starts_at'] = $request->event_date;
+        $data['ends_at'] = $request->end_date;
+        $data['location_address'] = $request->location;
+
+        $event->fill($data);
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            // Delete old image
-            if ($event->image) {
-                Storage::disk('public')->delete($event->image);
+            // Delete old image(s)
+            if ($event->images) {
+                foreach (json_decode($event->images, true) as $img) {
+                    Storage::disk('public')->delete($img);
+                }
             }
             $path = $request->file('image')->store('events', 'public');
-            $event->image = $path;
+            $event->images = json_encode([$path]);
         }
 
         $event->save();
@@ -187,9 +200,11 @@ class CommunityEventController extends Controller
     {
         $this->authorize('delete', $event);
 
-        // Delete image
-        if ($event->image) {
-            Storage::disk('public')->delete($event->image);
+        // Delete image(s)
+        if ($event->images) {
+            foreach (json_decode($event->images, true) as $img) {
+                Storage::disk('public')->delete($img);
+            }
         }
 
         $event->delete();
@@ -210,7 +225,7 @@ class CommunityEventController extends Controller
             return redirect()->back()->with('error', 'This event is full.');
         }
 
-        if ($event->event_date <= Carbon::now()) {
+        if ($event->starts_at <= Carbon::now()) {
             return redirect()->back()->with('error', 'Registration has closed for this event.');
         }
 

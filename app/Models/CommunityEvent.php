@@ -40,6 +40,12 @@ class CommunityEvent extends Model
         'is_featured' => 'boolean',
     ];
 
+    // Relations
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     // Relationships
     public function user()
     {
@@ -91,8 +97,8 @@ class CommunityEvent extends Model
             ->whereNotNull('location_lng')
             ->whereRaw("
                 6371 * acos(
-                    cos(radians(?)) * cos(radians(location_lat)) * 
-                    cos(radians(location_lng) - radians(?)) + 
+                    cos(radians(?)) * cos(radians(location_lat)) *
+                    cos(radians(location_lng) - radians(?)) +
                     sin(radians(?)) * sin(radians(location_lat))
                 ) < ?
             ", [$lat, $lng, $lat, $radius]);
@@ -104,11 +110,11 @@ class CommunityEvent extends Model
         if (!$this->max_participants) {
             return null;
         }
-        
+
         $registeredCount = $this->registrations()
             ->whereIn('status', ['registered', 'confirmed', 'attended'])
             ->count();
-            
+
         return max(0, $this->max_participants - $registeredCount);
     }
 
@@ -129,14 +135,18 @@ class CommunityEvent extends Model
 
     public function getFirstImageAttribute()
     {
-        return $this->images && count($this->images) > 0 ? $this->images[0] : null;
+        $images = $this->images;
+        if (is_string($images)) {
+            $images = json_decode($images, true);
+        }
+        return is_array($images) && count($images) > 0 ? $images[0] : null;
     }
 
     // Methods
     public function canRegister()
     {
-        return $this->status === 'published' && 
-               $this->is_upcoming && 
+        return $this->status === 'published' &&
+               $this->is_upcoming &&
                (!$this->is_full);
     }
 
@@ -147,3 +157,4 @@ class CommunityEvent extends Model
             ->count();
     }
 }
+

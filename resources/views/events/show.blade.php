@@ -4,11 +4,19 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Create Event button at the top -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ route('events.create') }}" class="btn btn-outline-dark">
+                <i class="fas fa-plus"></i> Create Event
+            </a>
+        </div>
+    </div>
     <!-- Hero Section -->
     <div class="event-hero">
         <div class="hero-background">
-            @if($event->image)
-                <img src="{{ Storage::url($event->image) }}" alt="{{ $event->title }}" class="hero-image">
+            @if($event->firstImage)
+                <img src="{{ Storage::url($event->firstImage) }}" alt="{{ $event->title }}" class="hero-image">
             @else
                 <div class="hero-placeholder">
                     <i class="fas fa-calendar-alt fa-4x"></i>
@@ -16,7 +24,7 @@
             @endif
             <div class="hero-overlay"></div>
         </div>
-        
+
         <div class="hero-content">
             <div class="container">
                 <div class="row">
@@ -44,39 +52,45 @@
                                         <i class="fas fa-calendar me-1"></i>{{ ucfirst($event->type) }}
                                 @endswitch
                             </span>
-                            
+
                             <span class="badge badge-status">
-                                @if($event->event_date > now())
+                                @if($event->starts_at && \Carbon\Carbon::parse($event->starts_at)->gt(now()))
                                     <i class="fas fa-clock me-1"></i>Upcoming
-                                @elseif($event->event_date <= now() && $event->end_date > now())
+                                @elseif($event->starts_at && $event->ends_at && \Carbon\Carbon::parse($event->starts_at)->lte(now()) && \Carbon\Carbon::parse($event->ends_at)->gt(now()))
                                     <i class="fas fa-play me-1"></i>Ongoing
                                 @else
                                     <i class="fas fa-check me-1"></i>Completed
                                 @endif
                             </span>
-                            
+
                             @if($event->is_virtual)
                                 <span class="badge badge-virtual">
                                     <i class="fas fa-video me-1"></i>Virtual
                                 </span>
                             @endif
                         </div>
-                        
+
                         <h1 class="hero-title">{{ $event->title }}</h1>
-                        
+
                         <!-- Event Meta -->
                         <div class="event-meta">
                             <div class="meta-item">
                                 <i class="fas fa-calendar-alt"></i>
-                                <span>{{ $event->event_date->format('l, F j, Y') }}</span>
+                                <span>
+                                    {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('l, F j, Y') : 'Date not set' }}
+                                </span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-clock"></i>
-                                <span>{{ $event->event_date->format('g:i A') }} - {{ $event->end_date->format('g:i A') }}</span>
+                                <span>
+                                    {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('g:i A') : 'Start time not set' }}
+                                    -
+                                    {{ $event->ends_at ? \Carbon\Carbon::parse($event->ends_at)->format('g:i A') : 'End time not set' }}
+                                </span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <span>{{ $event->location }}</span>
+                                <span>{{ $event->location ?? $event->location_address ?? 'Location not set' }}</span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-user"></i>
@@ -84,6 +98,7 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Remove any col-lg-4 or button section here -->
                 </div>
             </div>
         </div>
@@ -121,7 +136,7 @@
                                     @endif
                                 </div>
                             @endforeach
-                            
+
                             @if($event->attendees->count() > 12)
                                 <div class="participant-card more-participants">
                                     <div class="participant-avatar">
@@ -155,7 +170,7 @@
                                             <h6>{{ Str::limit($relatedEvent->title, 40) }}</h6>
                                             <small class="text-muted">
                                                 <i class="fas fa-calendar me-1"></i>
-                                                {{ $relatedEvent->event_date->format('M j') }}
+                                                {{ $relatedEvent->starts_at ? \Carbon\Carbon::parse($relatedEvent->starts_at)->format('M j') : '' }}
                                             </small>
                                             <a href="{{ route('events.show', $relatedEvent) }}" class="stretched-link"></a>
                                         </div>
@@ -172,7 +187,7 @@
                 <!-- Registration Card -->
                 <div class="sidebar-card registration-card">
                     <div class="participation-status">
-                        @if($event->event_date > now())
+                        @if($event->starts_at && \Carbon\Carbon::parse($event->starts_at)->gt(now()))
                             @if($isAttending)
                                 <div class="status-registered">
                                     <i class="fas fa-check-circle fa-2x mb-2"></i>
@@ -195,7 +210,7 @@
                         @else
                             <div class="status-past">
                                 <i class="fas fa-clock fa-2x mb-2"></i>
-                                <h5>Event {{ $event->end_date < now() ? 'Completed' : 'Ongoing' }}</h5>
+                                <h5>Event {{ $event->ends_at && \Carbon\Carbon::parse($event->ends_at)->lt(now()) ? 'Completed' : 'Ongoing' }}</h5>
                                 <p class="text-muted">Registration is no longer available.</p>
                             </div>
                         @endif
@@ -203,7 +218,7 @@
 
                     <!-- Action Buttons -->
                     <div class="action-buttons">
-                        @if($event->event_date > now())
+                        @if($event->starts_at && \Carbon\Carbon::parse($event->starts_at)->gt(now()))
                             @if($isAttending)
                                 <form method="POST" action="{{ route('events.unregister', $event) }}">
                                     @csrf
@@ -226,6 +241,16 @@
                             <a href="{{ route('events.edit', $event) }}" class="btn btn-outline-primary w-100 mb-2">
                                 <i class="fas fa-edit me-2"></i>Edit Event
                             </a>
+                        @endcan
+
+                        @can('delete', $event)
+                            <form method="POST" action="{{ route('events.destroy', $event) }}" onsubmit="return confirm('Are you sure you want to delete this event?');" class="mb-2">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-trash me-2"></i>Delete Event
+                                </button>
+                            </form>
                         @endcan
 
                         <button class="btn btn-outline-secondary w-100" onclick="shareEvent()">
@@ -251,25 +276,37 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="stat-item">
                             <div class="stat-icon">
                                 <i class="fas fa-calendar-day"></i>
                             </div>
                             <div class="stat-content">
-                                <div class="stat-number">{{ $event->event_date->diffInDays(now()) }}</div>
+                                <div class="stat-number">
+                                    @if($event->starts_at)
+                                        {{ \Carbon\Carbon::parse($event->starts_at)->diffInDays(now()) }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </div>
                                 <div class="stat-label">
-                                    Days {{ $event->event_date > now() ? 'Until Event' : 'Since Event' }}
+                                    Days {{ $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->gt(now()) ? 'Until Event' : 'Since Event' }}
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="stat-item">
                             <div class="stat-icon">
                                 <i class="fas fa-clock"></i>
                             </div>
                             <div class="stat-content">
-                                <div class="stat-number">{{ $event->event_date->diffInHours($event->end_date) }}</div>
+                                <div class="stat-number">
+                                    @if($event->starts_at && $event->ends_at)
+                                        {{ \Carbon\Carbon::parse($event->starts_at)->diffInHours(\Carbon\Carbon::parse($event->ends_at)) }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </div>
                                 <div class="stat-label">Hours Duration</div>
                             </div>
                         </div>
@@ -608,20 +645,20 @@
         height: 300px;
         border-radius: 0 0 20px 20px;
     }
-    
+
     .hero-title {
         font-size: 1.8rem;
     }
-    
+
     .event-meta {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .participants-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .content-card, .sidebar-card {
         border-radius: 10px;
         padding: 1rem;

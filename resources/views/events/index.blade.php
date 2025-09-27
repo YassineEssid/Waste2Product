@@ -14,12 +14,9 @@
                     </h1>
                     <p class="lead mb-4">Join eco-friendly workshops, cleanup drives, and sustainability events in your community.</p>
                     <div class="d-flex flex-wrap gap-3">
-                        <button type="button" class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                        <a href="{{ route('events.create') }}" class="btn btn-light btn-lg" style="z-index:9999;position:relative;">
                             <i class="fas fa-plus me-2"></i>Create Event
-                        </button>
-                        <button class="btn btn-outline-light btn-lg" data-bs-toggle="modal" data-bs-target="#filterModal">
-                            <i class="fas fa-filter me-2"></i>Filters
-                        </button>
+                        </a>
                     </div>
                 </div>
                 <div class="col-lg-4">
@@ -59,10 +56,10 @@
                         <span class="input-group-text bg-white border-end-0">
                             <i class="fas fa-search text-muted"></i>
                         </span>
-                        <input type="text" 
-                               class="form-control border-start-0 border-end-0" 
-                               name="search" 
-                               value="{{ request('search') }}" 
+                        <input type="text"
+                               class="form-control border-start-0 border-end-0"
+                               name="search"
+                               value="{{ request('search') }}"
                                placeholder="Search events by title, description, or location...">
                         <button class="btn btn-primary" type="submit">
                             <i class="fas fa-search"></i>
@@ -76,23 +73,23 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="quick-filters d-flex flex-wrap gap-2">
-                    <a href="{{ route('events.index') }}" 
+                    <a href="{{ route('events.index') }}"
                        class="btn btn-outline-primary {{ !request()->hasAny(['status', 'type']) ? 'active' : '' }}">
                         <i class="fas fa-globe me-1"></i>All Events
                     </a>
-                    <a href="{{ route('events.index', ['status' => 'upcoming']) }}" 
+                    <a href="{{ route('events.index', ['status' => 'upcoming']) }}"
                        class="btn btn-outline-success {{ request('status') == 'upcoming' ? 'active' : '' }}">
                         <i class="fas fa-clock me-1"></i>Upcoming
                     </a>
-                    <a href="{{ route('events.index', ['type' => 'workshop']) }}" 
+                    <a href="{{ route('events.index', ['type' => 'workshop']) }}"
                        class="btn btn-outline-info {{ request('type') == 'workshop' ? 'active' : '' }}">
                         <i class="fas fa-tools me-1"></i>Workshops
                     </a>
-                    <a href="{{ route('events.index', ['type' => 'cleanup']) }}" 
+                    <a href="{{ route('events.index', ['type' => 'cleanup']) }}"
                        class="btn btn-outline-warning {{ request('type') == 'cleanup' ? 'active' : '' }}">
                         <i class="fas fa-leaf me-1"></i>Cleanups
                     </a>
-                    <a href="{{ route('events.index', ['type' => 'exhibition']) }}" 
+                    <a href="{{ route('events.index', ['type' => 'exhibition']) }}"
                        class="btn btn-outline-danger {{ request('type') == 'exhibition' ? 'active' : '' }}">
                         <i class="fas fa-eye me-1"></i>Exhibitions
                     </a>
@@ -106,65 +103,22 @@
                 @foreach($events as $event)
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="event-card h-100">
-                            <!-- Event Image -->
-                            <div class="event-image">
-                                @if($event->image)
-                                    <img src="{{ Storage::url($event->image) }}" alt="{{ $event->title }}" class="img-fluid">
-                                @else
-                                    <div class="placeholder-image d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-calendar-alt fa-3x text-muted"></i>
-                                    </div>
-                                @endif
-                                
-                                <!-- Event Type Badge -->
-                                <div class="event-type-badge">
-                                    <span class="badge bg-primary">
-                                        @switch($event->type)
-                                            @case('workshop')
-                                                <i class="fas fa-tools me-1"></i>Workshop
-                                                @break
-                                            @case('cleanup')
-                                                <i class="fas fa-leaf me-1"></i>Cleanup
-                                                @break
-                                            @case('exhibition')
-                                                <i class="fas fa-eye me-1"></i>Exhibition
-                                                @break
-                                            @case('seminar')
-                                                <i class="fas fa-graduation-cap me-1"></i>Seminar
-                                                @break
-                                            @case('competition')
-                                                <i class="fas fa-trophy me-1"></i>Competition
-                                                @break
-                                            @default
-                                                <i class="fas fa-calendar me-1"></i>{{ ucfirst($event->type) }}
-                                        @endswitch
-                                    </span>
-                                </div>
-
-                                <!-- Event Status -->
-                                <div class="event-status-badge">
-                                    @if($event->event_date > now())
-                                        <span class="badge bg-success">Upcoming</span>
-                                    @elseif($event->event_date <= now() && $event->end_date > now())
-                                        <span class="badge bg-warning">Ongoing</span>
-                                    @else
-                                        <span class="badge bg-secondary">Completed</span>
-                                    @endif
-                                </div>
-                            </div>
-
                             <!-- Event Content -->
                             <div class="event-content">
                                 <div class="event-meta mb-2">
                                     <small class="text-muted d-flex align-items-center mb-1">
                                         <i class="fas fa-calendar me-2"></i>
-                                        {{ $event->event_date->format('M d, Y • g:i A') }}
+                                        @if($event->starts_at)
+                                            {{ \Carbon\Carbon::parse($event->starts_at)->format('M d, Y • g:i A') }}
+                                        @else
+                                            <span>—</span>
+                                        @endif
                                     </small>
                                     <small class="text-muted d-flex align-items-center mb-1">
                                         <i class="fas fa-map-marker-alt me-2"></i>
-                                        {{ $event->location }}
+                                        {{ $event->location_address ?? '—' }}
                                     </small>
-                                    @if($event->is_virtual)
+                                    @if($event->is_online)
                                         <small class="text-info d-flex align-items-center">
                                             <i class="fas fa-video me-2"></i>Virtual Event
                                         </small>
@@ -221,6 +175,15 @@
                                             </span>
                                         @endif
                                     @endif
+                                    @can('delete', $event)
+                                        <form method="POST" action="{{ route('events.destroy', $event) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this event?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
                             </div>
                         </div>
@@ -265,52 +228,6 @@
     </div>
 </div>
 
-<!-- Filter Modal -->
-<div class="modal fade" id="filterModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="GET">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-filter me-2"></i>Filter Events
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label">Event Status</label>
-                            <select name="status" class="form-select">
-                                <option value="">All Status</option>
-                                <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
-                                <option value="ongoing" {{ request('status') == 'ongoing' ? 'selected' : '' }}>Ongoing</option>
-                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Event Type</label>
-                            <select name="type" class="form-select">
-                                <option value="">All Types</option>
-                                <option value="workshop" {{ request('type') == 'workshop' ? 'selected' : '' }}>Workshop</option>
-                                <option value="cleanup" {{ request('type') == 'cleanup' ? 'selected' : '' }}>Cleanup</option>
-                                <option value="exhibition" {{ request('type') == 'exhibition' ? 'selected' : '' }}>Exhibition</option>
-                                <option value="seminar" {{ request('type') == 'seminar' ? 'selected' : '' }}>Seminar</option>
-                                <option value="competition" {{ request('type') == 'competition' ? 'selected' : '' }}>Competition</option>
-                                <option value="other" {{ request('type') == 'other' ? 'selected' : '' }}>Other</option>
-                            </select>
-                        </div>
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <a href="{{ route('events.index') }}" class="btn btn-outline-secondary">Clear All</a>
-                    <button type="submit" class="btn btn-primary">Apply Filters</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <style>
 .hero-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -351,32 +268,6 @@
 .event-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.event-image {
-    position: relative;
-    height: 200px;
-    overflow: hidden;
-}
-
-.event-image img,
-.placeholder-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-}
-
-.event-type-badge {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-}
-
-.event-status-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
 }
 
 .event-content {
@@ -429,119 +320,15 @@
     .hero-section {
         border-radius: 0 0 20px 20px;
     }
-    
+
     .quick-filters {
         justify-content: center;
     }
-    
+
     .event-card {
         border-radius: 15px;
     }
 }
-
-<!-- Create Event Modal -->
-<div class="modal fade" id="createEventModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-plus me-2"></i>Create New Event
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Event Title -->
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Event Title</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
-                    </div>
-
-                    <div class="row">
-                        <!-- Event Type -->
-                        <div class="col-md-6 mb-3">
-                            <label for="type" class="form-label">Event Type</label>
-                            <select class="form-select" id="type" name="type" required>
-                                <option value="">Select Type</option>
-                                <option value="workshop">Workshop</option>
-                                <option value="cleanup">Cleanup Drive</option>
-                                <option value="exhibition">Exhibition</option>
-                                <option value="seminar">Seminar</option>
-                                <option value="competition">Competition</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-
-                        <!-- Max Participants -->
-                        <div class="col-md-6 mb-3">
-                            <label for="max_participants" class="form-label">Max Participants</label>
-                            <input type="number" class="form-control" id="max_participants" name="max_participants" min="1">
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- Event Date -->
-                        <div class="col-md-6 mb-3">
-                            <label for="event_date" class="form-label">Event Date</label>
-                            <input type="date" class="form-control" id="event_date" name="event_date" required>
-                        </div>
-
-                        <!-- Start Time -->
-                        <div class="col-md-6 mb-3">
-                            <label for="start_time" class="form-label">Start Time</label>
-                            <input type="time" class="form-control" id="start_time" name="start_time" required>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- Duration -->
-                        <div class="col-md-6 mb-3">
-                            <label for="duration" class="form-label">Duration (hours)</label>
-                            <input type="number" class="form-control" id="duration" name="duration" step="0.5" min="0.5">
-                        </div>
-
-                        <!-- Fee -->
-                        <div class="col-md-6 mb-3">
-                            <label for="fee" class="form-label">Registration Fee</label>
-                            <input type="number" class="form-control" id="fee" name="fee" step="0.01" min="0" placeholder="0.00">
-                        </div>
-                    </div>
-
-                    <!-- Location -->
-                    <div class="mb-3">
-                        <label for="location" class="form-label">Location</label>
-                        <input type="text" class="form-control" id="location" name="location" required>
-                    </div>
-
-                    <!-- Requirements -->
-                    <div class="mb-3">
-                        <label for="requirements" class="form-label">Requirements</label>
-                        <textarea class="form-control" id="requirements" name="requirements" rows="2" placeholder="What should participants bring or prepare?"></textarea>
-                    </div>
-
-                    <!-- Event Image -->
-                    <div class="mb-3">
-                        <label for="image" class="form-label">Event Image</label>
-                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                        <small class="text-muted">Optional: Upload an image for your event</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-plus me-2"></i>Create Event
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 </style>
 @endsection
+
