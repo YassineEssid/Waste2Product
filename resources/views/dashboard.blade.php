@@ -119,25 +119,7 @@
                     </div>
                 </div>
                 
-                @if(auth()->user()->isRepairer() && isset($myStats['assigned_repairs']))
-                <hr>
-                <div class="row">
-                    <div class="col-12 text-center">
-                        <h4 class="text-danger">{{ $myStats['assigned_repairs'] }}</h4>
-                        <small class="text-muted">Active Repair Assignments</small>
-                    </div>
-                </div>
-                @endif
-                
-                @if(auth()->user()->isArtisan() && isset($myStats['marketplace_items']))
-                <hr>
-                <div class="row">
-                    <div class="col-12 text-center">
-                        <h4 class="text-success">{{ $myStats['marketplace_items'] }}</h4>
-                        <small class="text-muted">Marketplace Listings</small>
-                    </div>
-                </div>
-                @endif
+                <!-- Supprimer les sections conditionnelles qui causent des erreurs -->
             </div>
         </div>
     </div>
@@ -152,18 +134,22 @@
                 <a href="{{ route('waste-items.index') }}" class="btn btn-sm btn-outline-success">View All</a>
             </div>
             <div class="card-body p-0">
-                @forelse($recentWasteItems ?? [] as $item)
+                @forelse($recentWasteItems as $item)
                 <div class="list-group-item">
                     <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">{{ $item->title }}</h6>
-                        <small>{{ $item->created_at->diffForHumans() }}</small>
+                        <h6 class="mb-1">{{ $item->title ?? 'Untitled Item' }}</h6>
+                        <small>{{ $item->created_at->diffForHumans() ?? 'Recently' }}</small>
                     </div>
-                    <p class="mb-1">{{ Str::limit($item->description, 50) }}</p>
-                    <small class="text-muted">by {{ $item->user->name }}</small>
+                    <p class="mb-1">{{ Str::limit($item->description ?? 'No description', 50) }}</p>
+                    <small class="text-muted">Community Item</small>
                 </div>
                 @empty
                 <div class="text-center p-4">
-                    <p class="text-muted">No recent items</p>
+                    <i class="fas fa-recycle fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">No recent waste items</p>
+                    <a href="{{ route('waste-items.create') }}" class="btn btn-sm btn-outline-success">
+                        Add First Item
+                    </a>
                 </div>
                 @endforelse
             </div>
@@ -177,18 +163,22 @@
                 <a href="{{ route('transformations.index') }}" class="btn btn-sm btn-outline-warning">View All</a>
             </div>
             <div class="card-body p-0">
-                @forelse($recentTransformations ?? [] as $transformation)
+                @forelse($recentTransformations as $transformation)
                 <div class="list-group-item">
                     <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">{{ $transformation->title }}</h6>
-                        <small>{{ $transformation->created_at->diffForHumans() }}</small>
+                        <h6 class="mb-1">{{ $transformation->title ?? 'Untitled Transformation' }}</h6>
+                        <small>{{ $transformation->created_at->diffForHumans() ?? 'Recently' }}</small>
                     </div>
-                    <p class="mb-1">{{ Str::limit($transformation->description, 50) }}</p>
-                    <small class="text-muted">by {{ $transformation->user->name }}</small>
+                    <p class="mb-1">{{ Str::limit($transformation->description ?? 'No description', 50) }}</p>
+                    <small class="text-muted">Community Transformation</small>
                 </div>
                 @empty
                 <div class="text-center p-4">
+                    <i class="fas fa-magic fa-2x text-muted mb-2"></i>
                     <p class="text-muted">No recent transformations</p>
+                    <a href="{{ route('transformations.create') }}" class="btn btn-sm btn-outline-warning">
+                        Start Transforming
+                    </a>
                 </div>
                 @endforelse
             </div>
@@ -202,18 +192,22 @@
                 <a href="{{ route('events.index') }}" class="btn btn-sm btn-outline-info">View All</a>
             </div>
             <div class="card-body p-0">
-                @forelse($upcomingEvents ?? [] as $event)
+                @forelse($upcomingEvents as $event)
                 <div class="list-group-item">
                     <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">{{ $event->title }}</h6>
-                        <small>{{ $event->starts_at->format('M d') }}</small>
+                        <h6 class="mb-1">{{ $event->title ?? 'Untitled Event' }}</h6>
+                        <small>{{ $event->starts_at ? $event->starts_at->format('M d') : 'Date TBD' }}</small>
                     </div>
-                    <p class="mb-1">{{ Str::limit($event->description, 50) }}</p>
-                    <small class="text-muted">by {{ $event->user->name }}</small>
+                    <p class="mb-1">{{ Str::limit($event->description ?? 'No description', 50) }}</p>
+                    <small class="text-muted">by {{ $event->creator_name ?? 'Community Organizer' }}</small>
                 </div>
                 @empty
                 <div class="text-center p-4">
+                    <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
                     <p class="text-muted">No upcoming events</p>
+                    <a href="{{ route('events.create') }}" class="btn btn-sm btn-outline-info">
+                        Create First Event
+                    </a>
                 </div>
                 @endforelse
             </div>
@@ -240,13 +234,11 @@
                             <i class="fas fa-search"></i> Browse Items
                         </a>
                     </div>
-                    @if(auth()->user()->isArtisan())
                     <div class="col-md-3 mb-3">
                         <a href="{{ route('transformations.create') }}" class="btn btn-warning w-100">
                             <i class="fas fa-magic"></i> Start Transformation
                         </a>
                     </div>
-                    @endif
                     <div class="col-md-3 mb-3">
                         <a href="{{ route('events.create') }}" class="btn btn-info w-100">
                             <i class="fas fa-calendar-plus"></i> Create Event
@@ -257,4 +249,84 @@
         </div>
     </div>
 </div>
+
+<style>
+.stats-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.stats-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.environmental-impact {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 15px;
+}
+
+.environmental-impact h3 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 15px 15px 0 0 !important;
+    font-weight: 600;
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .stats-card .card-body {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .stats-icon {
+        margin-top: 1rem;
+    }
+    
+    .environmental-impact h3 {
+        font-size: 1.5rem;
+    }
+}
+</style>
 @endsection

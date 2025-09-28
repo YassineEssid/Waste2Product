@@ -12,10 +12,13 @@
                     <h1 class="display-4 fw-bold mb-3">
                         <i class="fas fa-calendar-alt me-3"></i>Community Events
                     </h1>
-                    <p class="lead mb-4">Join eco-friendly workshops, cleanup drives, and sustainability events in your community.</p>
+                    <p class="lead mb-4">Join our community events, workshops, and gatherings to connect with like-minded eco-enthusiasts.</p>
                     <div class="d-flex flex-wrap gap-3">
-                        <a href="{{ route('events.create') }}" class="btn btn-light btn-lg" style="z-index:9999;position:relative;">
-                            <i class="fas fa-plus me-2"></i>Create Event
+                        <a href="{{ route('events.create') }}" class="btn btn-lg btn-list-item shadow-sm px-4 py-2 d-flex align-items-center">
+                            <span class="icon-circle bg-white text-primary d-flex align-items-center justify-content-center me-2" style="width:2.5rem;height:2.5rem;border-radius:50%;">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                            <span class="fw-bold">Create Event</span>
                         </a>
                     </div>
                 </div>
@@ -36,8 +39,8 @@
                             </div>
                             <div class="col-12">
                                 <div class="stat-card">
-                                    <h3 class="h4 mb-1">{{ number_format($stats['participants']) }}</h3>
-                                    <small>Total Participants</small>
+                                    <h3 class="h4 mb-1">{{ number_format($stats['ongoing']) }}</h3>
+                                    <small>Ongoing Events</small>
                                 </div>
                             </div>
                         </div>
@@ -46,6 +49,35 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border-radius: 0 0 30px 30px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-list-item {
+            background: white;
+            color: #007bff;
+            border: none;
+            border-radius: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .btn-list-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .icon-circle {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
 
     <div class="container">
         <!-- Search Bar -->
@@ -60,7 +92,7 @@
                                class="form-control border-start-0 border-end-0"
                                name="search"
                                value="{{ request('search') }}"
-                               placeholder="Search events by title, description, or location...">
+                               placeholder="Search for events, workshops, gatherings...">
                         <button class="btn btn-primary" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
@@ -69,30 +101,60 @@
             </div>
         </div>
 
-        <!-- Quick Filters -->
+        <!-- Status Filters -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="quick-filters d-flex flex-wrap gap-2">
+                <div class="status-filters d-flex flex-wrap gap-2">
                     <a href="{{ route('events.index') }}"
-                       class="btn btn-outline-primary {{ !request()->hasAny(['status', 'type']) ? 'active' : '' }}">
+                       class="btn btn-outline-primary {{ !request()->has('status') ? 'active' : '' }}">
                         <i class="fas fa-globe me-1"></i>All Events
                     </a>
                     <a href="{{ route('events.index', ['status' => 'upcoming']) }}"
-                       class="btn btn-outline-success {{ request('status') == 'upcoming' ? 'active' : '' }}">
+                       class="btn btn-outline-primary {{ request('status') == 'upcoming' ? 'active' : '' }}">
                         <i class="fas fa-clock me-1"></i>Upcoming
                     </a>
-                    <a href="{{ route('events.index', ['type' => 'workshop']) }}"
-                       class="btn btn-outline-info {{ request('type') == 'workshop' ? 'active' : '' }}">
-                        <i class="fas fa-tools me-1"></i>Workshops
+                    <a href="{{ route('events.index', ['status' => 'ongoing']) }}"
+                       class="btn btn-outline-primary {{ request('status') == 'ongoing' ? 'active' : '' }}">
+                        <i class="fas fa-play-circle me-1"></i>Ongoing
                     </a>
-                    <a href="{{ route('events.index', ['type' => 'cleanup']) }}"
-                       class="btn btn-outline-warning {{ request('type') == 'cleanup' ? 'active' : '' }}">
-                        <i class="fas fa-leaf me-1"></i>Cleanups
+                    <a href="{{ route('events.index', ['status' => 'completed']) }}"
+                       class="btn btn-outline-primary {{ request('status') == 'completed' ? 'active' : '' }}">
+                        <i class="fas fa-check-circle me-1"></i>Completed
                     </a>
-                    <a href="{{ route('events.index', ['type' => 'exhibition']) }}"
-                       class="btn btn-outline-danger {{ request('type') == 'exhibition' ? 'active' : '' }}">
-                        <i class="fas fa-eye me-1"></i>Exhibitions
-                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sort Options -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="results-count">
+                        <p class="text-muted mb-0">
+                            Showing {{ $events->count() }} of {{ $events->total() }} events
+                            @if(request('search'))
+                                for "<strong>{{ request('search') }}</strong>"
+                            @endif
+                        </p>
+                    </div>
+                    <div class="sort-options">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-sort me-2"></i>Sort By
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sort' => 'date_asc']) }}">
+                                    <i class="fas fa-sort-amount-up me-2"></i>Date: Earliest First
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sort' => 'date_desc']) }}">
+                                    <i class="fas fa-sort-amount-down me-2"></i>Date: Latest First
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sort' => 'title']) }}">
+                                    <i class="fas fa-sort-alpha-down me-2"></i>Title A-Z
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -102,89 +164,62 @@
             <div class="row">
                 @foreach($events as $event)
                     <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="event-card h-100">
-                            <!-- Event Content -->
-                            <div class="event-content">
-                                <div class="event-meta mb-2">
-                                    <small class="text-muted d-flex align-items-center mb-1">
-                                        <i class="fas fa-calendar me-2"></i>
-                                        @if($event->starts_at)
-                                            {{ \Carbon\Carbon::parse($event->starts_at)->format('M d, Y • g:i A') }}
+                        <div class="event-card card h-100 shadow-sm">
+                            <div class="card-body">
+                                <!-- Event Status Badge -->
+                                <div class="mb-2">
+                                    <span class="badge 
+                                        @if($event->is_upcoming) bg-success
+                                        @elseif($event->is_ongoing) bg-primary
+                                        @else bg-secondary @endif">
+                                        @if($event->is_upcoming)
+                                            <i class="fas fa-clock me-1"></i>Upcoming
+                                        @elseif($event->is_ongoing)
+                                            <i class="fas fa-play me-1"></i>Ongoing
                                         @else
-                                            <span>—</span>
+                                            <i class="fas fa-check me-1"></i>Completed
                                         @endif
-                                    </small>
-                                    <small class="text-muted d-flex align-items-center mb-1">
-                                        <i class="fas fa-map-marker-alt me-2"></i>
-                                        {{ $event->location_address ?? '—' }}
-                                    </small>
-                                    @if($event->is_online)
-                                        <small class="text-info d-flex align-items-center">
-                                            <i class="fas fa-video me-2"></i>Virtual Event
-                                        </small>
-                                    @endif
+                                    </span>
                                 </div>
 
-                                <h5 class="event-title">
-                                    <a href="{{ route('events.show', $event) }}" class="text-decoration-none">
-                                        {{ $event->title }}
-                                    </a>
-                                </h5>
-
-                                <p class="event-description text-muted">
-                                    {{ Str::limit($event->description, 120) }}
-                                </p>
-
-                                <!-- Event Stats -->
-                                <div class="event-stats d-flex justify-content-between align-items-center mb-3">
-                                    <div class="participants">
-                                        <small class="text-muted">
-                                            <i class="fas fa-users me-1"></i>
-                                            {{ $event->attendees->count() }}
-                                            @if($event->max_participants)
-                                                / {{ $event->max_participants }}
-                                            @endif
-                                            participants
-                                        </small>
-                                    </div>
-                                    <div class="creator">
-                                        <small class="text-muted">
-                                            by <strong>{{ $event->creator->name }}</strong>
-                                        </small>
-                                    </div>
+                                <h5 class="card-title">{{ $event->title }}</h5>
+                                <p class="card-text">{{ Str::limit($event->description, 100) }}</p>
+                                
+                                <div class="event-meta">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ $event->starts_at->format('M j, Y g:i A') }}
+                                    </small>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-users me-1"></i>
+                                        {{ $event->attendees_count }} participants
+                                    </small>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ $event->location }}
+                                    </small>
                                 </div>
-
-                                <!-- Action Buttons -->
-                                <div class="event-actions d-flex gap-2">
-                                    <a href="{{ route('events.show', $event) }}" class="btn btn-primary btn-sm flex-grow-1">
-                                        <i class="fas fa-eye me-1"></i>View Details
-                                    </a>
-                                    @if($event->event_date > now())
-                                        @if(!$event->attendees->contains(auth()->id()))
-                                            @if(!$event->max_participants || $event->attendees->count() < $event->max_participants)
-                                                <form method="POST" action="{{ route('events.register', $event) }}" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-success btn-sm">
-                                                        <i class="fas fa-user-plus me-1"></i>Join
-                                                    </button>
-                                                </form>
-                                            @endif
-                                        @else
-                                            <span class="btn btn-outline-success btn-sm">
-                                                <i class="fas fa-check me-1"></i>Registered
-                                            </span>
-                                        @endif
-                                    @endif
-                                    @can('delete', $event)
-                                        <form method="POST" action="{{ route('events.destroy', $event) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this event?');">
+                            </div>
+                            <div class="card-footer bg-transparent border-top-0">
+                                <a href="{{ route('events.show', $event) }}" class="btn btn-primary btn-sm">
+                                    View Details
+                                </a>
+                                @auth
+                                    <div class="mt-2">
+                                        <a href="{{ route('events.edit', $event) }}" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="POST" action="{{ route('events.destroy', $event) }}" style="display:inline;" onsubmit="return confirm('Are you sure?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                <i class="fas fa-trash me-1"></i>Delete
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
-                                    @endcan
-                                </div>
+                                    </div>
+                                @endauth
                             </div>
                         </div>
                     </div>
@@ -192,29 +227,25 @@
             </div>
 
             <!-- Pagination -->
-            <div class="row mt-5">
-                <div class="col-12">
-                    <div class="d-flex justify-content-center">
-                        {{ $events->withQueryString()->links() }}
-                    </div>
-                </div>
+            <div class="d-flex justify-content-center mt-4">
+                {{ $events->links() }}
             </div>
         @else
             <!-- Empty State -->
-            <div class="empty-state text-center py-5">
+            <div class="text-center py-5">
                 <div class="empty-icon mb-4">
                     <i class="fas fa-calendar-times fa-4x text-muted"></i>
                 </div>
                 <h3 class="h4 mb-3">No Events Found</h3>
                 <p class="text-muted mb-4">
-                    @if(request()->hasAny(['search', 'status', 'type']))
+                    @if(request()->hasAny(['search', 'status']))
                         No events match your current filters. Try adjusting your search criteria.
                     @else
-                        There are no community events yet. Be the first to create one!
+                        No events are currently available. Be the first to create one!
                     @endif
                 </p>
                 <div class="d-flex justify-content-center gap-3">
-                    @if(request()->hasAny(['search', 'status', 'type']))
+                    @if(request()->hasAny(['search', 'status']))
                         <a href="{{ route('events.index') }}" class="btn btn-outline-primary">
                             <i class="fas fa-times me-2"></i>Clear Filters
                         </a>
@@ -229,72 +260,40 @@
 </div>
 
 <style>
-.hero-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 0 0 30px 30px;
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><pattern id="grain" width="100" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" fill-opacity="0.1"/></pattern></defs><rect width="100" height="20" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
-}
-
-.stat-card {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 1rem;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
 .event-card {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .event-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
 }
 
-.event-content {
+.event-card .card-body {
     padding: 1.5rem;
 }
 
-.event-title a {
+.event-card .card-title {
     color: #2c3e50;
-    transition: color 0.3s ease;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
 }
 
-.event-title a:hover {
-    color: #3498db;
-}
-
-.event-description {
-    font-size: 0.9rem;
+.event-card .card-text {
+    color: #6c757d;
     line-height: 1.5;
+    margin-bottom: 1rem;
 }
 
-.quick-filters .btn {
-    border-radius: 25px;
-    transition: all 0.3s ease;
+.event-meta {
+    margin-top: 1rem;
 }
 
-.quick-filters .btn.active {
-    transform: scale(1.05);
+.event-meta small {
+    display: block;
+    margin-bottom: 0.25rem;
 }
 
 .search-form .input-group {
@@ -303,32 +302,48 @@
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
 }
 
-.empty-state {
-    background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
-    border-radius: 20px;
-    margin: 2rem 0;
+.status-filters .btn {
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.status-filters .btn.active {
+    background: #007bff;
+    color: white;
+    transform: scale(1.05);
 }
 
 .empty-icon {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    opacity: 0.5;
 }
 
 @media (max-width: 768px) {
     .hero-section {
         border-radius: 0 0 20px 20px;
     }
-
-    .quick-filters {
+    
+    .hero-section .display-4 {
+        font-size: 2rem;
+    }
+    
+    .status-filters {
         justify-content: center;
     }
-
+    
     .event-card {
-        border-radius: 15px;
+        margin-bottom: 1rem;
+    }
+    
+    .results-count {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .sort-options {
+        width: 100%;
+        display: flex;
+        justify-content: center;
     }
 }
 </style>
 @endsection
-

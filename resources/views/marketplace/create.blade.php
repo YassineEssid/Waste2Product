@@ -88,10 +88,10 @@
                         </div>
                     </div>
 
-                    <!-- Pricing & Location -->
+                    <!-- Pricing -->
                     <div class="form-section">
                         <h4 class="section-title">
-                            <i class="fas fa-dollar-sign me-2"></i>Pricing & Location
+                            <i class="fas fa-dollar-sign me-2"></i>Pricing
                         </h4>
                         
                         <div class="row g-3">
@@ -114,19 +114,62 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label required">Location</label>
-                                <input type="text" 
-                                       class="form-control @error('location') is-invalid @enderror" 
-                                       name="location" 
-                                       value="{{ old('location') }}" 
-                                       placeholder="e.g., Downtown Seattle, WA"
-                                       required>
-                                @error('location')
+                                <label class="form-label">Quantity</label>
+                                <input type="number" 
+                                       class="form-control @error('quantity') is-invalid @enderror" 
+                                       name="quantity" 
+                                       value="{{ old('quantity', 1) }}" 
+                                       min="1"
+                                       placeholder="1">
+                                @error('quantity')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                                 <div class="form-text">
-                                    <i class="fas fa-map-marker-alt me-1"></i>
-                                    General area for pickup/delivery coordination
+                                    <i class="fas fa-cube me-1"></i>
+                                    Number of items available
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Options -->
+                    <div class="form-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-cog me-2"></i>Additional Options
+                        </h4>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           name="is_negotiable" 
+                                           id="is_negotiable" 
+                                           value="1"
+                                           {{ old('is_negotiable') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_negotiable">
+                                        <i class="fas fa-handshake me-2"></i>Price is negotiable
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    Allow buyers to negotiate the price
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           name="is_featured" 
+                                           id="is_featured" 
+                                           value="1"
+                                           {{ old('is_featured') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_featured">
+                                        <i class="fas fa-star me-2"></i>Feature this item
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    Highlight your item in featured listings
                                 </div>
                             </div>
                         </div>
@@ -339,6 +382,11 @@
     box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
 }
 
+.form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
 @media (max-width: 768px) {
     .form-card {
         padding: 1.5rem;
@@ -478,10 +526,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form validation
     document.getElementById('itemForm').addEventListener('submit', function(e) {
         const price = parseFloat(document.querySelector('input[name="price"]').value);
+        const quantity = parseInt(document.querySelector('input[name="quantity"]').value) || 1;
         
         if (price < 0) {
             e.preventDefault();
             alert('Price cannot be negative');
+            return false;
+        }
+        
+        if (quantity < 1) {
+            e.preventDefault();
+            alert('Quantity must be at least 1');
             return false;
         }
         

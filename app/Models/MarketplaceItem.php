@@ -12,7 +12,8 @@ class MarketplaceItem extends Model
     protected $fillable = [
         'seller_id',
         'transformation_id',
-        'title',
+        'title', // Ajouté
+        'name', // Ajouté
         'description',
         'price',
         'category',
@@ -24,7 +25,8 @@ class MarketplaceItem extends Model
         'status',
         'is_featured',
         'views_count',
-        'promoted_until'
+        'promoted_until',
+        'is_available' // Ajouté
     ];
 
     protected $casts = [
@@ -32,6 +34,7 @@ class MarketplaceItem extends Model
         'is_negotiable' => 'boolean',
         'is_featured' => 'boolean',
         'promoted_until' => 'datetime',
+        'is_available' => 'boolean',
     ];
 
     // Relationships
@@ -140,4 +143,3 @@ class MarketplaceItem extends Model
         ]);
     }
 }
-

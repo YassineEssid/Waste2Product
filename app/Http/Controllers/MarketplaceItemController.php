@@ -20,13 +20,14 @@ class MarketplaceItemController extends Controller
      */
     public function index(Request $request)
     {
-    $query = MarketplaceItem::with('seller', 'images')->where('status', 'available');
+        $query = MarketplaceItem::with('seller', 'images')->where('status', 'available');
 
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
         }
@@ -95,19 +96,19 @@ class MarketplaceItemController extends Controller
             'category' => 'required|string',
             'condition' => 'required|in:excellent,good,fair,needs_repair',
             'price' => 'required|numeric|min:0',
-            'location' => 'required|string|max:255',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $data = [
-            'title' => $request->title,
+            'title' => $request->title, // Colonne title qui est requise
+            'name' => $request->title,  // Colonne name aussi
             'description' => $request->description,
             'category' => $request->category,
             'condition' => $request->condition,
             'price' => $request->price,
-            'location' => $request->location,
             'seller_id' => Auth::id(),
-            // add other fields as needed, e.g. 'quantity', 'status', etc.
+            'status' => 'available',
+            'quantity' => 1,
         ];
 
         $item = MarketplaceItem::create($data);
@@ -131,11 +132,11 @@ class MarketplaceItemController extends Controller
         $marketplaceItem = MarketplaceItem::with('seller', 'images')->findOrFail($id);
 
         // Get related items
-    $relatedItems = MarketplaceItem::where('category', $marketplaceItem->category)
-                    ->where('id', '!=', $marketplaceItem->id)
-                    ->where('status', 'available')
-                    ->limit(4)
-                    ->get();
+        $relatedItems = MarketplaceItem::where('category', $marketplaceItem->category)
+                        ->where('id', '!=', $marketplaceItem->id)
+                        ->where('status', 'available')
+                        ->limit(4)
+                        ->get();
 
         return view('marketplace.show', compact('marketplaceItem', 'relatedItems'));
     }
@@ -169,12 +170,21 @@ class MarketplaceItemController extends Controller
             'category' => 'required|string',
             'condition' => 'required|in:excellent,good,fair,needs_repair',
             'price' => 'required|numeric|min:0',
-            'location' => 'required|string|max:255',
             'status' => 'string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $marketplace->update($request->all());
+        $updateData = [
+            'title' => $request->title,
+            'name' => $request->title,
+            'description' => $request->description,
+            'category' => $request->category,
+            'condition' => $request->condition,
+            'price' => $request->price,
+            'status' => $request->status ?? $marketplace->status,
+        ];
+
+        $marketplace->update($updateData);
 
         // Handle image uploads
         if ($request->hasFile('images')) {
@@ -203,7 +213,6 @@ class MarketplaceItemController extends Controller
      */
     public function destroy(MarketplaceItem $marketplace)
     {
-
         // Delete all images
         if ($marketplace->images) {
             foreach ($marketplace->images as $image) {
@@ -221,11 +230,25 @@ class MarketplaceItemController extends Controller
      */
     public function byCategory($category)
     {
-    $items = MarketplaceItem::with('seller', 'images')
-                   ->where('category', $category)
-                   ->where('status', 'available')
-                   ->paginate(12);
+        $items = MarketplaceItem::with('seller', 'images')
+                       ->where('category', $category)
+                       ->where('status', 'available')
+                       ->paginate(12);
 
         return view('marketplace.category', compact('items', 'category'));
+    }
+
+    /**
+     * Toggle item status (available/sold)
+     */
+    public function toggleStatus(MarketplaceItem $marketplace)
+    {
+        $this->authorize('update', $marketplace);
+
+        $marketplace->update([
+            'status' => $marketplace->status === 'available' ? 'sold' : 'available'
+        ]);
+
+        return back()->with('success', 'Status updated successfully!');
     }
 }

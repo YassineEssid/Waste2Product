@@ -13,14 +13,11 @@ class EventRegistration extends Model
         'user_id',
         'community_event_id',
         'status',
-        'special_requirements',
-        'registered_at',
-        'attended_at'
+        'registered_at'
     ];
 
     protected $casts = [
         'registered_at' => 'datetime',
-        'attended_at' => 'datetime',
     ];
 
     // Relationships
@@ -40,16 +37,6 @@ class EventRegistration extends Model
         return $query->where('status', 'registered');
     }
 
-    public function scopeConfirmed($query)
-    {
-        return $query->where('status', 'confirmed');
-    }
-
-    public function scopeAttended($query)
-    {
-        return $query->where('status', 'attended');
-    }
-
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
@@ -58,24 +45,5 @@ class EventRegistration extends Model
     public function scopeForEvent($query, $eventId)
     {
         return $query->where('community_event_id', $eventId);
-    }
-
-    // Methods
-    public function confirm()
-    {
-        $this->update(['status' => 'confirmed']);
-    }
-
-    public function markAsAttended()
-    {
-        $this->update([
-            'status' => 'attended',
-            'attended_at' => now()
-        ]);
-    }
-
-    public function cancel()
-    {
-        $this->update(['status' => 'cancelled']);
     }
 }

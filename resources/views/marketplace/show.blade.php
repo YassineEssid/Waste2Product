@@ -18,7 +18,7 @@
             <!-- Image Gallery -->
             <div class="col-lg-6 mb-4">
                 <div class="image-gallery-container">
-                    @if(optional($marketplaceItem->images)->count() > 0)
+                    @if($marketplaceItem->images && $marketplaceItem->images->count() > 0)
                         <div id="mainCarousel" class="carousel slide main-carousel mb-3" data-bs-ride="carousel">
                             <div class="carousel-inner">
                                 @foreach($marketplaceItem->images as $index => $image)
@@ -27,7 +27,7 @@
                                     </div>
                                 @endforeach
                             </div>
-                            @if(optional($marketplaceItem->images)->count() > 1)
+                            @if($marketplaceItem->images->count() > 1)
                                 <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
                                     <span class="carousel-control-prev-icon"></span>
                                 </button>
@@ -38,16 +38,13 @@
                         </div>
 
                         <!-- Thumbnail Navigation -->
-                        @if($marketplaceItem->images->count())
-                            <div class="item-images">
-                                @foreach($marketplaceItem->images as $image)
-                                    <img src="{{ asset('storage/' . $image->path) }}" alt="Item Image" style="max-width: 100%; height: auto;">
+                        @if($marketplaceItem->images->count() > 1)
+                            <div class="thumbnail-nav">
+                                @foreach($marketplaceItem->images as $index => $image)
+                                    <div class="thumbnail {{ $index === 0 ? 'active' : '' }}" data-bs-target="#mainCarousel" data-bs-slide-to="{{ $index }}">
+                                        <img src="{{ Storage::url($image->path) }}" alt="Thumbnail">
+                                    </div>
                                 @endforeach
-                            </div>
-                        @else
-                            <div class="no-images">
-                                <img src="{{ asset('images/no-image.png') }}" alt="No images available">
-                                <p>No images available</p>
                             </div>
                         @endif
                     @else
@@ -90,26 +87,22 @@
                                 <h1 class="item-title">{{ $marketplaceItem->title }}</h1>
                             </div>
                             <div class="item-price">
-                                <span class="price-amount">${{ number_format($marketplaceItem->price, 0) }}</span>
+                                <span class="price-amount">${{ number_format($marketplaceItem->price, 2) }}</span>
                             </div>
                         </div>
 
                         <!-- Item Meta -->
                         <div class="item-meta">
                             <div class="meta-item">
-                                <i class="fas fa-map-marker-alt text-muted me-2"></i>
-                                <span>
-                                    @if(!empty($marketplaceItem->location))
-                                        {{ $marketplaceItem->location }}
-                                    @else
-                                        <span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>Non renseignée</span>
-                                    @endif
-                                </span>
-                            </div>
-                            <div class="meta-item">
                                 <i class="fas fa-clock text-muted me-2"></i>
-                                <span>Listed {{ $marketplaceItem->created_at ? $marketplaceItem->created_at->diffForHumans() : 'N/A' }}</span>
+                                <span>Listed {{ $marketplaceItem->created_at->diffForHumans() }}</span>
                             </div>
+                            @if($marketplaceItem->views_count)
+                                <div class="meta-item">
+                                    <i class="fas fa-eye text-muted me-2"></i>
+                                    <span>{{ $marketplaceItem->views_count }} views</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -125,26 +118,16 @@
                                 <i class="fas fa-user fa-2x"></i>
                             </div>
                             <div class="seller-details flex-grow-1">
-                                <h6 class="mb-1">
-                                    @if($marketplaceItem->seller)
-                                        {{ $marketplaceItem->seller->name }}
-                                    @else
-                                        <span class="text-danger"><i class="fas fa-user-slash me-1"></i>Vendeur inconnu</span>
-                                    @endif
-                                </h6>
+                                <h6 class="mb-1">{{ $marketplaceItem->seller->name }}</h6>
                                 <p class="text-muted mb-1">
-                                    @if($marketplaceItem->seller && $marketplaceItem->seller->role)
+                                    @if($marketplaceItem->seller->role && $marketplaceItem->seller->role !== 'user')
                                         {{ ucfirst($marketplaceItem->seller->role) }}
                                     @else
-                                        <span class="text-danger">Rôle non renseigné</span>
+                                        Community Member
                                     @endif
                                 </p>
                                 <small class="text-muted">
-                                    @if($marketplaceItem->seller && $marketplaceItem->seller->created_at)
-                                        Membre depuis {{ $marketplaceItem->seller->created_at->format('M Y') }}
-                                    @else
-                                        <span class="text-danger">Date d'inscription inconnue</span>
-                                    @endif
+                                    Member since {{ $marketplaceItem->seller->created_at->format('M Y') }}
                                 </small>
                             </div>
                             @if($marketplaceItem->seller_id !== auth()->id())
@@ -170,18 +153,12 @@
                                 </button>
                             </div>
                             <div class="availability-toggle">
-                                <form method="POST" action="{{ route('marketplace.update', $marketplaceItem->id) }}">
+                                <form method="POST" action="{{ route('marketplace.update', $marketplaceItem) }}">
                                     @csrf
                                     @method('PUT')
-                                    <input type="hidden" name="title" value="{{ $marketplaceItem->title }}">
-                                    <input type="hidden" name="description" value="{{ $marketplaceItem->description }}">
-                                    <input type="hidden" name="category" value="{{ $marketplaceItem->category }}">
-                                    <input type="hidden" name="condition" value="{{ $marketplaceItem->condition }}">
-                                    <input type="hidden" name="price" value="{{ $marketplaceItem->price }}">
-                                    <input type="hidden" name="location" value="{{ $marketplaceItem->location }}">
-                                    <input type="hidden" name="is_available" value="{{ $marketplaceItem->is_available ? '0' : '1' }}">
-                                    <button type="submit" class="btn {{ $marketplaceItem->is_available ? 'btn-warning' : 'btn-success' }} w-100">
-                                        @if($marketplaceItem->is_available)
+                                    <input type="hidden" name="status" value="{{ $marketplaceItem->status === 'available' ? 'sold' : 'available' }}">
+                                    <button type="submit" class="btn {{ $marketplaceItem->status === 'available' ? 'btn-warning' : 'btn-success' }} w-100">
+                                        @if($marketplaceItem->status === 'available')
                                             <i class="fas fa-eye-slash me-2"></i>Mark as Sold
                                         @else
                                             <i class="fas fa-eye me-2"></i>Mark as Available
@@ -191,13 +168,13 @@
                             </div>
                         @else
                             <!-- Buyer Actions -->
-                            @if($marketplaceItem->is_available)
+                            @if($marketplaceItem->status === 'available')
                                 <button class="btn btn-success btn-lg w-100 mb-3" onclick="contactSeller()">
-                                    <i class="fas fa-envelope me-2"></i>Contact Seller
+                                    <i class="fas fa-shopping-cart me-2"></i>Buy Now
                                 </button>
                             @else
                                 <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>
-                                    <i class="fas fa-ban me-2"></i>Item Not Available
+                                    <i class="fas fa-ban me-2"></i>Item Sold
                                 </button>
                             @endif
                         @endif
@@ -237,95 +214,55 @@
                 </div>
             </div>
         </div>
-                    <div class="details-section beautiful-details p-4 mb-4">
-                        <h3 class="section-title mb-4">
-                            <i class="fas fa-list-alt me-2"></i>Détails du produit
-                        </h3>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-tag me-2 text-success"></i>Catégorie</span>
-                                    <span class="badge bg-success ms-2">{{ ucfirst($marketplaceItem->category) }}</span>
-                                </div>
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-cube me-2 text-primary"></i>État</span>
-                                    <span class="badge {{ $marketplaceItem->condition === 'excellent' ? 'bg-success' : ($marketplaceItem->condition === 'good' ? 'bg-primary' : ($marketplaceItem->condition === 'fair' ? 'bg-warning' : 'bg-danger')) }} ms-2">{{ ucfirst($marketplaceItem->condition) }}</span>
-                                </div>
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-dollar-sign me-2 text-warning"></i>Prix</span>
-                                    <span class="fw-bold ms-2">{{ $marketplaceItem->getFormattedPriceAttribute() }}</span>
-                                </div>
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-sort-numeric-up me-2 text-info"></i>Quantité</span>
-                                    <span class="badge bg-info ms-2">{{ $marketplaceItem->quantity ?? '1' }}</span>
-                                </div>
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-handshake me-2 text-secondary"></i>Négociable</span>
-                                    <span class="badge {{ $marketplaceItem->is_negotiable ? 'bg-success' : 'bg-danger' }} ms-2">{{ $marketplaceItem->is_negotiable ? 'Oui' : 'Non' }}</span>
-                                </div>
+
+        <!-- Product Details -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="details-section beautiful-details p-4 mb-4">
+                    <h3 class="section-title mb-4">
+                        <i class="fas fa-list-alt me-2"></i>Product Details
+                    </h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <span class="detail-label"><i class="fas fa-tag me-2 text-success"></i>Category</span>
+                                <span class="badge bg-success ms-2">{{ ucfirst($marketplaceItem->category) }}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-truck me-2 text-dark"></i>Méthode de livraison</span>
-                                    <span class="badge bg-dark ms-2">{{ $marketplaceItem->delivery_method ?? 'Non spécifiée' }}</span>
-                                </div>
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-sticky-note me-2 text-warning"></i>Notes de livraison</span>
-                                    <span class="ms-2">{{ $marketplaceItem->delivery_notes ?? 'Aucune' }}</span>
-                                </div>
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-info-circle me-2 text-primary"></i>Statut</span>
-                                    <span class="badge bg-primary ms-2">{{ ucfirst($marketplaceItem->status) }}</span>
-                                </div>
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-eye me-2 text-success"></i>Vues</span>
-                                    <span class="badge bg-success ms-2">{{ $marketplaceItem->views_count ?? 0 }}</span>
-                                </div>
-                                <div class="detail-card">
-                                    <span class="detail-label"><i class="fas fa-bolt me-2 text-warning"></i>Promotion jusqu'au</span>
-                                    <span class="badge bg-warning ms-2">{{ $marketplaceItem->promoted_until ? $marketplaceItem->promoted_until->format('d/m/Y') : 'Non' }}</span>
-                                </div>
+                            <div class="detail-card">
+                                <span class="detail-label"><i class="fas fa-cube me-2 text-primary"></i>Condition</span>
+                                <span class="badge {{ $marketplaceItem->condition === 'excellent' ? 'bg-success' : ($marketplaceItem->condition === 'good' ? 'bg-primary' : ($marketplaceItem->condition === 'fair' ? 'bg-warning' : 'bg-danger')) }} ms-2">{{ ucfirst($marketplaceItem->condition) }}</span>
+                            </div>
+                            <div class="detail-card">
+                                <span class="detail-label"><i class="fas fa-dollar-sign me-2 text-warning"></i>Price</span>
+                                <span class="fw-bold ms-2">${{ number_format($marketplaceItem->price, 2) }}</span>
+                            </div>
+                            <div class="detail-card">
+                                <span class="detail-label"><i class="fas fa-sort-numeric-up me-2 text-info"></i>Quantity</span>
+                                <span class="badge bg-info ms-2">{{ $marketplaceItem->quantity ?? '1' }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <span class="detail-label"><i class="fas fa-info-circle me-2 text-primary"></i>Status</span>
+                                <span class="badge {{ $marketplaceItem->status === 'available' ? 'bg-success' : 'bg-secondary' }} ms-2">{{ ucfirst($marketplaceItem->status) }}</span>
+                            </div>
+                            <div class="detail-card">
+                                <span class="detail-label"><i class="fas fa-eye me-2 text-info"></i>Views</span>
+                                <span class="badge bg-info ms-2">{{ $marketplaceItem->views_count ?? 0 }}</span>
+                            </div>
+                            <div class="detail-card">
+                                <span class="detail-label"><i class="fas fa-handshake me-2 text-secondary"></i>Negotiable</span>
+                                <span class="badge {{ $marketplaceItem->is_negotiable ? 'bg-success' : 'bg-secondary' }} ms-2">{{ $marketplaceItem->is_negotiable ? 'Yes' : 'No' }}</span>
+                            </div>
+                            <div class="detail-card">
+                                <span class="detail-label"><i class="fas fa-calendar me-2 text-dark"></i>Listed</span>
+                                <span class="ms-2">{{ $marketplaceItem->created_at->format('M d, Y') }}</span>
                             </div>
                         </div>
                     </div>
-                    <style>
-                    .beautiful-details {
-                        background: linear-gradient(135deg, #f8f9fa 0%, #e6ffef 100%);
-                        border-radius: 20px;
-                        box-shadow: 0 8px 30px rgba(40, 167, 69, 0.08);
-                    }
-                    .detail-card {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        padding: 0.75rem 1.25rem;
-                        margin-bottom: 1rem;
-                        background: #fff;
-                        border-radius: 12px;
-                        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.05);
-                    }
-                    .detail-label {
-                        font-weight: 500;
-                        color: #2c3e50;
-                        font-size: 1rem;
-                    }
-                    .badge {
-                        font-size: 1rem;
-                        padding: 0.5em 1em;
-                        border-radius: 20px;
-                    }
-                    @media (max-width: 768px) {
-                        .beautiful-details {
-                            padding: 1rem;
-                            border-radius: 12px;
-                        }
-                        .detail-card {
-                            flex-direction: column;
-                            align-items: flex-start;
-                            padding: 0.75rem 0.5rem;
-                        }
-                    }
-                    </style>
+                </div>
+            </div>
+        </div>
 
         <!-- Related Items -->
         @if($relatedItems->count() > 0)
@@ -339,7 +276,7 @@
                             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                                 <div class="related-item-card">
                                     <div class="related-item-image">
-                                        @if(!empty($item->images) && $item->images->count() > 0)
+                                        @if($item->images && $item->images->count() > 0)
                                             <img src="{{ Storage::url($item->images->first()->path) }}" alt="{{ $item->title }}">
                                         @else
                                             <div class="related-placeholder">
@@ -347,12 +284,12 @@
                                             </div>
                                         @endif
                                         <div class="related-price">
-                                            <span class="badge bg-success">${{ number_format($item->price, 0) }}</span>
+                                            <span class="badge bg-success">${{ number_format($item->price, 2) }}</span>
                                         </div>
                                     </div>
                                     <div class="related-item-content">
                                         <h6>{{ Str::limit($item->title, 40) }}</h6>
-                                        <small class="text-muted">{{ $item->location }}</small>
+                                        <small class="text-muted">{{ $item->category }}</small>
                                         <a href="{{ route('marketplace.show', $item) }}" class="stretched-link"></a>
                                     </div>
                                 </div>
@@ -385,7 +322,7 @@
                 <div class="item-preview">
                     <h6>{{ $marketplaceItem->title }}</h6>
                     <small class="text-muted">
-                        ${{ number_format($marketplaceItem->price, 0) }} • {{ $marketplaceItem->category }}
+                        ${{ number_format($marketplaceItem->price, 2) }} • {{ $marketplaceItem->category }}
                     </small>
                 </div>
             </div>
@@ -394,7 +331,7 @@
                 <form method="POST" action="{{ route('marketplace.destroy', $marketplaceItem) }}" class="d-inline">
                     @csrf
                     @method('DELETE')
-                    <button"submit" class="btn btn-danger">
+                    <button type="submit" class="btn btn-danger">
                         <i class="fas fa-trash me-2"></i>Delete Item
                     </button>
                 </form>
@@ -603,6 +540,35 @@
     margin-top: 1rem;
 }
 
+.beautiful-details {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e6ffef 100%);
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(40, 167, 69, 0.08);
+}
+
+.detail-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.05);
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.badge {
+    font-size: 0.9rem;
+    padding: 0.4em 0.8em;
+    border-radius: 20px;
+}
+
 @media (max-width: 768px) {
     .item-title {
         font-size: 1.5rem;
@@ -628,6 +594,17 @@
         padding: 1rem;
         border-radius: 10px;
     }
+
+    .beautiful-details {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .detail-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.75rem 0.5rem;
+    }
 }
 </style>
 
@@ -637,16 +614,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const thumbnails = document.querySelectorAll('.thumbnail');
     thumbnails.forEach(thumbnail => {
         thumbnail.addEventListener('click', function() {
-            // Remove active class from all thumbnails
             thumbnails.forEach(t => t.classList.remove('active'));
-            // Add active class to clicked thumbnail
             this.classList.add('active');
         });
     });
 });
 
 function contactSeller() {
-    // This would typically open a contact form or messaging system
     alert('Contact seller functionality would be implemented here. This could open a contact form, messaging system, or show seller contact details.');
 }
 
@@ -658,7 +632,6 @@ function shareItem() {
             url: window.location.href
         });
     } else {
-        // Fallback for browsers that don't support Web Share API
         navigator.clipboard.writeText(window.location.href).then(() => {
             alert('Item link copied to clipboard!');
         });

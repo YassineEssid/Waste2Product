@@ -12,16 +12,13 @@
             </a>
         </div>
     </div>
+    
     <!-- Hero Section -->
     <div class="event-hero">
         <div class="hero-background">
-            @if($event->firstImage)
-                <img src="{{ Storage::url($event->firstImage) }}" alt="{{ $event->title }}" class="hero-image">
-            @else
-                <div class="hero-placeholder">
-                    <i class="fas fa-calendar-alt fa-4x"></i>
-                </div>
-            @endif
+            <div class="hero-placeholder">
+                <i class="fas fa-calendar-alt fa-4x"></i>
+            </div>
             <div class="hero-overlay"></div>
         </div>
 
@@ -29,45 +26,17 @@
             <div class="container">
                 <div class="row">
                     <div class="col-lg-8">
-                        <!-- Event Type & Status -->
+                        <!-- Event Status -->
                         <div class="event-badges mb-3">
-                            <span class="badge badge-type">
-                                @switch($event->type)
-                                    @case('workshop')
-                                        <i class="fas fa-tools me-1"></i>Workshop
-                                        @break
-                                    @case('cleanup')
-                                        <i class="fas fa-leaf me-1"></i>Cleanup
-                                        @break
-                                    @case('exhibition')
-                                        <i class="fas fa-eye me-1"></i>Exhibition
-                                        @break
-                                    @case('seminar')
-                                        <i class="fas fa-graduation-cap me-1"></i>Seminar
-                                        @break
-                                    @case('competition')
-                                        <i class="fas fa-trophy me-1"></i>Competition
-                                        @break
-                                    @default
-                                        <i class="fas fa-calendar me-1"></i>{{ ucfirst($event->type) }}
-                                @endswitch
-                            </span>
-
                             <span class="badge badge-status">
-                                @if($event->starts_at && \Carbon\Carbon::parse($event->starts_at)->gt(now()))
+                                @if($event->starts_at && $event->starts_at->gt(now()))
                                     <i class="fas fa-clock me-1"></i>Upcoming
-                                @elseif($event->starts_at && $event->ends_at && \Carbon\Carbon::parse($event->starts_at)->lte(now()) && \Carbon\Carbon::parse($event->ends_at)->gt(now()))
+                                @elseif($event->starts_at && $event->ends_at && $event->starts_at->lte(now()) && $event->ends_at->gt(now()))
                                     <i class="fas fa-play me-1"></i>Ongoing
                                 @else
                                     <i class="fas fa-check me-1"></i>Completed
                                 @endif
                             </span>
-
-                            @if($event->is_virtual)
-                                <span class="badge badge-virtual">
-                                    <i class="fas fa-video me-1"></i>Virtual
-                                </span>
-                            @endif
                         </div>
 
                         <h1 class="hero-title">{{ $event->title }}</h1>
@@ -77,28 +46,27 @@
                             <div class="meta-item">
                                 <i class="fas fa-calendar-alt"></i>
                                 <span>
-                                    {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('l, F j, Y') : 'Date not set' }}
+                                    {{ $event->starts_at ? $event->starts_at->format('l, F j, Y') : 'Date not set' }}
                                 </span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-clock"></i>
                                 <span>
-                                    {{ $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->format('g:i A') : 'Start time not set' }}
+                                    {{ $event->starts_at ? $event->starts_at->format('g:i A') : 'Start time not set' }}
                                     -
-                                    {{ $event->ends_at ? \Carbon\Carbon::parse($event->ends_at)->format('g:i A') : 'End time not set' }}
+                                    {{ $event->ends_at ? $event->ends_at->format('g:i A') : 'End time not set' }}
                                 </span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <span>{{ $event->location ?? $event->location_address ?? 'Location not set' }}</span>
+                                <span>{{ $event->location }}</span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-user"></i>
-                                <span>by {{ $event->creator->name }}</span>
+                                <span>by {{ $event->creator_name }}</span>
                             </div>
                         </div>
                     </div>
-                    <!-- Remove any col-lg-4 or button section here -->
                 </div>
             </div>
         </div>
@@ -117,38 +85,6 @@
                     </div>
                 </div>
 
-                <!-- Participants -->
-                @if($event->attendees->count() > 0)
-                    <div class="content-card mb-4">
-                        <h3 class="card-title">
-                            <i class="fas fa-users me-2"></i>
-                            Participants ({{ $event->attendees->count() }}{{ $event->max_participants ? '/' . $event->max_participants : '' }})
-                        </h3>
-                        <div class="participants-grid">
-                            @foreach($event->attendees->take(12) as $participant)
-                                <div class="participant-card">
-                                    <div class="participant-avatar">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <span class="participant-name">{{ $participant->name }}</span>
-                                    @if($participant->role !== 'user')
-                                        <span class="participant-role">{{ ucfirst($participant->role) }}</span>
-                                    @endif
-                                </div>
-                            @endforeach
-
-                            @if($event->attendees->count() > 12)
-                                <div class="participant-card more-participants">
-                                    <div class="participant-avatar">
-                                        <i class="fas fa-plus"></i>
-                                    </div>
-                                    <span>+{{ $event->attendees->count() - 12 }} more</span>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-
                 <!-- Related Events -->
                 @if($relatedEvents->count() > 0)
                     <div class="content-card">
@@ -159,18 +95,14 @@
                             @foreach($relatedEvents as $relatedEvent)
                                 <div class="col-md-4 mb-3">
                                     <div class="related-event-card">
-                                        @if($relatedEvent->image)
-                                            <img src="{{ Storage::url($relatedEvent->image) }}" alt="{{ $relatedEvent->title }}">
-                                        @else
-                                            <div class="related-event-placeholder">
-                                                <i class="fas fa-calendar"></i>
-                                            </div>
-                                        @endif
+                                        <div class="related-event-placeholder">
+                                            <i class="fas fa-calendar"></i>
+                                        </div>
                                         <div class="related-event-content">
                                             <h6>{{ Str::limit($relatedEvent->title, 40) }}</h6>
                                             <small class="text-muted">
                                                 <i class="fas fa-calendar me-1"></i>
-                                                {{ $relatedEvent->starts_at ? \Carbon\Carbon::parse($relatedEvent->starts_at)->format('M j') : '' }}
+                                                {{ $relatedEvent->starts_at ? $relatedEvent->starts_at->format('M j') : '' }}
                                             </small>
                                             <a href="{{ route('events.show', $relatedEvent) }}" class="stretched-link"></a>
                                         </div>
@@ -187,30 +119,16 @@
                 <!-- Registration Card -->
                 <div class="sidebar-card registration-card">
                     <div class="participation-status">
-                        @if($event->starts_at && \Carbon\Carbon::parse($event->starts_at)->gt(now()))
-                            @if($isAttending)
-                                <div class="status-registered">
-                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
-                                    <h5>You're Registered!</h5>
-                                    <p class="text-muted">We'll send you event updates and reminders.</p>
-                                </div>
-                            @elseif($canRegister)
-                                <div class="status-available">
-                                    <i class="fas fa-calendar-plus fa-2x mb-2"></i>
-                                    <h5>Join This Event</h5>
-                                    <p class="text-muted">Be part of this amazing community event.</p>
-                                </div>
-                            @else
-                                <div class="status-full">
-                                    <i class="fas fa-users fa-2x mb-2"></i>
-                                    <h5>Event Full</h5>
-                                    <p class="text-muted">This event has reached maximum capacity.</p>
-                                </div>
-                            @endif
+                        @if($event->starts_at && $event->starts_at->gt(now()))
+                            <div class="status-available">
+                                <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                                <h5>Join This Event</h5>
+                                <p class="text-muted">Be part of this amazing community event.</p>
+                            </div>
                         @else
                             <div class="status-past">
                                 <i class="fas fa-clock fa-2x mb-2"></i>
-                                <h5>Event {{ $event->ends_at && \Carbon\Carbon::parse($event->ends_at)->lt(now()) ? 'Completed' : 'Ongoing' }}</h5>
+                                <h5>Event {{ $event->ends_at && $event->ends_at->lt(now()) ? 'Completed' : 'Ongoing' }}</h5>
                                 <p class="text-muted">Registration is no longer available.</p>
                             </div>
                         @endif
@@ -218,32 +136,18 @@
 
                     <!-- Action Buttons -->
                     <div class="action-buttons">
-                        @if($event->starts_at && \Carbon\Carbon::parse($event->starts_at)->gt(now()))
-                            @if($isAttending)
-                                <form method="POST" action="{{ route('events.unregister', $event) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-outline-danger btn-lg w-100 mb-2">
-                                        <i class="fas fa-user-minus me-2"></i>Unregister
-                                    </button>
-                                </form>
-                            @elseif($canRegister)
-                                <form method="POST" action="{{ route('events.register', $event) }}">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
-                                        <i class="fas fa-user-plus me-2"></i>Register Now
-                                    </button>
-                                </form>
-                            @endif
+                        @if($event->starts_at && $event->starts_at->gt(now()))
+                            <button class="btn btn-primary btn-lg w-100 mb-2" onclick="showRegistrationInfo()">
+                                <i class="fas fa-user-plus me-2"></i>Register Now
+                            </button>
                         @endif
 
-                        @can('update', $event)
+                        <!-- Edit and Delete buttons for all authenticated users (temporarily) -->
+                        @auth
                             <a href="{{ route('events.edit', $event) }}" class="btn btn-outline-primary w-100 mb-2">
                                 <i class="fas fa-edit me-2"></i>Edit Event
                             </a>
-                        @endcan
-
-                        @can('delete', $event)
+                            
                             <form method="POST" action="{{ route('events.destroy', $event) }}" onsubmit="return confirm('Are you sure you want to delete this event?');" class="mb-2">
                                 @csrf
                                 @method('DELETE')
@@ -251,7 +155,7 @@
                                     <i class="fas fa-trash me-2"></i>Delete Event
                                 </button>
                             </form>
-                        @endcan
+                        @endauth
 
                         <button class="btn btn-outline-secondary w-100" onclick="shareEvent()">
                             <i class="fas fa-share-alt me-2"></i>Share Event
@@ -270,10 +174,8 @@
                                 <i class="fas fa-users"></i>
                             </div>
                             <div class="stat-content">
-                                <div class="stat-number">{{ $event->attendees->count() }}</div>
-                                <div class="stat-label">
-                                    {{ $event->max_participants ? 'of ' . $event->max_participants : '' }} Participants
-                                </div>
+                                <div class="stat-number">{{ $event->attendees_count }}</div>
+                                <div class="stat-label">Participants</div>
                             </div>
                         </div>
 
@@ -284,13 +186,13 @@
                             <div class="stat-content">
                                 <div class="stat-number">
                                     @if($event->starts_at)
-                                        {{ \Carbon\Carbon::parse($event->starts_at)->diffInDays(now()) }}
+                                        {{ $event->starts_at->diffInDays(now()) }}
                                     @else
                                         N/A
                                     @endif
                                 </div>
                                 <div class="stat-label">
-                                    Days {{ $event->starts_at && \Carbon\Carbon::parse($event->starts_at)->gt(now()) ? 'Until Event' : 'Since Event' }}
+                                    Days {{ $event->starts_at && $event->starts_at->gt(now()) ? 'Until Event' : 'Since Event' }}
                                 </div>
                             </div>
                         </div>
@@ -302,7 +204,7 @@
                             <div class="stat-content">
                                 <div class="stat-number">
                                     @if($event->starts_at && $event->ends_at)
-                                        {{ \Carbon\Carbon::parse($event->starts_at)->diffInHours(\Carbon\Carbon::parse($event->ends_at)) }}
+                                        {{ $event->starts_at->diffInHours($event->ends_at) }}
                                     @else
                                         N/A
                                     @endif
@@ -323,10 +225,10 @@
                             <i class="fas fa-user fa-2x"></i>
                         </div>
                         <div class="creator-details">
-                            <h6>{{ $event->creator->name }}</h6>
-                            <p class="text-muted mb-1">{{ ucfirst($event->creator->role) }}</p>
+                            <h6>{{ $event->creator_name }}</h6>
+                            <p class="text-muted mb-1">Community Organizer</p>
                             <small class="text-muted">
-                                Member since {{ $event->creator->created_at->format('M Y') }}
+                                Organizing great events for the community
                             </small>
                         </div>
                     </div>
@@ -350,12 +252,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-}
-
-.hero-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
 }
 
 .hero-placeholder {
@@ -399,16 +295,8 @@
     font-weight: 500;
 }
 
-.badge-type {
-    background: rgba(52, 152, 219, 0.9);
-}
-
 .badge-status {
     background: rgba(46, 204, 113, 0.9);
-}
-
-.badge-virtual {
-    background: rgba(155, 89, 182, 0.9);
 }
 
 .hero-title {
@@ -460,53 +348,6 @@
     color: #555;
 }
 
-.participants-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.participant-card {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    background: #f8f9fa;
-    border-radius: 10px;
-}
-
-.participant-avatar {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-}
-
-.participant-name {
-    font-weight: 500;
-    flex-grow: 1;
-}
-
-.participant-role {
-    font-size: 0.75rem;
-    background: #e9ecef;
-    padding: 0.25rem 0.5rem;
-    border-radius: 15px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.more-participants {
-    background: #e9ecef;
-    justify-content: center;
-    color: #6c757d;
-    font-weight: 500;
-}
-
 .related-event-card {
     position: relative;
     border-radius: 10px;
@@ -520,14 +361,9 @@
     transform: translateY(-5px);
 }
 
-.related-event-card img,
 .related-event-placeholder {
     width: 100%;
     height: 120px;
-    object-fit: cover;
-}
-
-.related-event-placeholder {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     display: flex;
     align-items: center;
@@ -537,6 +373,11 @@
 
 .related-event-content {
     padding: 1rem;
+}
+
+.related-event-content h6 {
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
 }
 
 .registration-card {
@@ -552,16 +393,8 @@
     background-clip: text;
 }
 
-.status-registered {
-    color: #28a745;
-}
-
 .status-available {
     color: #007bff;
-}
-
-.status-full {
-    color: #ffc107;
 }
 
 .status-past {
@@ -571,6 +404,7 @@
 .action-buttons .btn {
     border-radius: 25px;
     font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .btn-primary {
@@ -582,6 +416,10 @@
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn-outline-primary:hover, .btn-outline-secondary:hover, .btn-outline-danger:hover {
+    transform: translateY(-2px);
 }
 
 .stats-list {
@@ -655,13 +493,26 @@
         gap: 0.5rem;
     }
 
-    .participants-grid {
-        grid-template-columns: 1fr;
-    }
-
     .content-card, .sidebar-card {
         border-radius: 10px;
         padding: 1rem;
+    }
+    
+    .stats-list {
+        gap: 0.75rem;
+    }
+    
+    .stat-item {
+        gap: 0.75rem;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .stat-number {
+        font-size: 1.25rem;
     }
 }
 </style>
@@ -680,6 +531,10 @@ function shareEvent() {
             alert('Event link copied to clipboard!');
         });
     }
+}
+
+function showRegistrationInfo() {
+    alert('Registration system is temporarily disabled. This feature will be available soon!');
 }
 </script>
 @endsection
