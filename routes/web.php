@@ -9,11 +9,15 @@ use App\Http\Controllers\TransformationController;
 use App\Http\Controllers\CommunityEventController;
 use App\Http\Controllers\MarketplaceItemController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
 
-// Home page - Smart redirection
-Route::get('/', function () {
-    return redirect()->route('login');
-})->name('home');
+// Front Office Routes
+Route::get('/', [HomeController::class, 'index'])->name('front.home');
+Route::get('/a-propos', [HomeController::class, 'about'])->name('front.about');
+Route::get('/comment-ca-marche', [HomeController::class, 'howItWorks'])->name('front.how-it-works');
+Route::get('/contact', [HomeController::class, 'contact'])->name('front.contact');
+Route::get('/evenements', [HomeController::class, 'events'])->name('front.events');
+Route::get('/boutique', [HomeController::class, 'marketplace'])->name('front.marketplace');
 
 // Authentication routes
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
