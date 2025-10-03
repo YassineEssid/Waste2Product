@@ -19,7 +19,7 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ route('events.update', $event) }}">
+                    <form method="POST" action="{{ route('events.update', $event) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -111,6 +111,47 @@
                                 <small class="form-text text-muted">
                                     Leave empty if location is not specified
                                 </small>
+                            </div>
+                        </div>
+
+                        <!-- Event Image -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-image me-2"></i>Image de l'événement
+                                </h5>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                @if($event->image)
+                                <div class="mb-3">
+                                    <label class="form-label">Image actuelle</label>
+                                    <div class="position-relative d-inline-block">
+                                        <img src="{{ Storage::url($event->image) }}" 
+                                             alt="{{ $event->title }}" 
+                                             class="img-thumbnail" 
+                                             style="max-width: 300px; max-height: 200px;">
+                                    </div>
+                                </div>
+                                @endif
+
+                                <label class="form-label">{{ $event->image ? 'Changer l\'image' : 'Ajouter une image' }}</label>
+                                <input type="file" 
+                                       class="form-control @error('image') is-invalid @enderror" 
+                                       name="image" 
+                                       id="image"
+                                       accept="image/*"
+                                       onchange="previewImage(event)">
+                                @error('image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="form-text text-muted">
+                                    Formats acceptés : JPEG, PNG, JPG, GIF (Max : 2MB)
+                                </small>
+                                
+                                <div id="imagePreview" class="mt-3" style="display: none;">
+                                    <img id="preview" src="" alt="Preview" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
+                                </div>
                             </div>
                         </div>
 
@@ -245,6 +286,24 @@
 </style>
 
 <script>
+// Preview image before upload
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('imagePreview');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        previewContainer.style.display = 'none';
+    }
+}
+
 // Client-side validation for date times
 document.addEventListener('DOMContentLoaded', function() {
     const startDateInput = document.querySelector('input[name="event_date"]');
@@ -266,5 +325,23 @@ document.addEventListener('DOMContentLoaded', function() {
     startDateInput.addEventListener('change', validateDates);
     endDateInput.addEventListener('change', validateDates);
 });
+
+// Image preview function
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('preview');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.style.display = 'none';
+    }
+}
 </script>
 @endsection
