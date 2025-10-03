@@ -1,4 +1,4 @@
-<!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html>
+﻿<!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html><!DOCTYPE html>
 
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -242,7 +242,7 @@
 
             font-size: 1.1rem;
 
-            font-weight: 600;                <i class="fas fa-recycle"></i> Waste2Product
+            font-weight: 600;                <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" style="height: 35px; width: auto; margin-right: 10px;"> Waste2Product
 
             border-radius: 50px;
 
@@ -1070,7 +1070,7 @@
 
                                 <p class="text-muted mb-0">Weekly Events</p>
 
-                            </div>                </div>                <i class="fas fa-recycle"></i> Waste2Product        }
+                            </div>                </div>                <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" style="height: 35px; width: auto; margin-right: 10px;"> Waste2Product        }
 
                         </div>
 
@@ -1572,7 +1572,7 @@
 
                 navbar.style.background = 'rgba(255, 255, 255, 0.95)';
 
-                navbar.style.boxShadow = 'none';        <div class="container">            transition: all 0.3s ease;                <i class="fas fa-recycle"></i> Waste2Product
+                navbar.style.boxShadow = 'none';        <div class="container">            transition: all 0.3s ease;                <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" style="height: 35px; width: auto; margin-right: 10px;"> Waste2Product
 
             }
 
@@ -2041,7 +2041,7 @@
 
         </div>
 
-    </section>        }                        <div class="dropdown">                <i class="fas fa-recycle"></i> Waste2Product
+    </section>        }                        <div class="dropdown">                <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" style="height: 35px; width: auto; margin-right: 10px;"> Waste2Product
 
 
 
@@ -2354,7 +2354,7 @@
 
             <a class="navbar-brand text-success" href="{{ url('/') }}">            position: relative;
 
-                <i class="fas fa-recycle"></i> Waste2Product
+                <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" style="height: 35px; width: auto; margin-right: 10px;"> Waste2Product
 
             </a>            z-index: 2;                        Transform <span class="text-warning">Waste</span> Into <span class="text-info">Value</span>
 
@@ -2804,7 +2804,7 @@
 
                         <p class="text-muted">Take a photo of your waste item and describe what needs to be done.</p>
 
-                    </div>                <i class="fas fa-recycle"></i> Waste2Product        
+                    </div>                <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" style="height: 35px; width: auto; margin-right: 10px;"> Waste2Product        
 
                 </div>
 
@@ -2892,7 +2892,7 @@
 
     </section>
 
-                        <i class="fas fa-sign-in-alt"></i> Login        <div class="container">        </div>                <i class="fas fa-recycle"></i> Waste2Product                        </a>
+                        <i class="fas fa-sign-in-alt"></i> Login        <div class="container">        </div>                <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" style="height: 35px; width: auto; margin-right: 10px;"> Waste2Product                        </a>
 
     <!-- Community Stats Section -->
 

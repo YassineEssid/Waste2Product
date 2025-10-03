@@ -11,8 +11,8 @@
                     <div class="card-body p-5">
                         <!-- Logo and Header -->
                         <div class="text-center mb-4">
-                            <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                                <i class="fas fa-recycle text-success fs-1"></i>
+                            <div class="mb-3">
+                                <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" class="mx-auto" style="height: 100px; width: auto;">
                             </div>
                             <h2 class="fw-bold text-dark mb-2">Welcome Back!</h2>
                             <p class="text-muted">Sign in to continue your sustainability journey</p>

@@ -10,8 +10,11 @@ class CommunityEvent extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'title',
         'description',
+        'image',
+        'location',
         'starts_at',
         'ends_at',
         'status'
@@ -21,6 +24,17 @@ class CommunityEvent extends Model
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
     ];
+
+    // Relationships
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function registrations()
+    {
+        return $this->hasMany(EventRegistration::class);
+    }
 
     // Accessors pour simuler les données manquantes
     public function getCreatorNameAttribute()
