@@ -16,9 +16,15 @@
     <!-- Hero Section -->
     <div class="event-hero">
         <div class="hero-background">
-            <div class="hero-placeholder">
-                <i class="fas fa-calendar-alt fa-4x"></i>
-            </div>
+            @if($event->image)
+                <img src="{{ Storage::url($event->image) }}" 
+                     alt="{{ $event->title }}" 
+                     style="width: 100%; height: 100%; object-fit: cover;">
+            @else
+                <div class="hero-placeholder">
+                    <i class="fas fa-calendar-alt fa-4x"></i>
+                </div>
+            @endif
             <div class="hero-overlay"></div>
         </div>
 

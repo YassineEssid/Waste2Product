@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CommunityEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class CommunityEventController extends Controller
@@ -91,22 +92,35 @@ class CommunityEventController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'location' => 'nullable|string|max:255',
             'event_date' => 'required|date|after:now',
             'end_date' => 'required|date|after:event_date',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $event = CommunityEvent::create([
+        $data = [
+            'user_id' => Auth::id(),
             'title' => $request->title,
             'description' => $request->description,
+            'location' => $request->location,
             'starts_at' => $request->event_date,
             'ends_at' => $request->end_date,
             'status' => 'published'
-        ]);
+        ];
 
-        return redirect()->route('events.index')->with('success', 'Event created successfully!');
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('events', 'public');
+            $data['image'] = $imagePath;
+        }
+
+        $event = CommunityEvent::create($data);
+
+        return redirect()->route('events.index')
+            ->with('success', 'Événement créé avec succès !');
     }
 
     /**
@@ -137,21 +151,37 @@ class CommunityEventController extends Controller
      */
     public function update(Request $request, CommunityEvent $event)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'location' => 'nullable|string|max:255',
             'event_date' => 'required|date',
             'end_date' => 'required|date|after:event_date',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $event->update([
+        $data = [
             'title' => $request->title,
             'description' => $request->description,
+            'location' => $request->location,
             'starts_at' => $request->event_date,
             'ends_at' => $request->end_date,
-        ]);
+        ];
 
-        return redirect()->route('events.show', $event)->with('success', 'Event updated successfully!');
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($event->image && Storage::disk('public')->exists($event->image)) {
+                Storage::disk('public')->delete($event->image);
+            }
+            $imagePath = $request->file('image')->store('events', 'public');
+            $data['image'] = $imagePath;
+        }
+
+        $event->update($data);
+
+        return redirect()->route('events.show', $event)
+            ->with('success', 'Événement mis à jour avec succès !');
     }
 
     /**
@@ -159,9 +189,15 @@ class CommunityEventController extends Controller
      */
     public function destroy(CommunityEvent $event)
     {
+        // Delete image if exists
+        if ($event->image && Storage::disk('public')->exists($event->image)) {
+            Storage::disk('public')->delete($event->image);
+        }
+
         $event->delete();
 
-        return redirect()->route('events.index')->with('success', 'Event deleted successfully!');
+        return redirect()->route('events.index')
+            ->with('success', 'Événement supprimé avec succès !');
     }
 
     /**
