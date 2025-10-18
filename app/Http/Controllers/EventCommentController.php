@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EventComment;
 use App\Models\CommunityEvent;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -12,9 +13,12 @@ class EventCommentController extends Controller
 {
     use AuthorizesRequests;
 
-    public function __construct()
+    protected $gamificationService;
+
+    public function __construct(GamificationService $gamificationService)
     {
         $this->middleware('auth');
+        $this->gamificationService = $gamificationService;
     }
 
     /**
@@ -132,9 +136,27 @@ class EventCommentController extends Controller
             'commented_at' => now(),
         ]);
 
+        // Award points for posting comment
+        $this->gamificationService->awardPoints(
+            Auth::user(),
+            'comment_posted',
+            "Comment posted on event: {$comment->event->title}",
+            $comment
+        );
+
+        // Award points for giving rating
+        if ($validated['rating'] ?? null) {
+            $this->gamificationService->awardPoints(
+                Auth::user(),
+                'rating_given',
+                "Rating given for event: {$comment->event->title}",
+                $comment
+            );
+        }
+
         return redirect()
             ->route('event-comments.show', $comment)
-            ->with('success', 'Commentaire ajouté avec succès !');
+            ->with('success', 'Commentaire ajouté avec succès ! Vous avez gagné des points !');
     }
 
     /**
@@ -234,9 +256,21 @@ class EventCommentController extends Controller
             abort(403, 'Vous n\'êtes pas autorisé à effectuer cette action.');
         }
 
+        $wasApproved = $eventComment->is_approved;
+
         $eventComment->update([
             'is_approved' => !$eventComment->is_approved,
         ]);
+
+        // Award points when comment gets approved
+        if (!$wasApproved && $eventComment->is_approved) {
+            $this->gamificationService->awardPoints(
+                $eventComment->user,
+                'comment_approved',
+                "Comment approved on event: {$eventComment->event->title}",
+                $eventComment
+            );
+        }
 
         $status = $eventComment->is_approved ? 'approuvé' : 'désapprouvé';
 

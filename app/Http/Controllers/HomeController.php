@@ -33,7 +33,7 @@ class HomeController extends Controller
 
         // Get upcoming events
         $upcomingEvents = CommunityEvent::where('starts_at', '>', Carbon::now())
-            ->where('status', 'published')
+            ->where('status', 'upcoming')
             ->orderBy('starts_at', 'asc')
             ->limit(3)
             ->get();

@@ -12,13 +12,13 @@
             </a>
         </div>
     </div>
-    
+
     <!-- Hero Section -->
     <div class="event-hero">
         <div class="hero-background">
             @if($event->image)
-                <img src="{{ Storage::url($event->image) }}" 
-                     alt="{{ $event->title }}" 
+                <img src="{{ Storage::url($event->image) }}"
+                     alt="{{ $event->title }}"
                      style="width: 100%; height: 100%; object-fit: cover;">
             @else
                 <div class="hero-placeholder">
@@ -148,19 +148,21 @@
                             </button>
                         @endif
 
-                        <!-- Edit and Delete buttons for all authenticated users (temporarily) -->
+                        <!-- Edit and Delete buttons for owner or admin only -->
                         @auth
-                            <a href="{{ route('events.edit', $event) }}" class="btn btn-outline-primary w-100 mb-2">
-                                <i class="fas fa-edit me-2"></i>Edit Event
-                            </a>
-                            
-                            <form method="POST" action="{{ route('events.destroy', $event) }}" onsubmit="return confirm('Are you sure you want to delete this event?');" class="mb-2">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger w-100">
-                                    <i class="fas fa-trash me-2"></i>Delete Event
-                                </button>
-                            </form>
+                            @if($event->user_id === auth()->id() || auth()->user()->role === 'admin')
+                                <a href="{{ route('events.edit', $event) }}" class="btn btn-outline-primary w-100 mb-2">
+                                    <i class="fas fa-edit me-2"></i>Edit Event
+                                </a>
+
+                                <form method="POST" action="{{ route('events.destroy', $event) }}" onsubmit="return confirm('Are you sure you want to delete this event?');" class="mb-2">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger w-100">
+                                        <i class="fas fa-trash me-2"></i>Delete Event
+                                    </button>
+                                </form>
+                            @endif
                         @endauth
 
                         <button class="btn btn-outline-secondary w-100" onclick="shareEvent()">
@@ -503,20 +505,20 @@
         border-radius: 10px;
         padding: 1rem;
     }
-    
+
     .stats-list {
         gap: 0.75rem;
     }
-    
+
     .stat-item {
         gap: 0.75rem;
     }
-    
+
     .stat-icon {
         width: 40px;
         height: 40px;
     }
-    
+
     .stat-number {
         font-size: 1.25rem;
     }

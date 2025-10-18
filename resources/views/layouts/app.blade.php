@@ -134,6 +134,29 @@
                         <i class="fas fa-store me-2"></i>Marketplace
                     </a>
 
+                    <!-- Gamification Section -->
+                    <div class="list-group-item bg-light text-muted small fw-bold mt-2">
+                        <i class="fas fa-trophy me-2"></i>GAMIFICATION
+                    </div>
+                    <a href="{{ route('gamification.profile') }}" class="list-group-item list-group-item-action {{ request()->routeIs('gamification.profile') ? 'active' : '' }}">
+                        <i class="fas fa-user-circle me-2"></i>My Profile
+                        @if(auth()->user()->total_points > 0)
+                            <span class="badge bg-warning text-dark float-end">{{ number_format(auth()->user()->total_points) }} pts</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('badges.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('badges.*') ? 'active' : '' }}">
+                        <i class="fas fa-award me-2"></i>Badges
+                        @if(auth()->user()->earnedBadges && auth()->user()->earnedBadges()->count() > 0)
+                            <span class="badge bg-success float-end">{{ auth()->user()->earnedBadges()->count() }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('leaderboard.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('leaderboard.*') ? 'active' : '' }}">
+                        <i class="fas fa-crown me-2"></i>Leaderboard
+                    </a>
+                    <a href="{{ route('gamification.points-info') }}" class="list-group-item list-group-item-action {{ request()->routeIs('gamification.points-info') ? 'active' : '' }}">
+                        <i class="fas fa-coins me-2"></i>Points Info
+                    </a>
+
                     @if(auth()->user()->role === 'repairer')
                         <!-- Repairer Section -->
                         <div class="list-group-item bg-light text-muted small fw-bold mt-2">

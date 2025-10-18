@@ -171,14 +171,23 @@
                                 </div>
 
                                 <!-- Event Info -->
-                                <div class="event-info mb-3 p-2 bg-light rounded">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="fas fa-calendar me-1"></i>Event:
-                                    </small>
-                                    <a href="{{ route('events.show', $comment->event) }}" class="text-decoration-none fw-semibold text-success">
-                                        {{ Str::limit($comment->event->title, 40) }}
-                                    </a>
-                                </div>
+                                @if($comment->event)
+                                    <div class="event-info mb-3 p-2 bg-light rounded">
+                                        <small class="text-muted d-block mb-1">
+                                            <i class="fas fa-calendar me-1"></i>Event:
+                                        </small>
+                                        <a href="{{ route('events.show', $comment->event) }}" class="text-decoration-none fw-semibold text-success">
+                                            {{ Str::limit($comment->event->title, 40) }}
+                                        </a>
+                                    </div>
+                                @else
+                                    <div class="event-info mb-3 p-2 bg-light rounded">
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-calendar me-1"></i>Event:
+                                            <span class="text-danger">Deleted Event</span>
+                                        </small>
+                                    </div>
+                                @endif
 
                                 <!-- Rating -->
                                 @if($comment->rating)

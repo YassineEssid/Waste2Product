@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CommunityEvent;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -10,9 +11,12 @@ use Carbon\Carbon;
 
 class CommunityEventController extends Controller
 {
-    public function __construct()
+    protected $gamificationService;
+
+    public function __construct(GamificationService $gamificationService)
     {
         $this->middleware('auth');
+        $this->gamificationService = $gamificationService;
     }
 
     /**
@@ -108,7 +112,7 @@ class CommunityEventController extends Controller
             'location' => $request->location,
             'starts_at' => $request->event_date,
             'ends_at' => $request->end_date,
-            'status' => 'published'
+            'status' => 'upcoming'
         ];
 
         // Handle image upload
@@ -119,8 +123,16 @@ class CommunityEventController extends Controller
 
         $event = CommunityEvent::create($data);
 
+        // Award points for creating event
+        $this->gamificationService->awardPoints(
+            Auth::user(),
+            'event_created',
+            "Created event: {$event->title}",
+            $event
+        );
+
         return redirect()->route('events.index')
-            ->with('success', 'Événement créé avec succès !');
+            ->with('success', 'Événement créé avec succès ! Vous avez gagné 50 points !');
     }
 
     /**
@@ -143,6 +155,11 @@ class CommunityEventController extends Controller
      */
     public function edit(CommunityEvent $event)
     {
+        // Check if user owns the event or is admin
+        if ($event->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+            abort(403, 'Vous n\'êtes pas autorisé à modifier cet événement.');
+        }
+
         return view('events.edit', compact('event'));
     }
 
@@ -151,6 +168,10 @@ class CommunityEventController extends Controller
      */
     public function update(Request $request, CommunityEvent $event)
     {
+        // Check if user owns the event or is admin
+        if ($event->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+            abort(403, 'Vous n\'êtes pas autorisé à modifier cet événement.');
+        }
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -189,6 +210,11 @@ class CommunityEventController extends Controller
      */
     public function destroy(CommunityEvent $event)
     {
+        // Check if user owns the event or is admin
+        if ($event->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+            abort(403, 'Vous n\'êtes pas autorisé à supprimer cet événement.');
+        }
+
         // Delete image if exists
         if ($event->image && Storage::disk('public')->exists($event->image)) {
             Storage::disk('public')->delete($event->image);
@@ -205,7 +231,25 @@ class CommunityEventController extends Controller
      */
     public function register(CommunityEvent $event)
     {
-        return redirect()->back()->with('info', 'Registration system is temporarily disabled.');
+        // Check if user is already registered
+        if ($event->registrations()->where('user_id', Auth::id())->exists()) {
+            return redirect()->back()->with('error', 'Vous êtes déjà inscrit à cet événement.');
+        }
+
+        // Register user
+        $event->registrations()->create([
+            'user_id' => Auth::id(),
+        ]);
+
+        // Award points for attending event
+        $this->gamificationService->awardPoints(
+            Auth::user(),
+            'event_attended',
+            "Registered for event: {$event->title}",
+            $event
+        );
+
+        return redirect()->back()->with('success', 'Inscription réussie ! Vous avez gagné 30 points !');
     }
 
     /**
@@ -222,7 +266,7 @@ class CommunityEventController extends Controller
     public function export(Request $request)
     {
         $events = CommunityEvent::all();
-        
+
         $fileName = 'events_' . date('Y-m-d') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
@@ -231,10 +275,10 @@ class CommunityEventController extends Controller
 
         $callback = function() use ($events) {
             $file = fopen('php://output', 'w');
-            
+
             // Headers
             fputcsv($file, ['Title', 'Description', 'Start Date', 'End Date', 'Status']);
-            
+
             // Data
             foreach ($events as $event) {
                 fputcsv($file, [
@@ -245,7 +289,7 @@ class CommunityEventController extends Controller
                     $event->current_status
                 ]);
             }
-            
+
             fclose($file);
         };
 

@@ -72,6 +72,28 @@ Route::middleware('auth')->group(function () {
     Route::resource('event-comments', EventCommentController::class);
     Route::post('/event-comments/{eventComment}/toggle-approval', [EventCommentController::class, 'toggleApproval'])->name('event-comments.toggle-approval');
 
+    // Gamification Routes
+    Route::prefix('gamification')->name('gamification.')->group(function () {
+        Route::get('/profile', [App\Http\Controllers\GamificationController::class, 'profile'])->name('profile');
+        Route::get('/activity', [App\Http\Controllers\GamificationController::class, 'activity'])->name('activity');
+        Route::get('/achievements', [App\Http\Controllers\GamificationController::class, 'achievements'])->name('achievements');
+        Route::get('/points-info', [App\Http\Controllers\GamificationController::class, 'pointsInfo'])->name('points-info');
+    });
+
+    // Badges Routes
+    Route::prefix('badges')->name('badges.')->group(function () {
+        Route::get('/', [App\Http\Controllers\BadgeController::class, 'index'])->name('index');
+        Route::get('/collection', [App\Http\Controllers\BadgeController::class, 'collection'])->name('collection');
+        Route::get('/{badge}', [App\Http\Controllers\BadgeController::class, 'show'])->name('show');
+        Route::post('/{badge}/toggle-display', [App\Http\Controllers\BadgeController::class, 'toggleDisplay'])->name('toggle-display');
+    });
+
+    // Leaderboard Routes
+    Route::prefix('leaderboard')->name('leaderboard.')->group(function () {
+        Route::get('/', [App\Http\Controllers\LeaderboardController::class, 'index'])->name('index');
+        Route::get('/user/{user}', [App\Http\Controllers\LeaderboardController::class, 'userProfile'])->name('user-profile');
+    });
+
     // Marketplace create (public, en dehors du groupe auth)
 Route::get('/marketplace/create', [MarketplaceItemController::class, 'create'])->name('marketplace.create');
 
