@@ -31,11 +31,11 @@
                 <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" style="height: 35px; width: auto; margin-right: 10px;">
                 Waste2Product
             </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -59,12 +59,12 @@
                         </a>
                     </li>
                 </ul>
-                
+
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             @if(auth()->user()->avatar)
-                                <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}" 
+                                <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}"
                                      class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
                             @else
                                 <i class="fas fa-user-circle"></i>
@@ -111,7 +111,7 @@
                     <a href="{{ route('dashboard') }}" class="list-group-item list-group-item-action {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                     </a>
-                    
+
                     <!-- Waste Items Section -->
                     <div class="list-group-item bg-light text-muted small fw-bold">
                         <i class="fas fa-recycle me-2"></i>WASTE MANAGEMENT
@@ -119,7 +119,7 @@
                     <a href="{{ route('waste-items.my') }}" class="list-group-item list-group-item-action {{ request()->routeIs('waste-items.my') ? 'active' : '' }}">
                         <i class="fas fa-user me-2"></i>My Items
                     </a>
-                    
+
                     <!-- Community Section -->
                     <div class="list-group-item bg-light text-muted small fw-bold mt-2">
                         <i class="fas fa-users me-2"></i>COMMUNITY
@@ -127,10 +127,13 @@
                     <a href="{{ route('events.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('events.*') ? 'active' : '' }}">
                         <i class="fas fa-calendar-alt me-2"></i>Events
                     </a>
+                    <a href="{{ route('event-comments.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('event-comments.*') ? 'active' : '' }}">
+                        <i class="fas fa-comments me-2"></i>Event Comments
+                    </a>
                     <a href="{{ route('marketplace.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('marketplace.*') ? 'active' : '' }}">
                         <i class="fas fa-store me-2"></i>Marketplace
                     </a>
-                    
+
                     @if(auth()->user()->role === 'repairer')
                         <!-- Repairer Section -->
                         <div class="list-group-item bg-light text-muted small fw-bold mt-2">
@@ -143,7 +146,7 @@
                             <i class="fas fa-clipboard-list me-2"></i>My Repairs
                         </a>
                     @endif
-                    
+
                     @if(auth()->user()->role === 'artisan')
                         <!-- Artisan Section -->
                         <div class="list-group-item bg-light text-muted small fw-bold mt-2">

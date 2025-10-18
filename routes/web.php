@@ -7,6 +7,7 @@ use App\Http\Controllers\WasteItemController;
 use App\Http\Controllers\RepairRequestController;
 use App\Http\Controllers\TransformationController;
 use App\Http\Controllers\CommunityEventController;
+use App\Http\Controllers\EventCommentController;
 use App\Http\Controllers\MarketplaceItemController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -26,7 +27,7 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Public routes (no authentication required)
+// Public routes (no authentication required) - Waste Items
 Route::get('/waste-items', [WasteItemController::class, 'index'])->name('waste-items.index');
 Route::get('/waste-items/{wasteItem}', [WasteItemController::class, 'show'])->name('waste-items.show');
 
@@ -67,6 +68,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/events/{event}/register', [CommunityEventController::class, 'register'])->name('events.register');
     Route::delete('/events/{event}/unregister', [CommunityEventController::class, 'unregister'])->name('events.unregister');
 
+    // Event Comments
+    Route::resource('event-comments', EventCommentController::class);
+    Route::post('/event-comments/{eventComment}/toggle-approval', [EventCommentController::class, 'toggleApproval'])->name('event-comments.toggle-approval');
+
     // Marketplace create (public, en dehors du groupe auth)
 Route::get('/marketplace/create', [MarketplaceItemController::class, 'create'])->name('marketplace.create');
 
@@ -78,7 +83,7 @@ Route::get('/marketplace/create', [MarketplaceItemController::class, 'create'])-
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // Admin Dashboard
     Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
-    
+
     // User Management - Full CRUD
     Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
@@ -87,15 +92,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/users/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
-    
+
     // User Actions
     Route::post('/users/{user}/toggle-role', [App\Http\Controllers\Admin\UserController::class, 'toggleRole'])->name('users.toggle-role');
     Route::post('/users/bulk-delete', [App\Http\Controllers\Admin\UserController::class, 'bulkDelete'])->name('users.bulk-delete');
     Route::get('/users/export/csv', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('users.export');
-    
+
     // Statistics
     Route::get('/statistics', [App\Http\Controllers\Admin\StatisticsController::class, 'index'])->name('statistics');
-    
+
     // Admin Profile Management
     Route::get('/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [App\Http\Controllers\Admin\AdminProfileController::class, 'edit'])->name('profile.edit');

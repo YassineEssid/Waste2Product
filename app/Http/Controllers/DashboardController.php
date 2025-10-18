@@ -84,7 +84,7 @@ class DashboardController extends Controller
                 ->count(),
             'total_earnings' => RepairRequest::where('repairer_id', $user->id)
                 ->where('status', 'completed')
-                ->sum('cost') ?? 0,
+                ->sum('actual_cost') ?? 0,
         ];
 
         // Demandes en attente

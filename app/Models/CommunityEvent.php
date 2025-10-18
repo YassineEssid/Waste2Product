@@ -36,6 +36,11 @@ class CommunityEvent extends Model
         return $this->hasMany(EventRegistration::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(EventComment::class);
+    }
+
     // Accessors pour simuler les données manquantes
     public function getCreatorNameAttribute()
     {
