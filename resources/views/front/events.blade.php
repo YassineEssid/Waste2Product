@@ -1,6 +1,6 @@
 @extends('front.layout')
 
-@section('title', 'Événements - Waste2Product')
+@section('title', 'Events - Waste2Product')
 
 @section('content')
 <!-- Hero -->
@@ -8,9 +8,9 @@
     <div class="container">
         <div class="row align-items-center min-vh-50">
             <div class="col-lg-8 mx-auto text-center">
-                <h1 class="display-4 fw-bold text-white mb-4">Événements Communautaires</h1>
+                <h1 class="display-4 fw-bold text-white mb-4">Community Events</h1>
                 <p class="lead text-white-50">
-                    Participez à nos événements pour apprendre, partager et agir ensemble
+                    Join our events to learn, share and act together
                 </p>
             </div>
         </div>
@@ -26,14 +26,14 @@
                 <div class="filter-card">
                     <div class="row g-3">
                         <div class="col-md-8">
-                            <input type="text" class="form-control" placeholder="Rechercher un événement...">
+                            <input type="text" class="form-control" placeholder="Search for an event...">
                         </div>
                         <div class="col-md-4">
                             <select class="form-select">
-                                <option selected>Tous les événements</option>
-                                <option>À venir</option>
-                                <option>En cours</option>
-                                <option>Terminés</option>
+                                <option selected>All events</option>
+                                <option>Upcoming</option>
+                                <option>Ongoing</option>
+                                <option>Completed</option>
                             </select>
                         </div>
                     </div>
@@ -54,7 +54,7 @@
                                 <i class="fas fa-calendar-alt fa-4x text-white"></i>
                             </div>
                         @endif
-                        
+
                         <div class="event-content">
                             <div class="d-flex gap-2 mb-3">
                                 <span class="badge bg-success">
@@ -64,31 +64,31 @@
                                     <i class="fas fa-clock me-1"></i>{{ $event->starts_at->format('H:i') }}
                                 </span>
                             </div>
-                            
+
                             <h4 class="mb-3">{{ $event->title }}</h4>
-                            
+
                             <p class="text-muted mb-3">
                                 {{ Str::limit($event->description, 120) }}
                             </p>
-                            
+
                             <div class="event-meta mb-3">
                                 <div class="meta-item">
                                     <i class="fas fa-map-marker-alt text-success me-2"></i>
-                                    <span>{{ $event->location ?? 'En ligne' }}</span>
+                                    <span>{{ $event->location ?? 'Online' }}</span>
                                 </div>
                                 <div class="meta-item">
                                     <i class="fas fa-users text-success me-2"></i>
                                     <span>{{ $event->registrations_count ?? 0 }} participants</span>
                                 </div>
                             </div>
-                            
+
                             @auth
                                 <a href="{{ route('events.show', $event) }}" class="btn btn-success w-100">
-                                    <i class="fas fa-info-circle me-2"></i>Voir les détails
+                                    <i class="fas fa-info-circle me-2"></i>View details
                                 </a>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-success w-100" title="Connectez-vous pour participer">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter pour participer
+                                <a href="{{ route('login') }}" class="btn btn-success w-100" title="Login to participate">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login to participate
                                 </a>
                             @endauth
                         </div>
@@ -106,8 +106,8 @@
         @else
             <div class="text-center py-5">
                 <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
-                <h4 class="text-muted">Aucun événement disponible pour le moment</h4>
-                <p class="text-muted">Revenez bientôt pour découvrir nos prochains événements !</p>
+                <h4 class="text-muted">No events available at the moment</h4>
+                <p class="text-muted">Check back soon to discover our upcoming events!</p>
             </div>
         @endif
     </div>
@@ -118,17 +118,17 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
-                <h2 class="text-white fw-bold mb-4">Vous organisez un événement ?</h2>
+                <h2 class="text-white fw-bold mb-4">Organizing an event?</h2>
                 <p class="text-white-50 mb-4">
-                    Rejoignez notre communauté et partagez vos événements éco-responsables
+                    Join our community and share your eco-friendly events
                 </p>
                 @auth
                     <a href="{{ route('dashboard') }}" class="btn btn-light btn-lg">
-                        <i class="fas fa-plus-circle me-2"></i>Créer un événement
+                        <i class="fas fa-plus-circle me-2"></i>Create an event
                     </a>
                 @else
                     <a href="{{ route('register') }}" class="btn btn-light btn-lg">
-                        <i class="fas fa-user-plus me-2"></i>Rejoindre la communauté
+                        <i class="fas fa-user-plus me-2"></i>Join the community
                     </a>
                 @endauth
             </div>

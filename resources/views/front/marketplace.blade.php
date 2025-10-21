@@ -10,7 +10,7 @@
             <div class="col-lg-8 mx-auto text-center">
                 <h1 class="display-4 fw-bold text-white mb-4">Marketplace</h1>
                 <p class="lead text-white-50">
-                    Découvrez des créations uniques issues de l'upcycling et du recyclage
+                    Discover unique creations from upcycling and recycling
                 </p>
             </div>
         </div>
@@ -26,25 +26,25 @@
                 <div class="filter-card">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <input type="text" class="form-control" placeholder="Rechercher un produit...">
+                            <input type="text" class="form-control" placeholder="Search for a product...">
                         </div>
                         <div class="col-md-3">
                             <select class="form-select">
-                                <option selected>Toutes catégories</option>
-                                <option>Décoration</option>
-                                <option>Mobilier</option>
-                                <option>Accessoires</option>
+                                <option selected>All categories</option>
+                                <option>Decoration</option>
+                                <option>Furniture</option>
+                                <option>Accessories</option>
                                 <option>Art</option>
-                                <option>Autres</option>
+                                <option>Other</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <select class="form-select">
-                                <option selected>Trier par</option>
-                                <option>Prix croissant</option>
-                                <option>Prix décroissant</option>
-                                <option>Plus récent</option>
-                                <option>Populaire</option>
+                                <option selected>Sort by</option>
+                                <option>Price: Low to High</option>
+                                <option>Price: High to Low</option>
+                                <option>Most Recent</option>
+                                <option>Popular</option>
                             </select>
                         </div>
                     </div>
@@ -58,48 +58,43 @@
                 @foreach($items as $item)
                 <div class="col-lg-3 col-md-4 col-sm-6">
                     <div class="product-card">
-                        @php
-                            $images = $item->images ?? [];
-                            $firstImage = is_array($images) && count($images) > 0 ? $images[0] : null;
-                        @endphp
-                        
-                        @if($firstImage)
-                            <img src="{{ Storage::url($firstImage->path ?? $firstImage) }}" alt="{{ $item->title }}" class="product-img">
+                        @if($item->images && $item->images->count() > 0)
+                            <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="product-img">
                         @else
                             <div class="product-img-placeholder">
                                 <i class="fas fa-shopping-bag fa-3x text-white"></i>
                             </div>
                         @endif
-                        
+
                         <div class="product-badge">
-                            <span class="badge bg-success">Disponible</span>
+                            <span class="badge bg-success">Available</span>
                         </div>
-                        
+
                         <div class="product-content">
                             <h5 class="product-title">{{ $item->title }}</h5>
-                            
+
                             <p class="product-desc">
                                 {{ Str::limit($item->description, 60) }}
                             </p>
-                            
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div class="product-price">
                                     <span class="price">{{ number_format($item->price, 2) }} DT</span>
                                 </div>
                                 <div class="product-seller">
                                     <small class="text-muted">
-                                        <i class="fas fa-user me-1"></i>{{ $item->seller->name ?? 'Vendeur' }}
+                                        <i class="fas fa-user me-1"></i>{{ $item->seller->name ?? 'Seller' }}
                                     </small>
                                 </div>
                             </div>
-                            
+
                             @auth
                                 <a href="{{ route('marketplace.show', $item) }}" class="btn btn-success w-100">
-                                    <i class="fas fa-eye me-2"></i>Voir le produit
+                                    <i class="fas fa-eye me-2"></i>View product
                                 </a>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-success w-100" title="Connectez-vous pour acheter">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter pour acheter
+                                <a href="{{ route('login') }}" class="btn btn-success w-100" title="Login to buy">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login to buy
                                 </a>
                             @endauth
                         </div>
@@ -117,8 +112,8 @@
         @else
             <div class="text-center py-5">
                 <i class="fas fa-shopping-basket fa-4x text-muted mb-4"></i>
-                <h4 class="text-muted">Aucun produit disponible pour le moment</h4>
-                <p class="text-muted">Nos artisans travaillent sur de nouvelles créations !</p>
+                <h4 class="text-muted">No products available at the moment</h4>
+                <p class="text-muted">Our artisans are working on new creations!</p>
             </div>
         @endif
     </div>
@@ -129,19 +124,19 @@
     <div class="container">
         <div class="row text-center mb-5">
             <div class="col-12">
-                <h2 class="fw-bold mb-3">Pourquoi acheter sur notre Marketplace ?</h2>
-                <p class="text-muted">Des produits uniques, éco-responsables et faits avec passion</p>
+                <h2 class="fw-bold mb-3">Why buy on our Marketplace?</h2>
+                <p class="text-muted">Unique, eco-friendly products made with passion</p>
             </div>
         </div>
-        
+
         <div class="row g-4">
             <div class="col-lg-3 col-md-6">
                 <div class="feature-box">
                     <div class="feature-icon bg-success">
                         <i class="fas fa-leaf text-white"></i>
                     </div>
-                    <h5 class="mt-3 mb-2">100% Recyclé</h5>
-                    <p class="text-muted small">Tous nos produits sont créés à partir de matériaux recyclés</p>
+                    <h5 class="mt-3 mb-2">100% Recycled</h5>
+                    <p class="text-muted small">All our products are created from recycled materials</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
@@ -149,8 +144,8 @@
                     <div class="feature-icon bg-primary">
                         <i class="fas fa-star text-white"></i>
                     </div>
-                    <h5 class="mt-3 mb-2">Pièces Uniques</h5>
-                    <p class="text-muted small">Chaque création est unique et faite main</p>
+                    <h5 class="mt-3 mb-2">Unique Pieces</h5>
+                    <p class="text-muted small">Each creation is unique and handmade</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
@@ -158,8 +153,8 @@
                     <div class="feature-icon bg-warning">
                         <i class="fas fa-users text-white"></i>
                     </div>
-                    <h5 class="mt-3 mb-2">Artisans Locaux</h5>
-                    <p class="text-muted small">Soutenez les artisans de votre région</p>
+                    <h5 class="mt-3 mb-2">Local Artisans</h5>
+                    <p class="text-muted small">Support artisans from your region</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
@@ -167,8 +162,8 @@
                     <div class="feature-icon bg-info">
                         <i class="fas fa-shield-alt text-white"></i>
                     </div>
-                    <h5 class="mt-3 mb-2">Paiement Sécurisé</h5>
-                    <p class="text-muted small">Vos transactions sont 100% sécurisées</p>
+                    <h5 class="mt-3 mb-2">Secure Payment</h5>
+                    <p class="text-muted small">Your transactions are 100% secure</p>
                 </div>
             </div>
         </div>
@@ -180,17 +175,17 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
-                <h2 class="text-white fw-bold mb-4">Vous êtes artisan ?</h2>
+                <h2 class="text-white fw-bold mb-4">Are you an artisan?</h2>
                 <p class="text-white-50 mb-4">
-                    Vendez vos créations sur notre marketplace et touchez une large audience
+                    Sell your creations on our marketplace and reach a wide audience
                 </p>
                 @auth
                     <a href="{{ route('dashboard') }}" class="btn btn-light btn-lg">
-                        <i class="fas fa-store me-2"></i>Vendre mes créations
+                        <i class="fas fa-store me-2"></i>Sell my creations
                     </a>
                 @else
                     <a href="{{ route('register') }}" class="btn btn-light btn-lg">
-                        <i class="fas fa-user-plus me-2"></i>Devenir vendeur
+                        <i class="fas fa-user-plus me-2"></i>Become a seller
                     </a>
                 @endauth
             </div>
