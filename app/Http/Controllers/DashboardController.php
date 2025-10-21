@@ -122,13 +122,17 @@ class DashboardController extends Controller
         // Statistiques de transformation
         $stats = [
             'my_transformations' => Transformation::where('artisan_id', $user->id)->count(),
-            'published_items' => Transformation::where('artisan_id', $user->id)
-                ->where('status', 'published')
+            'pending_transformations' => Transformation::where('artisan_id', $user->id)
+                ->where('status', 'pending')
                 ->count(),
-            'sold_items' => Transformation::where('artisan_id', $user->id)
-                ->where('status', 'sold')
+            'in_progress_transformations' => Transformation::where('artisan_id', $user->id)
+                ->where('status', 'in_progress')
                 ->count(),
-            'total_revenue' => Transformation::where('artisan_id', $user->id)
+            'completed_transformations' => Transformation::where('artisan_id', $user->id)
+                ->where('status', 'completed')
+                ->count(),
+            'marketplace_items' => MarketplaceItem::where('seller_id', $user->id)->count(),
+            'total_revenue' => MarketplaceItem::where('seller_id', $user->id)
                 ->where('status', 'sold')
                 ->sum('price') ?? 0,
         ];
@@ -142,14 +146,12 @@ class DashboardController extends Controller
 
         // Articles disponibles à transformer
         $availableWasteItems = WasteItem::where('status', 'available')
-            ->where('condition', 'recyclable')
             ->latest()
             ->limit(8)
             ->get();
 
-        // Mes articles en vente
-        $myMarketplaceItems = Transformation::where('artisan_id', $user->id)
-            ->where('status', 'published')
+        // Mes articles en vente sur marketplace
+        $myMarketplaceItems = MarketplaceItem::where('seller_id', $user->id)
             ->latest()
             ->limit(6)
             ->get();

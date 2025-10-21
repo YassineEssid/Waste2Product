@@ -175,13 +175,13 @@
                         <div class="list-group-item bg-light text-muted small fw-bold mt-2">
                             <i class="fas fa-magic me-2"></i>TRANSFORMATIONS
                         </div>
-                        <a href="#" class="list-group-item list-group-item-action">
+                        <a href="{{ route('transformations.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('transformations.index') && !request()->has('my') ? 'active' : '' }}">
                             <i class="fas fa-palette me-2"></i>Browse Projects
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action">
+                        <a href="{{ route('transformations.create') }}" class="list-group-item list-group-item-action {{ request()->routeIs('transformations.create') ? 'active' : '' }}">
                             <i class="fas fa-plus me-2"></i>New Project
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action">
+                        <a href="{{ route('transformations.index') }}?my=1" class="list-group-item list-group-item-action {{ request()->has('my') ? 'active' : '' }}">
                             <i class="fas fa-user-edit me-2"></i>My Projects
                         </a>
                     @endif

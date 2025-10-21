@@ -142,14 +142,14 @@
                         <h4 class="section-title">
                             <i class="fas fa-cog me-2"></i>Additional Options
                         </h4>
-                        
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           name="is_negotiable" 
-                                           id="is_negotiable" 
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="is_negotiable"
+                                           id="is_negotiable"
                                            value="1"
                                            {{ old('is_negotiable', $marketplace->is_negotiable) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_negotiable">
@@ -160,10 +160,10 @@
 
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           name="is_featured" 
-                                           id="is_featured" 
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="is_featured"
+                                           id="is_featured"
                                            value="1"
                                            {{ old('is_featured', $marketplace->is_featured) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_featured">
@@ -183,7 +183,7 @@
                             <div class="current-images-grid mb-3">
                                 @foreach($marketplace->images as $image)
                                     <div class="current-image-item">
-                                        <img src="{{ Storage::url($image->path) }}" alt="Current image">
+                                        <img src="{{ Storage::url($image->image_path) }}" alt="Current image">
                                         <div class="image-overlay">
                                             <div class="form-check">
                                                 <input class="form-check-input"
@@ -565,32 +565,32 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return true;
         });
-        
+
         // Check total file count
         if (selectedFiles.length + newFiles.length > maxFiles) {
             alert(`You can only upload up to ${maxFiles} images`);
             return;
         }
-        
+
         // Add new files to selection
         selectedFiles = [...selectedFiles, ...newFiles];
         updateImagePreviews();
         updateFileInput();
     }
-    
+
     // Update preview display
     function updateImagePreviews() {
         previewsGrid.innerHTML = '';
-        
+
         if (selectedFiles.length === 0) {
             uploadPlaceholder.style.display = 'block';
             imagePreviews.style.display = 'none';
             return;
         }
-        
+
         uploadPlaceholder.style.display = 'none';
         imagePreviews.style.display = 'block';
-        
+
         selectedFiles.forEach((file, index) => {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -609,38 +609,38 @@ document.addEventListener('DOMContentLoaded', function() {
             reader.readAsDataURL(file);
         });
     }
-    
+
     // Update file input with selected files
     function updateFileInput() {
         const dt = new DataTransfer();
         selectedFiles.forEach(file => dt.items.add(file));
         imageInput.files = dt.files;
     }
-    
+
     // Global functions
     window.removeImage = function(index) {
         selectedFiles.splice(index, 1);
         updateImagePreviews();
         updateFileInput();
     };
-    
+
     window.clearAllImages = function() {
         selectedFiles = [];
         updateImagePreviews();
         updateFileInput();
     };
-    
+
     // Form validation
     document.getElementById('itemForm').addEventListener('submit', function(e) {
         const price = parseFloat(document.querySelector('input[name="price"]').value);
         const quantity = parseInt(document.querySelector('input[name="quantity"]').value) || 1;
-        
+
         if (price < 0) {
             e.preventDefault();
             alert('Price cannot be negative');
             return false;
         }
-        
+
         if (quantity < 1) {
             e.preventDefault();
             alert('Quantity must be at least 1');
