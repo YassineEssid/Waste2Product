@@ -20,6 +20,10 @@ Route::get('/contact', [HomeController::class, 'contact'])->name('front.contact'
 Route::get('/evenements', [HomeController::class, 'events'])->name('front.events');
 Route::get('/boutique', [HomeController::class, 'marketplace'])->name('front.marketplace');
 
+// AJAX Search Routes for Front Office
+Route::get('/api/search/events', [HomeController::class, 'searchEvents'])->name('api.search.events');
+Route::get('/api/search/marketplace', [HomeController::class, 'searchMarketplace'])->name('api.search.marketplace');
+
 // Authentication routes
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);

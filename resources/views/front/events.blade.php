@@ -26,14 +26,16 @@
                 <div class="filter-card">
                     <div class="row g-3">
                         <div class="col-md-8">
-                            <input type="text" class="form-control" placeholder="Search for an event...">
+                            <input type="text" id="searchInput" class="form-control" 
+                                   placeholder="Search for an event..." 
+                                   value="{{ request('search') }}">
                         </div>
                         <div class="col-md-4">
-                            <select class="form-select">
-                                <option selected>All events</option>
-                                <option>Upcoming</option>
-                                <option>Ongoing</option>
-                                <option>Completed</option>
+                            <select id="statusFilter" class="form-select">
+                                <option value="">All events</option>
+                                <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+                                <option value="ongoing" {{ request('status') == 'ongoing' ? 'selected' : '' }}>Ongoing</option>
+                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                             </select>
                         </div>
                     </div>
@@ -42,74 +44,76 @@
         </div>
 
         <!-- Events List -->
-        @if(isset($events) && $events->count() > 0)
-            <div class="row g-4">
-                @foreach($events as $event)
-                <div class="col-lg-4 col-md-6">
-                    <div class="event-card-public">
-                        @if($event->image)
-                            <img src="{{ Storage::url($event->image) }}" alt="{{ $event->title }}" class="event-img">
-                        @else
-                            <div class="event-img-placeholder">
-                                <i class="fas fa-calendar-alt fa-4x text-white"></i>
-                            </div>
-                        @endif
-
-                        <div class="event-content">
-                            <div class="d-flex gap-2 mb-3">
-                                <span class="badge bg-success">
-                                    <i class="fas fa-calendar me-1"></i>{{ $event->starts_at->format('d/m/Y') }}
-                                </span>
-                                <span class="badge bg-primary">
-                                    <i class="fas fa-clock me-1"></i>{{ $event->starts_at->format('H:i') }}
-                                </span>
-                            </div>
-
-                            <h4 class="mb-3">{{ $event->title }}</h4>
-
-                            <p class="text-muted mb-3">
-                                {{ Str::limit($event->description, 120) }}
-                            </p>
-
-                            <div class="event-meta mb-3">
-                                <div class="meta-item">
-                                    <i class="fas fa-map-marker-alt text-success me-2"></i>
-                                    <span>{{ $event->location ?? 'Online' }}</span>
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-users text-success me-2"></i>
-                                    <span>{{ $event->registrations_count ?? 0 }} participants</span>
-                                </div>
-                            </div>
-
-                            @auth
-                                <a href="{{ route('events.show', $event) }}" class="btn btn-success w-100">
-                                    <i class="fas fa-info-circle me-2"></i>View details
-                                </a>
+        <div id="eventsContainer">
+            @if(isset($events) && $events->count() > 0)
+                <div class="row g-4">
+                    @foreach($events as $event)
+                    <div class="col-lg-4 col-md-6">
+                        <div class="event-card-public">
+                            @if($event->image)
+                                <img src="{{ Storage::url($event->image) }}" alt="{{ $event->title }}" class="event-img">
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-success w-100" title="Login to participate">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Login to participate
-                                </a>
-                            @endauth
+                                <div class="event-img-placeholder">
+                                    <i class="fas fa-calendar-alt fa-4x text-white"></i>
+                                </div>
+                            @endif
+
+                            <div class="event-content">
+                                <div class="d-flex gap-2 mb-3">
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-calendar me-1"></i>{{ $event->starts_at->format('d/m/Y') }}
+                                    </span>
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-clock me-1"></i>{{ $event->starts_at->format('H:i') }}
+                                    </span>
+                                </div>
+
+                                <h4 class="mb-3">{{ $event->title }}</h4>
+
+                                <p class="text-muted mb-3">
+                                    {{ Str::limit($event->description, 120) }}
+                                </p>
+
+                                <div class="event-meta mb-3">
+                                    <div class="meta-item">
+                                        <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                        <span>{{ $event->location ?? 'Online' }}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-users text-success me-2"></i>
+                                        <span>{{ $event->registrations_count ?? 0 }} participants</span>
+                                    </div>
+                                </div>
+
+                                @auth
+                                    <a href="{{ route('events.show', $event) }}" class="btn btn-success w-100">
+                                        <i class="fas fa-info-circle me-2"></i>View details
+                                    </a>
+                                @else
+                                    <a href="{{ route('login') }}" class="btn btn-success w-100" title="Login to participate">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Login to participate
+                                    </a>
+                                @endauth
+                            </div>
                         </div>
                     </div>
+                    @endforeach
                 </div>
-                @endforeach
-            </div>
 
-            <!-- Pagination -->
-            @if($events->hasPages())
-                <div class="mt-5 d-flex justify-content-center">
-                    {{ $events->links() }}
+                <!-- Pagination -->
+                @if($events->hasPages())
+                    <div class="mt-5 d-flex justify-content-center">
+                        {{ $events->links() }}
+                    </div>
+                @endif
+            @else
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
+                    <h4 class="text-muted">No events available at the moment</h4>
+                    <p class="text-muted">Check back soon to discover our upcoming events!</p>
                 </div>
             @endif
-        @else
-            <div class="text-center py-5">
-                <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
-                <h4 class="text-muted">No events available at the moment</h4>
-                <p class="text-muted">Check back soon to discover our upcoming events!</p>
-            </div>
-        @endif
+        </div>
     </div>
 </section>
 
@@ -233,4 +237,138 @@
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 </style>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const eventsContainer = document.getElementById('eventsContainer');
+    let searchTimeout;
+
+    // Function to fetch events
+    function fetchEvents() {
+        const searchValue = searchInput.value;
+        const statusValue = statusFilter.value;
+
+        // Show loading state
+        eventsContainer.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Searching events...</p>
+            </div>
+        `;
+
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (searchValue) params.append('search', searchValue);
+        if (statusValue) params.append('status', statusValue);
+
+        // Fetch data
+        fetch(`{{ route('api.search.events') }}?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                displayEvents(data.events);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                eventsContainer.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-4x text-danger mb-4"></i>
+                        <h4 class="text-muted">Error loading events</h4>
+                        <p class="text-muted">Please try again later</p>
+                    </div>
+                `;
+            });
+    }
+
+    // Function to display events
+    function displayEvents(events) {
+        if (events.length === 0) {
+            eventsContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
+                    <h4 class="text-muted">No events available at the moment</h4>
+                    <p class="text-muted">Check back soon to discover our upcoming events!</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="row g-4">';
+        events.forEach(event => {
+            const imageHtml = event.image 
+                ? `<img src="/storage/${event.image}" alt="${event.title}" class="event-img">`
+                : `<div class="event-img-placeholder">
+                    <i class="fas fa-calendar-alt fa-4x text-white"></i>
+                   </div>`;
+
+            const startDate = new Date(event.starts_at);
+            const dateStr = startDate.toLocaleDateString('fr-FR');
+            const timeStr = startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+            const loginBtn = `{{ auth()->check() ? '' : 'true' }}`;
+            const actionBtn = loginBtn 
+                ? `<a href="{{ route('login') }}" class="btn btn-success w-100">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to participate
+                   </a>`
+                : `<a href="/events/${event.id}" class="btn btn-success w-100">
+                    <i class="fas fa-info-circle me-2"></i>View details
+                   </a>`;
+
+            html += `
+                <div class="col-lg-4 col-md-6">
+                    <div class="event-card-public">
+                        ${imageHtml}
+                        <div class="event-content">
+                            <div class="d-flex gap-2 mb-3">
+                                <span class="badge bg-success">
+                                    <i class="fas fa-calendar me-1"></i>${dateStr}
+                                </span>
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-clock me-1"></i>${timeStr}
+                                </span>
+                            </div>
+                            <h4 class="mb-3">${event.title}</h4>
+                            <p class="text-muted mb-3">${event.description ? event.description.substring(0, 120) + '...' : ''}</p>
+                            <div class="event-meta mb-3">
+                                <div class="meta-item">
+                                    <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                    <span>${event.location || 'Online'}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users text-success me-2"></i>
+                                    <span>${event.registrations_count || 0} participants</span>
+                                </div>
+                            </div>
+                            ${actionBtn}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        eventsContainer.innerHTML = html;
+    }
+
+    // Search input with debounce
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            fetchEvents();
+        }, 500);
+    });
+
+    // Status filter
+    statusFilter.addEventListener('change', function() {
+        fetchEvents();
+    });
+
+    // Initial load
+    fetchEvents();
+});
+</script>
 @endsection
