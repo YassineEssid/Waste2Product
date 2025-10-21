@@ -103,6 +103,7 @@ class CommunityEventController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'location' => 'nullable|string|max:255',
+            'max_participants' => 'nullable|integer|min:1',
             'event_date' => 'required|date|after:now',
             'end_date' => 'required|date|after:event_date',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
@@ -113,6 +114,7 @@ class CommunityEventController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'location' => $request->location,
+            'max_participants' => $request->max_participants,
             'starts_at' => $request->event_date,
             'ends_at' => $request->end_date,
             'status' => 'upcoming'
@@ -179,6 +181,7 @@ class CommunityEventController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'location' => 'nullable|string|max:255',
+            'max_participants' => 'nullable|integer|min:1',
             'event_date' => 'required|date',
             'end_date' => 'required|date|after:event_date',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
@@ -188,6 +191,7 @@ class CommunityEventController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'location' => $request->location,
+            'max_participants' => $request->max_participants,
             'starts_at' => $request->event_date,
             'ends_at' => $request->end_date,
         ];
@@ -236,7 +240,7 @@ class CommunityEventController extends Controller
     {
         // Check if user is already registered
         if ($event->registrations()->where('user_id', Auth::id())->exists()) {
-            return redirect()->back()->with('error', 'Vous êtes déjà inscrit à cet événement.');
+            return redirect()->back()->with('error', 'You are already registered for this event.');
         }
 
         // Register user
@@ -252,15 +256,25 @@ class CommunityEventController extends Controller
             $event
         );
 
-        return redirect()->back()->with('success', 'Inscription réussie ! Vous avez gagné 30 points !');
+        return redirect()->back()->with('success', 'Registration successful! You earned 30 points!');
     }
 
     /**
-     * Unregister user from event (feature disabled temporarily).
+     * Unregister user from event.
      */
     public function unregister(CommunityEvent $event)
     {
-        return redirect()->back()->with('info', 'Registration system is temporarily disabled.');
+        // Check if user is registered
+        $registration = $event->registrations()->where('user_id', Auth::id())->first();
+
+        if (!$registration) {
+            return redirect()->back()->with('error', 'You are not registered for this event.');
+        }
+
+        // Delete registration
+        $registration->delete();
+
+        return redirect()->back()->with('success', 'Registration cancelled successfully.');
     }
 
     /**

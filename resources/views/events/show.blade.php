@@ -143,9 +143,35 @@
                     <!-- Action Buttons -->
                     <div class="action-buttons">
                         @if($event->starts_at && $event->starts_at->gt(now()))
-                            <button class="btn btn-primary btn-lg w-100 mb-2" onclick="showRegistrationInfo()">
-                                <i class="fas fa-user-plus me-2"></i>Register Now
-                            </button>
+                            @auth
+                                @php
+                                    $isRegistered = $event->registrations()->where('user_id', auth()->id())->exists();
+                                @endphp
+
+                                @if($isRegistered)
+                                    <div class="alert alert-success mb-2">
+                                        <i class="fas fa-check-circle me-2"></i>You are registered for this event!
+                                    </div>
+                                    <form method="POST" action="{{ route('events.unregister', $event) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger w-100 mb-2">
+                                            <i class="fas fa-user-times me-2"></i>Cancel Registration
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route('events.register', $event) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
+                                            <i class="fas fa-user-plus me-2"></i>Register Now
+                                        </button>
+                                    </form>
+                                @endif
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-primary btn-lg w-100 mb-2">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login to Register
+                                </a>
+                            @endauth
                         @endif
 
                         <!-- Edit and Delete buttons for owner or admin only -->
@@ -539,10 +565,6 @@ function shareEvent() {
             alert('Event link copied to clipboard!');
         });
     }
-}
-
-function showRegistrationInfo() {
-    alert('Registration system is temporarily disabled. This feature will be available soon!');
 }
 </script>
 @endsection

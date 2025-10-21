@@ -69,13 +69,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/transformations/{transformation}/publish', [TransformationController::class, 'publish'])->name('transformations.publish');
 
     // Community Events
+    // AI Generation for Events (must be before resource routes to avoid conflicts)
+    Route::post('/events/ai/generate-description', [CommunityEventController::class, 'generateDescription'])->name('events.ai.generate-description');
+    Route::post('/events/ai/generate-faq', [CommunityEventController::class, 'generateFAQ'])->name('events.ai.generate-faq');
+
     Route::resource('events', CommunityEventController::class);
     Route::post('/events/{event}/register', [CommunityEventController::class, 'register'])->name('events.register');
     Route::delete('/events/{event}/unregister', [CommunityEventController::class, 'unregister'])->name('events.unregister');
-
-    // AI Generation for Events
-    Route::post('/events/ai/generate-description', [CommunityEventController::class, 'generateDescription'])->name('events.ai.generate-description');
-    Route::post('/events/ai/generate-faq', [CommunityEventController::class, 'generateFAQ'])->name('events.ai.generate-faq');
 
     // Event Comments
     Route::resource('event-comments', EventCommentController::class);
@@ -109,9 +109,26 @@ Route::get('/marketplace/create', [MarketplaceItemController::class, 'create'])-
     // Marketplace (protected)
     Route::resource('marketplace', MarketplaceItemController::class)->except(['create']);
 
+    // Marketplace AI - Category Detection & Price Suggestion
+    Route::post('/marketplace/ai/detect-category', [MarketplaceItemController::class, 'detectCategory'])
+        ->name('marketplace.ai.detect-category');
+    Route::post('/marketplace/ai/suggest-price', [MarketplaceItemController::class, 'suggestPrice'])
+        ->name('marketplace.ai.suggest-price');
+
+    // Marketplace Toggle Status (Mark as Sold)
+    Route::post('/marketplace/{marketplace}/toggle-status', [MarketplaceItemController::class, 'toggleStatus'])
+        ->name('marketplace.toggle-status');
+
+    // Marketplace Search (AJAX)
+    Route::get('/marketplace/search', [MarketplaceItemController::class, 'search'])
+        ->name('marketplace.search');
+
     // Messaging
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/recent', [MessageController::class, 'recentConversations'])->name('messages.recent');
+    Route::get('/messages/unread/count', [MessageController::class, 'unreadCount'])->name('messages.unread.count');
     Route::get('/messages/{conversation}', [MessageController::class, 'show'])->name('messages.show');
+    Route::get('/messages/{conversation}/poll', [MessageController::class, 'poll'])->name('messages.poll');
     Route::post('/messages/{conversation}', [MessageController::class, 'store'])->name('messages.store');
     Route::post('/marketplace/{item}/contact', [MarketplaceItemController::class, 'startConversation'])->name('marketplace.contact');
 });

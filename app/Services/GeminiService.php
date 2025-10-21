@@ -177,7 +177,9 @@ PROMPT;
 
         foreach ($blocks as $block) {
             $block = trim($block);
-            if (empty($block)) continue;
+            if (empty($block)) {
+                continue;
+            }
 
             // Match Q: ... A: ... pattern
             if (preg_match('/Q:\s*(.+?)\s*A:\s*(.+)/s', $block, $matches)) {
@@ -189,5 +191,34 @@ PROMPT;
         }
 
         return $faqs;
+    }
+
+    /**
+     * Generic method to generate content from any prompt
+     * Used by marketplace AI services
+     *
+     * @param string $prompt The prompt to send to Gemini
+     * @param array $config Optional generation config
+     * @return array ['success' => bool, 'text' => string, 'error' => string]
+     */
+    public function generateContent(string $prompt, array $config = []): array
+    {
+        try {
+            $text = $this->callGeminiAPI($prompt);
+
+            return [
+                'success' => true,
+                'text' => $text,
+                'error' => ''
+            ];
+        } catch (\Exception $e) {
+            Log::error('Gemini API Error (Generic): ' . $e->getMessage());
+
+            return [
+                'success' => false,
+                'text' => '',
+                'error' => $e->getMessage()
+            ];
+        }
     }
 }

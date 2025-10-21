@@ -15,8 +15,11 @@ class CommunityEvent extends Model
         'description',
         'image',
         'location',
+        'location_lat',
+        'location_lng',
         'starts_at',
         'ends_at',
+        'max_participants',
         'status'
     ];
 
@@ -47,9 +50,9 @@ class CommunityEvent extends Model
         return 'Community Organizer';
     }
 
-    public function getLocationAttribute()
+    public function getLocationAttribute($value)
     {
-        return 'Location not specified';
+        return $value ?? 'Location not specified';
     }
 
     public function getAttendeesCountAttribute()

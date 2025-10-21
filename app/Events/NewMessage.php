@@ -42,7 +42,7 @@ class NewMessage implements ShouldBroadcast
      */
     public function broadcastAs()
     {
-        return 'new.message';
+        return 'message.sent';
     }
 
     /**
@@ -53,15 +53,13 @@ class NewMessage implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'message' => [
-                'id' => $this->message->id,
-                'body' => $this->message->body,
-                'created_at' => $this->message->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $this->message->user->id,
-                    'name' => $this->message->user->name,
-                ]
-            ]
+            'id' => $this->message->id,
+            'conversation_id' => $this->message->conversation_id,
+            'sender_id' => $this->message->sender_id,
+            'sender_name' => $this->message->sender->name,
+            'message' => $this->message->message,
+            'is_read' => $this->message->is_read,
+            'created_at' => $this->message->created_at->format('h:i A'),
         ];
     }
 }

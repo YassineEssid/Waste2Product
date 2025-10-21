@@ -26,8 +26,8 @@
                 <div class="filter-card">
                     <div class="row g-3">
                         <div class="col-md-8">
-                            <input type="text" id="searchInput" class="form-control" 
-                                   placeholder="Search for an event..." 
+                            <input type="text" id="searchInput" class="form-control"
+                                   placeholder="Search for an event..."
                                    value="{{ request('search') }}">
                         </div>
                         <div class="col-md-4">
@@ -77,7 +77,7 @@
                                 <div class="event-meta mb-3">
                                     <div class="meta-item">
                                         <i class="fas fa-map-marker-alt text-success me-2"></i>
-                                        <span>{{ $event->location ?? 'Online' }}</span>
+                                        <span>{{ $event->location }}</span>
                                     </div>
                                     <div class="meta-item">
                                         <i class="fas fa-users text-success me-2"></i>
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let html = '<div class="row g-4">';
         events.forEach(event => {
-            const imageHtml = event.image 
+            const imageHtml = event.image
                 ? `<img src="/storage/${event.image}" alt="${event.title}" class="event-img">`
                 : `<div class="event-img-placeholder">
                     <i class="fas fa-calendar-alt fa-4x text-white"></i>
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const timeStr = startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
             const loginBtn = `{{ auth()->check() ? '' : 'true' }}`;
-            const actionBtn = loginBtn 
+            const actionBtn = loginBtn
                 ? `<a href="{{ route('login') }}" class="btn btn-success w-100">
                     <i class="fas fa-sign-in-alt me-2"></i>Login to participate
                    </a>`

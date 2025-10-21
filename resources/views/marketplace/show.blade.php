@@ -156,10 +156,8 @@
                                 </button>
                             </div>
                             <div class="availability-toggle">
-                                <form method="POST" action="{{ route('marketplace.update', $marketplaceItem) }}">
+                                <form method="POST" action="{{ route('marketplace.toggle-status', $marketplaceItem) }}">
                                     @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="status" value="{{ $marketplaceItem->status === 'available' ? 'sold' : 'available' }}">
                                     <button type="submit" class="btn {{ $marketplaceItem->status === 'available' ? 'btn-warning' : 'btn-success' }} w-100">
                                         @if($marketplaceItem->status === 'available')
                                             <i class="fas fa-eye-slash me-2"></i>Mark as Sold

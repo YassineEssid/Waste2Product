@@ -44,7 +44,7 @@
                                 <label class="form-label required">Event Type</label>
                                 <select class="form-select @error('type') is-invalid @enderror" name="type" required>
                                     <option value="">Choose event type</option>
-                                    @foreach(['workshop', 'cleanup', 'exhibition', 'seminar', 'other'] as $type)
+                                    @foreach(['workshop', 'conference', 'cleanup', 'exhibition', 'training', 'networking'] as $type)
                                         <option value="{{ $type }}" {{ old('type') == $type ? 'selected' : '' }}>
                                             {{ ucfirst($type) }}
                                         </option>
@@ -462,7 +462,7 @@ document.getElementById('generateDescriptionBtn').addEventListener('click', asyn
 
         const data = await response.json();
 
-        if (data.success) {
+        if (response.ok && data.success) {
             // Show modal with generated content
             showAIModal('Generated Description', data.description, function(accepted) {
                 if (accepted) {
@@ -472,11 +472,23 @@ document.getElementById('generateDescriptionBtn').addEventListener('click', asyn
                 }
             });
         } else {
-            alert(data.error || 'Failed to generate description. Please try again.');
+            // Handle validation or API errors
+            let errorMessage = 'Failed to generate description. Please try again.';
+
+            if (data.errors) {
+                // Laravel validation errors
+                errorMessage = Object.values(data.errors).flat().join('\n');
+            } else if (data.error) {
+                errorMessage = data.error;
+            } else if (data.message) {
+                errorMessage = data.message;
+            }
+
+            alert(errorMessage);
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred. Please try again.');
+        alert('An error occurred. Please try again. Check the console for details.');
     } finally {
         // Re-enable button
         btn.disabled = false;

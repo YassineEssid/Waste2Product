@@ -280,9 +280,7 @@
                                         <i class="fas fa-eye me-1"></i>View Details
                                     </a>
                                     @if($item->seller_id !== auth()->id())
-                                        <button class="btn btn-outline-primary btn-sm" onclick="contactSeller({{ $item->id }})">
-                                            <i class="fas fa-envelope me-1"></i>Contact
-                                        </button>
+
                                     @else
                                         <a href="{{ route('marketplace.edit', $item) }}" class="btn btn-outline-secondary btn-sm">
                                             <i class="fas fa-edit me-1"></i>Edit
@@ -560,6 +558,186 @@ function contactSeller(itemId) {
     alert('Contact seller feature would be implemented here. Item ID: ' + itemId);
 }
 
+// Real-time Search functionality
+let searchTimeout = null;
+const searchInput = document.querySelector('input[name="search"]');
+const itemsGrid = document.querySelector('.row');
+const resultsCount = document.querySelector('.results-count p');
+const categoryFilters = document.querySelectorAll('.category-filters .btn');
+
+if (searchInput) {
+    // Search on input with debouncing
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            performSearch();
+        }, 500); // Wait 500ms after user stops typing
+    });
+
+    // Prevent form submission
+    searchInput.closest('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        performSearch();
+    });
+}
+
+function performSearch() {
+    const searchTerm = searchInput.value.trim();
+    const currentCategory = document.querySelector('.category-filters .btn.active')?.dataset.category || '';
+
+    // Build URL with search parameters
+    const params = new URLSearchParams();
+    if (searchTerm) params.append('search', searchTerm);
+    if (currentCategory && currentCategory !== 'all') params.append('category', currentCategory);
+
+    // Show loading indicator
+    const loadingHtml = `
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Searching...</p>
+        </div>
+    `;
+
+    const itemsContainer = document.querySelector('.row:has(.marketplace-card)');
+    if (itemsContainer) {
+        itemsContainer.innerHTML = loadingHtml;
+    }
+
+    // Perform AJAX search
+    fetch(`{{ route('marketplace.search') }}?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateResults(data.items.data, data.count, data.total);
+        }
+    })
+    .catch(error => {
+        console.error('Search error:', error);
+        if (itemsContainer) {
+            itemsContainer.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <p class="text-muted">An error occurred while searching. Please try again.</p>
+                </div>
+            `;
+        }
+    });
+}
+
+function updateResults(items, count, total) {
+    const itemsContainer = document.querySelector('.row:has(.marketplace-card), .row:has(.empty-state)');
+
+    // Update results count
+    if (resultsCount) {
+        const searchTerm = searchInput.value.trim();
+        let countText = `Showing ${count} of ${total} items`;
+        if (searchTerm) {
+            countText += ` for "<strong>${searchTerm}</strong>"`;
+        }
+        resultsCount.innerHTML = countText;
+    }
+
+    if (items.length === 0) {
+        // Show empty state
+        itemsContainer.innerHTML = `
+            <div class="col-12">
+                <div class="empty-state text-center py-5">
+                    <div class="empty-icon mb-4">
+                        <i class="fas fa-shopping-bag fa-4x text-muted"></i>
+                    </div>
+                    <h3 class="h4 mb-3">No Items Found</h3>
+                    <p class="text-muted mb-4">
+                        No items match your current search. Try adjusting your search criteria.
+                    </p>
+                    <a href="{{ route('marketplace.index') }}" class="btn btn-outline-success">
+                        <i class="fas fa-times me-2"></i>Clear Search
+                    </a>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    // Build items HTML
+    let itemsHtml = '';
+    items.forEach(item => {
+        const imageUrl = item.images && item.images.length > 0
+            ? `/storage/${item.images[0].image_path}`
+            : '';
+
+        const conditionClass = item.condition === 'excellent' ? 'bg-success' :
+                              (item.condition === 'good' ? 'bg-primary' :
+                              (item.condition === 'fair' ? 'bg-warning' : 'bg-danger'));
+
+        const conditionIcon = item.condition === 'excellent' ? 'fa-star' :
+                             (item.condition === 'good' ? 'fa-thumbs-up' :
+                             (item.condition === 'fair' ? 'fa-hand-paper' : 'fa-tools'));
+
+        itemsHtml += `
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="marketplace-card h-100">
+                    <div class="item-image">
+                        ${imageUrl ? `
+                            <img src="${imageUrl}" alt="${item.title}" style="width:100%;height:200px;object-fit:cover;">
+                        ` : `
+                            <div class="placeholder-image d-flex align-items-center justify-content-center" style="height:200px;">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                            </div>
+                        `}
+                        <div class="price-badge">
+                            <span class="badge bg-success">${Math.round(item.price)} DT</span>
+                        </div>
+                        <div class="condition-badge">
+                            <span class="badge ${conditionClass}">
+                                <i class="fas ${conditionIcon} me-1"></i>${item.condition.charAt(0).toUpperCase() + item.condition.slice(1)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="item-content">
+                        <div class="item-meta mb-2">
+                            <small class="text-muted d-flex align-items-center mb-1">
+                                <i class="fas fa-tag me-2"></i>${item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+                            </small>
+                            <small class="text-muted d-flex align-items-center">
+                                <i class="fas fa-map-marker-alt me-2"></i>${item.location}
+                            </small>
+                        </div>
+                        <h5 class="item-title">
+                            <a href="/marketplace/${item.id}" class="text-decoration-none">${item.title}</a>
+                        </h5>
+                        <p class="item-description text-muted">
+                            ${item.description.substring(0, 80)}${item.description.length > 80 ? '...' : ''}
+                        </p>
+                        <div class="seller-info d-flex align-items-center mb-3">
+                            <div class="seller-avatar me-2">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="seller-details">
+                                <small class="text-muted">Sold by <strong>${item.seller.name}</strong></small>
+                            </div>
+                        </div>
+                        <div class="item-actions d-flex gap-2">
+                            <a href="/marketplace/${item.id}" class="btn btn-success btn-sm flex-grow-1">
+                                <i class="fas fa-eye me-1"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    itemsContainer.innerHTML = itemsHtml;
+}
+
 // Initialize carousel hover effects
 document.addEventListener('DOMContentLoaded', function() {
     const carousels = document.querySelectorAll('.carousel');
@@ -586,6 +764,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+</script>
 
 <!-- Create Marketplace Item Modal -->
 <div class="modal fade" id="createItemModal" tabindex="-1">
