@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MarketplaceItem;
 use App\Models\User;
+use App\Models\Conversation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -250,5 +251,35 @@ class MarketplaceItemController extends Controller
         ]);
 
         return back()->with('success', 'Status updated successfully!');
+    }
+
+    /**
+     * Start a new conversation or return an existing one.
+     */
+    public function startConversation(Request $request, MarketplaceItem $item)
+    {
+        $buyer = Auth::user();
+        $seller = $item->seller;
+
+        // Prevent user from starting a conversation with themselves
+        if ($buyer->id === $seller->id) {
+            return back()->with('error', 'You cannot start a conversation with yourself.');
+        }
+
+        // Check if a conversation already exists
+        $conversation = Conversation::where('marketplace_item_id', $item->id)
+            ->where('buyer_id', $buyer->id)
+            ->where('seller_id', $seller->id)
+            ->first();
+
+        if (!$conversation) {
+            $conversation = Conversation::create([
+                'marketplace_item_id' => $item->id,
+                'buyer_id' => $buyer->id,
+                'seller_id' => $seller->id,
+            ]);
+        }
+
+        return redirect()->route('messages.show', $conversation->id);
     }
 }

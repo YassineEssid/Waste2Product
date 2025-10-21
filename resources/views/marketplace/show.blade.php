@@ -132,9 +132,12 @@
                             </div>
                             @if($marketplaceItem->seller_id !== auth()->id())
                                 <div class="seller-actions">
-                                    <button class="btn btn-primary" onclick="contactSeller()">
-                                        <i class="fas fa-envelope me-1"></i>Contact
-                                    </button>
+                                    <form action="{{ route('marketplace.contact', $marketplaceItem) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-envelope me-1"></i>Contact
+                                        </button>
+                                    </form>
                                 </div>
                             @endif
                         </div>
@@ -169,9 +172,12 @@
                         @else
                             <!-- Buyer Actions -->
                             @if($marketplaceItem->status === 'available')
-                                <button class="btn btn-success btn-lg w-100 mb-3" onclick="contactSeller()">
-                                    <i class="fas fa-shopping-cart me-2"></i>Buy Now
-                                </button>
+                                <form action="{{ route('marketplace.contact', $marketplaceItem) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                                        <i class="fas fa-shopping-cart me-2"></i>Contact Seller
+                                    </button>
+                                </form>
                             @else
                                 <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>
                                     <i class="fas fa-ban me-2"></i>Item Sold
@@ -620,9 +626,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function contactSeller() {
-    alert('Contact seller functionality would be implemented here. This could open a contact form, messaging system, or show seller contact details.');
-}
 
 function shareItem() {
     if (navigator.share) {
