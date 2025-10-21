@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -16,41 +17,24 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'in:user,repairer,artisan'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'address' => ['nullable', 'string'],
-            'bio' => ['nullable', 'string', 'max:1000'],
-            'location_lat' => ['nullable', 'numeric', 'between:-90,90'],
-            'location_lng' => ['nullable', 'numeric', 'between:-180,180'],
-        ]);
+        $validated = $request->validated();
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
+        // Create user
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'bio' => $request->bio,
-            'location_lat' => $request->location_lat,
-            'location_lng' => $request->location_lng,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
         ]);
 
+        // Auto login after registration
         Auth::login($user);
 
-        return redirect()->intended('/dashboard')->with('success', 'Account created successfully!');
+        return redirect()->intended('/dashboard')->with('success', 'Bienvenue sur Waste2Product ! Votre compte a été créé avec succès.');
     }
 
     public function showLoginForm()
@@ -58,21 +42,24 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        $credentials = $request->validated();
+        $remember = $request->boolean('remember');
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $remember)) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard');
+            // Redirect admin users to admin panel
+            if (Auth::user()->role === 'admin') {
+                return redirect()->intended('/admin')->with('success', 'Bienvenue dans le panel administrateur !');
+            }
+
+            return redirect()->intended('/dashboard')->with('success', 'Connexion réussie ! Bienvenue ' . Auth::user()->name);
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Ces identifiants ne correspondent pas à nos enregistrements. Vérifiez votre email et mot de passe.',
         ])->onlyInput('email');
     }
 

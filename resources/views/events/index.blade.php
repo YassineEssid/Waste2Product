@@ -165,6 +165,19 @@
                 @foreach($events as $event)
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="event-card card h-100 shadow-sm">
+                            <!-- Event Image -->
+                            @if($event->image)
+                                <img src="{{ Storage::url($event->image) }}" 
+                                     class="card-img-top" 
+                                     alt="{{ $event->title }}"
+                                     style="height: 200px; object-fit: cover;">
+                            @else
+                                <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center" 
+                                     style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <i class="fas fa-calendar-alt fa-4x text-white opacity-50"></i>
+                                </div>
+                            @endif
+                            
                             <div class="card-body">
                                 <!-- Event Status Badge -->
                                 <div class="mb-2">
@@ -264,11 +277,21 @@
     border: none;
     border-radius: 15px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
 }
 
 .event-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.event-card .card-img-top {
+    border-radius: 15px 15px 0 0;
+    transition: transform 0.3s ease;
+}
+
+.event-card:hover .card-img-top {
+    transform: scale(1.05);
 }
 
 .event-card .card-body {

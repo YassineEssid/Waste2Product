@@ -27,8 +27,9 @@
     <!-- Navigation (Only for authenticated users) -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-success">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ route('dashboard') }}">
-                <i class="fas fa-recycle"></i> Waste2Product
+            <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}">
+                <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product" style="height: 35px; width: auto; margin-right: 10px;">
+                Waste2Product
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -62,24 +63,36 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user"></i> {{ auth()->user()->name }}
+                            @if(auth()->user()->avatar)
+                                <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}" 
+                                     class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                            @else
+                                <i class="fas fa-user-circle"></i>
+                            @endif
+                            {{ auth()->user()->name }}
                             <span class="badge bg-light text-dark ms-1">{{ auth()->user()->role }}</span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-edit"></i> Profile</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-list"></i> My Items</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ route('profile.show') }}"><i class="fas fa-user me-2"></i>Mon profil</a></li>
+                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fas fa-user-edit me-2"></i>Modifier profil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('waste-items.my') }}"><i class="fas fa-recycle me-2"></i>Mes articles</a></li>
                             @if(auth()->user()->role === 'repairer')
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-tools"></i> My Repairs</a></li>
+                                <li><a class="dropdown-item" href="{{ route('repairs.index') }}"><i class="fas fa-tools me-2"></i>Mes réparations</a></li>
                             @endif
                             @if(auth()->user()->role === 'artisan')
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-magic"></i> My Transformations</a></li>
+                                <li><a class="dropdown-item" href="{{ route('transformations.index') }}"><i class="fas fa-magic me-2"></i>Mes transformations</a></li>
+                            @endif
+                            @if(auth()->user()->role === 'admin')
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ route('admin.dashboard') }}"><i class="fas fa-user-shield me-2"></i>Panel Admin</a></li>
                             @endif
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
                                     </button>
                                 </form>
                             </li>
