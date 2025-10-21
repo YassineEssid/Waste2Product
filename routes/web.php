@@ -10,6 +10,7 @@ use App\Http\Controllers\CommunityEventController;
 use App\Http\Controllers\EventCommentController;
 use App\Http\Controllers\MarketplaceItemController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\HomeController;
 
 // Front Office Routes
@@ -107,6 +108,12 @@ Route::get('/marketplace/create', [MarketplaceItemController::class, 'create'])-
 
     // Marketplace (protected)
     Route::resource('marketplace', MarketplaceItemController::class)->except(['create']);
+
+    // Messaging
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{conversation}', [MessageController::class, 'show'])->name('messages.show');
+    Route::post('/messages/{conversation}', [MessageController::class, 'store'])->name('messages.store');
+    Route::post('/marketplace/{item}/contact', [MarketplaceItemController::class, 'startConversation'])->name('marketplace.contact');
 });
 
 // Admin routes

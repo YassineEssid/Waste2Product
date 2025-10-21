@@ -87,7 +87,7 @@
                                 <h1 class="item-title">{{ $marketplaceItem->title }}</h1>
                             </div>
                             <div class="item-price">
-                                <span class="price-amount">${{ number_format($marketplaceItem->price, 2) }}</span>
+                                <span class="price-amount">{{ number_format($marketplaceItem->price, 2) }}DT</span>
                             </div>
                         </div>
 
@@ -132,9 +132,12 @@
                             </div>
                             @if($marketplaceItem->seller_id !== auth()->id())
                                 <div class="seller-actions">
-                                    <button class="btn btn-primary" onclick="contactSeller()">
-                                        <i class="fas fa-envelope me-1"></i>Contact
-                                    </button>
+                                    <form action="{{ route('marketplace.contact', $marketplaceItem) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-envelope me-1"></i>Contact
+                                        </button>
+                                    </form>
                                 </div>
                             @endif
                         </div>
@@ -169,9 +172,12 @@
                         @else
                             <!-- Buyer Actions -->
                             @if($marketplaceItem->status === 'available')
-                                <button class="btn btn-success btn-lg w-100 mb-3" onclick="contactSeller()">
-                                    <i class="fas fa-shopping-cart me-2"></i>Buy Now
-                                </button>
+                                <form action="{{ route('marketplace.contact', $marketplaceItem) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                                        <i class="fas fa-shopping-cart me-2"></i>Contact Seller
+                                    </button>
+                                </form>
                             @else
                                 <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>
                                     <i class="fas fa-ban me-2"></i>Item Sold
@@ -234,7 +240,7 @@
                             </div>
                             <div class="detail-card">
                                 <span class="detail-label"><i class="fas fa-dollar-sign me-2 text-warning"></i>Price</span>
-                                <span class="fw-bold ms-2">${{ number_format($marketplaceItem->price, 2) }}</span>
+                                <span class="fw-bold ms-2">{{ number_format($marketplaceItem->price, 2) }}DT</span>
                             </div>
                             <div class="detail-card">
                                 <span class="detail-label"><i class="fas fa-sort-numeric-up me-2 text-info"></i>Quantity</span>
@@ -277,14 +283,14 @@
                                 <div class="related-item-card">
                                     <div class="related-item-image">
                                         @if($item->images && $item->images->count() > 0)
-                                            <img src="{{ Storage::url($item->images->first()->path) }}" alt="{{ $item->title }}">
+                                            <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}">
                                         @else
                                             <div class="related-placeholder">
                                                 <i class="fas fa-image"></i>
                                             </div>
                                         @endif
                                         <div class="related-price">
-                                            <span class="badge bg-success">${{ number_format($item->price, 2) }}</span>
+                                            <span class="badge bg-success">{{ number_format($item->price, 2) }}DT</span>
                                         </div>
                                     </div>
                                     <div class="related-item-content">
@@ -322,7 +328,7 @@
                 <div class="item-preview">
                     <h6>{{ $marketplaceItem->title }}</h6>
                     <small class="text-muted">
-                        ${{ number_format($marketplaceItem->price, 2) }} • {{ $marketplaceItem->category }}
+                        {{ number_format($marketplaceItem->price, 2) }} • {{ $marketplaceItem->category }} DT
                     </small>
                 </div>
             </div>
@@ -620,9 +626,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function contactSeller() {
-    alert('Contact seller functionality would be implemented here. This could open a contact form, messaging system, or show seller contact details.');
-}
 
 function shareItem() {
     if (navigator.share) {

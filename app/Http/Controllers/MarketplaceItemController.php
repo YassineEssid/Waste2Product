@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MarketplaceItem;
 use App\Models\User;
+use App\Models\Conversation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -250,5 +251,126 @@ class MarketplaceItemController extends Controller
         ]);
 
         return back()->with('success', 'Status updated successfully!');
+    }
+
+    /**
+     * Search marketplace items (AJAX)
+     */
+    public function search(Request $request)
+    {
+        $query = MarketplaceItem::with(['seller', 'images'])
+            ->where('status', 'available');
+
+        // Search in title and description
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Filter by category
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        // Filter by condition
+        if ($request->filled('condition')) {
+            $query->where('condition', $request->condition);
+        }
+
+        // Price range filter
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $query->orderBy($sortBy, $sortDirection);
+
+        $items = $query->paginate(12);
+
+        return response()->json([
+            'success' => true,
+            'items' => $items,
+            'total' => $items->total(),
+            'count' => $items->count()
+        ]);
+    }
+
+
+    /**
+     * Start a new conversation or return an existing one.
+     */
+    public function startConversation(Request $request, MarketplaceItem $item)
+    {
+        $buyer = Auth::user();
+        $seller = $item->seller;
+
+        // Prevent user from starting a conversation with themselves
+        if ($buyer->id === $seller->id) {
+            return back()->with('error', 'You cannot start a conversation with yourself.');
+        }
+
+        // Check if a conversation already exists
+        $conversation = Conversation::where('marketplace_item_id', $item->id)
+            ->where('buyer_id', $buyer->id)
+            ->where('seller_id', $seller->id)
+            ->first();
+
+        if (!$conversation) {
+            $conversation = Conversation::create([
+                'marketplace_item_id' => $item->id,
+                'buyer_id' => $buyer->id,
+                'seller_id' => $seller->id,
+            ]);
+        }
+
+        return redirect()->route('messages.show', $conversation->id);
+    }
+
+    /**
+     * Detect category and suggest metadata using AI
+     */
+    public function detectCategory(Request $request)
+    {
+        $request->validate([
+            'description' => 'required|string|min:5|max:500'
+        ]);
+
+        $categoryService = app(\App\Services\CategoryDetectionService::class);
+        $result = $categoryService->detectCategory($request->description);
+
+        return response()->json($result);
+    }
+
+    /**
+     * Suggest optimal price using AI
+     */
+    public function suggestPrice(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|min:3|max:200',
+            'description' => 'required|string|min:10|max:1000',
+            'category' => 'required|string',
+            'condition' => 'required|string',
+            'keywords' => 'nullable|array'
+        ]);
+
+        $priceService = app(\App\Services\PriceSuggestionService::class);
+        $result = $priceService->suggestPrice(
+            $request->title,
+            $request->description,
+            $request->category,
+            $request->condition,
+            $request->keywords ?? []
+        );
+
+        return response()->json($result);
     }
 }
