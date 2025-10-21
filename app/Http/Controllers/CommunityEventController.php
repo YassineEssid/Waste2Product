@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CommunityEvent;
 use App\Services\GamificationService;
+use App\Services\GeminiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -12,11 +13,13 @@ use Carbon\Carbon;
 class CommunityEventController extends Controller
 {
     protected $gamificationService;
+    protected $geminiService;
 
-    public function __construct(GamificationService $gamificationService)
+    public function __construct(GamificationService $gamificationService, GeminiService $geminiService)
     {
         $this->middleware('auth');
         $this->gamificationService = $gamificationService;
+        $this->geminiService = $geminiService;
     }
 
     /**
@@ -294,5 +297,45 @@ class CommunityEventController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Generate event description using AI
+     */
+    public function generateDescription(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'required|string|in:workshop,conference,cleanup,exhibition,training,networking',
+            'location' => 'nullable|string|max:255',
+        ]);
+
+        $result = $this->geminiService->generateEventDescription(
+            $request->title,
+            $request->type,
+            $request->location
+        );
+
+        return response()->json($result);
+    }
+
+    /**
+     * Generate event FAQ using AI
+     */
+    public function generateFAQ(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'required|string|in:workshop,conference,cleanup,exhibition,training,networking',
+            'description' => 'required|string',
+        ]);
+
+        $result = $this->geminiService->generateEventFAQ(
+            $request->title,
+            $request->type,
+            $request->description
+        );
+
+        return response()->json($result);
     }
 }

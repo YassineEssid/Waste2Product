@@ -68,6 +68,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/events/{event}/register', [CommunityEventController::class, 'register'])->name('events.register');
     Route::delete('/events/{event}/unregister', [CommunityEventController::class, 'unregister'])->name('events.unregister');
 
+    // AI Generation for Events
+    Route::post('/events/ai/generate-description', [CommunityEventController::class, 'generateDescription'])->name('events.ai.generate-description');
+    Route::post('/events/ai/generate-faq', [CommunityEventController::class, 'generateFAQ'])->name('events.ai.generate-faq');
+
     // Event Comments
     Route::resource('event-comments', EventCommentController::class);
     Route::post('/event-comments/{eventComment}/toggle-approval', [EventCommentController::class, 'toggleApproval'])->name('event-comments.toggle-approval');

@@ -73,26 +73,26 @@
                             <span class="badge bg-light text-dark ms-1">{{ auth()->user()->role }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ route('profile.show') }}"><i class="fas fa-user me-2"></i>Mon profil</a></li>
-                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fas fa-user-edit me-2"></i>Modifier profil</a></li>
+                            <li><a class="dropdown-item" href="{{ route('profile.show') }}"><i class="fas fa-user me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fas fa-user-edit me-2"></i>Edit Profile</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('waste-items.my') }}"><i class="fas fa-recycle me-2"></i>Mes articles</a></li>
+                            <li><a class="dropdown-item" href="{{ route('waste-items.my') }}"><i class="fas fa-recycle me-2"></i>My Items</a></li>
                             @if(auth()->user()->role === 'repairer')
-                                <li><a class="dropdown-item" href="{{ route('repairs.index') }}"><i class="fas fa-tools me-2"></i>Mes réparations</a></li>
+                                <li><a class="dropdown-item" href="{{ route('repairs.index') }}"><i class="fas fa-tools me-2"></i>My Repairs</a></li>
                             @endif
                             @if(auth()->user()->role === 'artisan')
-                                <li><a class="dropdown-item" href="{{ route('transformations.index') }}"><i class="fas fa-magic me-2"></i>Mes transformations</a></li>
+                                <li><a class="dropdown-item" href="{{ route('transformations.index') }}"><i class="fas fa-magic me-2"></i>My Transformations</a></li>
                             @endif
                             @if(auth()->user()->role === 'admin')
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{{ route('admin.dashboard') }}"><i class="fas fa-user-shield me-2"></i>Panel Admin</a></li>
+                                <li><a class="dropdown-item text-danger" href="{{ route('admin.dashboard') }}"><i class="fas fa-user-shield me-2"></i>Admin Panel</a></li>
                             @endif
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="dropdown-item text-danger">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
                                     </button>
                                 </form>
                             </li>

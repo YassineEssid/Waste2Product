@@ -69,15 +69,25 @@
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label required">Description</label>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label required mb-0">Description</label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="generateDescriptionBtn">
+                                        <i class="fas fa-magic me-1"></i> Generate with AI
+                                    </button>
+                                </div>
                                 <textarea class="form-control @error('description') is-invalid @enderror"
                                           name="description"
+                                          id="description"
                                           rows="4"
                                           placeholder="Describe your event, what participants will do, what they'll learn..."
                                           required>{{ old('description') }}</textarea>
                                 @error('description')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                <small class="text-muted">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Tip: Fill in the title and type first, then click "Generate with AI" for an instant description!
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -421,5 +431,188 @@ uploadArea.addEventListener('drop', function(e) {
         document.getElementById('image').dispatchEvent(new Event('change'));
     }
 });
+
+// ==================== AI Generation Features ====================
+
+// Generate Description with AI
+document.getElementById('generateDescriptionBtn').addEventListener('click', async function() {
+    const title = document.querySelector('input[name="title"]').value;
+    const type = document.querySelector('select[name="type"]').value;
+    const location = document.querySelector('input[name="location"]').value;
+    const btn = this;
+
+    if (!title || !type) {
+        alert('Please fill in the event title and type first!');
+        return;
+    }
+
+    // Disable button and show loading
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Generating...';
+
+    try {
+        const response = await fetch('{{ route("events.ai.generate-description") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ title, type, location })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Show modal with generated content
+            showAIModal('Generated Description', data.description, function(accepted) {
+                if (accepted) {
+                    document.getElementById('description').value = data.description;
+                    // Auto-generate FAQ after description
+                    setTimeout(() => generateFAQ(), 500);
+                }
+            });
+        } else {
+            alert(data.error || 'Failed to generate description. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    } finally {
+        // Re-enable button
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-magic me-1"></i> Generate with AI';
+    }
+});
+
+// Generate FAQ with AI
+async function generateFAQ() {
+    const title = document.querySelector('input[name="title"]').value;
+    const type = document.querySelector('select[name="type"]').value;
+    const description = document.getElementById('description').value;
+
+    if (!title || !type || !description) {
+        return;
+    }
+
+    // Show loading notification
+    const notification = document.createElement('div');
+    notification.className = 'alert alert-info position-fixed top-0 end-0 m-3';
+    notification.style.zIndex = '9999';
+    notification.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Generating FAQ...';
+    document.body.appendChild(notification);
+
+    try {
+        const response = await fetch('{{ route("events.ai.generate-faq") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ title, type, description })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.faqs.length > 0) {
+            let faqHtml = '<div class="faq-preview">';
+            data.faqs.forEach((faq, index) => {
+                faqHtml += `
+                    <div class="faq-item mb-3">
+                        <strong class="text-primary">Q${index + 1}: ${faq.question}</strong>
+                        <p class="text-muted mb-0 mt-1">${faq.answer}</p>
+                    </div>
+                `;
+            });
+            faqHtml += '</div>';
+
+            showAIModal('Generated FAQ', faqHtml, function(accepted) {
+                // FAQ is informational, just dismiss
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        document.body.removeChild(notification);
+    }
+}
+
+// AI Modal Component
+function showAIModal(title, content, callback) {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('aiModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'aiModal';
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-magic me-2"></i>${title}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="ai-content">
+                        ${content}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Close
+                    </button>
+                    ${title.includes('Description') ? `
+                        <button type="button" class="btn btn-primary" id="acceptAIBtn">
+                            <i class="fas fa-check me-1"></i> Use This Description
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Initialize Bootstrap modal
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    // Handle accept button
+    const acceptBtn = document.getElementById('acceptAIBtn');
+    if (acceptBtn) {
+        acceptBtn.addEventListener('click', function() {
+            callback(true);
+            bsModal.hide();
+        });
+    }
+
+    // Cleanup on close
+    modal.addEventListener('hidden.bs.modal', function() {
+        modal.remove();
+    });
+}
+
 </script>
+
+<style>
+.ai-content {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+.faq-preview .faq-item {
+    padding: 12px;
+    background: white;
+    border-left: 3px solid #667eea;
+    border-radius: 4px;
+}
+</style>
 @endsection
