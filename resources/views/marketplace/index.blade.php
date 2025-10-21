@@ -207,7 +207,7 @@
                                 <!-- Price Badge -->
                                 <div class="price-badge">
                                     <span class="badge bg-success">
-                                        ${{ number_format($item->price, 0) }}
+                                        {{ number_format($item->price, 0) }} DT
                                     </span>
                                 </div>
 

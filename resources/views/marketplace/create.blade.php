@@ -96,9 +96,9 @@
                         
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label required">Price (USD)</label>
+                                <label class="form-label required">Price (DT)</label>
                                 <div class="input-group">
-                                    <span class="input-group-text">$</span>
+                                    <span class="input-group-text">Dt</span>
                                     <input type="number" 
                                            class="form-control @error('price') is-invalid @enderror" 
                                            name="price" 

@@ -87,7 +87,7 @@
                                 <h1 class="item-title">{{ $marketplaceItem->title }}</h1>
                             </div>
                             <div class="item-price">
-                                <span class="price-amount">${{ number_format($marketplaceItem->price, 2) }}</span>
+                                <span class="price-amount">{{ number_format($marketplaceItem->price, 2) }}DT</span>
                             </div>
                         </div>
 
@@ -240,7 +240,7 @@
                             </div>
                             <div class="detail-card">
                                 <span class="detail-label"><i class="fas fa-dollar-sign me-2 text-warning"></i>Price</span>
-                                <span class="fw-bold ms-2">${{ number_format($marketplaceItem->price, 2) }}</span>
+                                <span class="fw-bold ms-2">{{ number_format($marketplaceItem->price, 2) }}DT</span>
                             </div>
                             <div class="detail-card">
                                 <span class="detail-label"><i class="fas fa-sort-numeric-up me-2 text-info"></i>Quantity</span>
@@ -290,7 +290,7 @@
                                             </div>
                                         @endif
                                         <div class="related-price">
-                                            <span class="badge bg-success">${{ number_format($item->price, 2) }}</span>
+                                            <span class="badge bg-success">{{ number_format($item->price, 2) }}DT</span>
                                         </div>
                                     </div>
                                     <div class="related-item-content">
@@ -328,7 +328,7 @@
                 <div class="item-preview">
                     <h6>{{ $marketplaceItem->title }}</h6>
                     <small class="text-muted">
-                        ${{ number_format($marketplaceItem->price, 2) }} • {{ $marketplaceItem->category }}
+                        {{ number_format($marketplaceItem->price, 2) }} • {{ $marketplaceItem->category }} DT
                     </small>
                 </div>
             </div>
