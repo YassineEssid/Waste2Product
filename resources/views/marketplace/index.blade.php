@@ -185,7 +185,7 @@
                                         <div class="carousel-inner">
                                             @foreach($item->images as $index => $image)
                                                 <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                                    <img src="{{ Storage::url($image->path) }}" alt="{{ $item->title }}" class="d-block w-100">
+                                                    <img src="{{ Storage::url($image->image_path) }}" alt="{{ $item->title }}" class="d-block w-100">
                                                 </div>
                                             @endforeach
                                         </div>

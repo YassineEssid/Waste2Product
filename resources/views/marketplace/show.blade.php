@@ -23,7 +23,7 @@
                             <div class="carousel-inner">
                                 @foreach($marketplaceItem->images as $index => $image)
                                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                        <img src="{{ Storage::url($image->path) }}" alt="{{ $marketplaceItem->title }}" class="d-block w-100">
+                                        <img src="{{ Storage::url($image->image_path) }}" alt="{{ $marketplaceItem->title }}" class="d-block w-100">
                                     </div>
                                 @endforeach
                             </div>
@@ -42,7 +42,7 @@
                             <div class="thumbnail-nav">
                                 @foreach($marketplaceItem->images as $index => $image)
                                     <div class="thumbnail {{ $index === 0 ? 'active' : '' }}" data-bs-target="#mainCarousel" data-bs-slide-to="{{ $index }}">
-                                        <img src="{{ Storage::url($image->path) }}" alt="Thumbnail">
+                                        <img src="{{ Storage::url($image->image_path) }}" alt="Thumbnail">
                                     </div>
                                 @endforeach
                             </div>
@@ -283,7 +283,7 @@
                                 <div class="related-item-card">
                                     <div class="related-item-image">
                                         @if($item->images && $item->images->count() > 0)
-                                            <img src="{{ Storage::url($item->images->first()->path) }}" alt="{{ $item->title }}">
+                                            <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}">
                                         @else
                                             <div class="related-placeholder">
                                                 <i class="fas fa-image"></i>

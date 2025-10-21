@@ -31,7 +31,7 @@
     // Recharge la page toutes les 3 secondes
     setTimeout(function() {
         window.location.reload();
-    }, 10000);
+    }, 5000);
 </script>
 @endsection
 

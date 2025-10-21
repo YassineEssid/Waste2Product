@@ -183,7 +183,7 @@
                             <div class="current-images-grid mb-3">
                                 @foreach($marketplace->images as $image)
                                     <div class="current-image-item">
-                                        <img src="{{ Storage::url($image->path) }}" alt="Current image">
+                                        <img src="{{ Storage::url($image->image_path) }}" alt="Current image">
                                         <div class="image-overlay">
                                             <div class="form-check">
                                                 <input class="form-check-input"

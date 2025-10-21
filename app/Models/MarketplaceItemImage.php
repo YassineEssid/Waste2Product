@@ -11,7 +11,8 @@ class MarketplaceItemImage extends Model
 
     protected $fillable = [
         'marketplace_item_id',
-        'path',
+        'image_path',
+        'order',
     ];
 
     public function item()

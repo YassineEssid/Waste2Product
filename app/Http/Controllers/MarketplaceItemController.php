@@ -118,7 +118,7 @@ class MarketplaceItemController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('marketplace', 'public');
-                $item->images()->create(['path' => $path]);
+                $item->images()->create(['image_path' => $path]);
             }
         }
 
@@ -191,7 +191,7 @@ class MarketplaceItemController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('marketplace', 'public');
-                $marketplace->images()->create(['path' => $path]);
+                $marketplace->images()->create(['image_path' => $path]);
             }
         }
 
