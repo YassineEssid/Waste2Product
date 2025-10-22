@@ -26,10 +26,6 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Public routes (no authentication required)
-Route::get('/waste-items', [WasteItemController::class, 'index'])->name('waste-items.index');
-Route::get('/waste-items/{wasteItem}', [WasteItemController::class, 'show'])->name('waste-items.show');
-
 // Protected routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -53,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/waste-items/{wasteItem}/toggle-availability', [WasteItemController::class, 'toggleAvailability'])->name('waste-items.toggle-availability');
 
     // Repair Requests
+    
     Route::resource('repairs', RepairRequestController::class);
     Route::post('/repairs/{repair}/assign', [RepairRequestController::class, 'assign'])->name('repairs.assign');
     Route::post('/repairs/{repair}/start', [RepairRequestController::class, 'start'])->name('repairs.start');
@@ -104,4 +101,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/profile/avatar', [App\Http\Controllers\Admin\AdminProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
 });
 
-
+// Public routes (no authentication required)
+Route::get('/waste-items', [WasteItemController::class, 'index'])->name('waste-items.index');
+Route::get('/waste-items/{wasteItem}', [WasteItemController::class, 'show'])->name('waste-items.show');

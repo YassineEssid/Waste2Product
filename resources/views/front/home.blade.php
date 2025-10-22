@@ -143,8 +143,43 @@
             @foreach($recentItems as $item)
             <div class="col-lg-4 col-md-6">
                 <div class="item-card">
-                    @if($item->images && count($item->images) > 0)
-                        <img src="{{ Storage::url($item->images[0]) }}" alt="{{ $item->title }}" class="item-image">
+                    @php
+                        // Normalize images: support JSON strings or arrays, and nested arrays with keys like 'path' or 'url'
+                        $images = $item->images;
+                        if (is_string($images)) {
+                            $images = json_decode($images, true);
+                        }
+                        if (is_object($images)) {
+                            $images = (array) $images;
+                        }
+
+                        $firstImage = null;
+                        if (is_array($images) && count($images) > 0) {
+                            foreach ($images as $img) {
+                                if (is_string($img) && trim($img) !== '') {
+                                    $firstImage = $img;
+                                    break;
+                                }
+                                if (is_array($img)) {
+                                    if (!empty($img['path'])) {
+                                        $firstImage = $img['path'];
+                                        break;
+                                    }
+                                    if (!empty($img['url'])) {
+                                        $firstImage = $img['url'];
+                                        break;
+                                    }
+                                    if (isset($img[0]) && is_string($img[0]) && trim($img[0]) !== '') {
+                                        $firstImage = $img[0];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    @endphp
+
+                    @if($firstImage)
+                        <img src="{{ Storage::url($firstImage) }}" alt="{{ $item->title }}" class="item-image">
                     @else
                         <div class="item-image-placeholder">
                             <i class="fas fa-image fa-3x text-muted"></i>
