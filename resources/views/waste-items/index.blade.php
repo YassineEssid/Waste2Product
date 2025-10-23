@@ -135,6 +135,19 @@
     </button>
 </div>
 @endauth
+<!-- Recommendation Results Zone -->
+<div class="container mt-5" id="recommendationZone" style="display: none;">
+    <div class="card shadow-sm border-success">
+        <div class="card-header bg-success text-white d-flex align-items-center">
+            <i class="fas fa-lightbulb me-2"></i>
+            <h5 class="mb-0">AI Recommendations</h5>
+        </div>
+        <div class="card-body" id="recommendationContent">
+            <p class="text-muted mb-0">Loading recommendations...</p>
+        </div>
+    </div>
+</div>
+
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-center mt-4">
@@ -251,6 +264,14 @@ document.getElementById('getRecommendations').addEventListener('click', async fu
         const itemDescription = card.querySelector('.card-text').innerText;
         return `- ${itemTitle}: ${itemDescription}`;
     });
+    const zone = document.getElementById('recommendationZone');
+    const content = document.getElementById('recommendationContent');
+    zone.style.display = 'block';
+    content.innerHTML = `<div class="text-center py-3">
+        <div class="spinner-border text-success" role="status"></div>
+        <p class="text-muted mt-2 mb-0">Generating recommendations...</p>
+    </div>`;
+
     const question = `For the following waste items, which products can be created? Provide 3 plans (sale, donate, craft) for each item:\n${products.join('\n')}`;
 
         try {
@@ -264,7 +285,50 @@ document.getElementById('getRecommendations').addEventListener('click', async fu
             });
 
             const data = await response.json();
-            alert(`Recommendations : Sale: ${data.sale}\nDonate: ${data.donate}\nCraft: ${data.craft}`);
+ let html = '';
+
+        if (data.items && Array.isArray(data.items)) {
+            html += `<div class="accordion" id="recommendationAccordion">`;
+            data.items.forEach((item, i) => {
+                html += `
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading${i}">
+                        <button class="accordion-button ${i > 0 ? 'collapsed' : ''}" 
+                                type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#collapse${i}" aria-expanded="${i === 0}" 
+                                aria-controls="collapse${i}">
+                            🗑️ Item ${i + 1}
+                        </button>
+                    </h2>
+                    <div id="collapse${i}" class="accordion-collapse collapse ${i === 0 ? 'show' : ''}" 
+                         aria-labelledby="heading${i}" data-bs-parent="#recommendationAccordion">
+                        <div class="accordion-body">
+                            <p><strong>💰 Sale:</strong> ${item.sale}</p>
+                            <p><strong>🎁 Donate:</strong> ${item.donate}</p>
+                            <p><strong>🎨 Craft:</strong> ${item.craft}</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+        } 
+        else if (data.sale && data.donate && data.craft) {
+            html = `
+                <p><strong>💰 Sale:</strong> ${data.sale}</p>
+                <p><strong>🎁 Donate:</strong> ${data.donate}</p>
+                <p><strong>🎨 Craft:</strong> ${data.craft}</p>
+            `;
+        } 
+        else if (data.error) {
+            html = `<div class="alert alert-danger">${data.error}</div>`;
+        } 
+        else {
+            html = `<div class="alert alert-warning">Unexpected response format from Gemini.</div>`;
+        }
+
+        // Display final results
+        content.innerHTML = html;
+
         } catch (error) {
             console.error('Error fetching recommendations:', error);
         }

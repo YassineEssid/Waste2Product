@@ -245,8 +245,7 @@ class WasteItemController extends Controller
         return $path;
     }
 
-    
-public function getRecommendation(Request $request)
+ public function getRecommendation(Request $request)
     {
         $request->validate([
             'question' => 'required|string',
@@ -255,25 +254,62 @@ public function getRecommendation(Request $request)
         $question = $request->input('question');
 
         try {
-            // Call Gemini Flash 2.5 API
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . config('services.gemini.api_key'),
                 'Content-Type' => 'application/json',
-            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', [
-                'prompt' => [
-                    'text' => $question
-                ],
-                'temperature' => 0.7,
-                'candidate_count' => 1,
-                'max_output_tokens' => 500
-            ]);
+            ])->post(
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . config('services.gemini.api_key'),
+                [
+                    'contents' => [
+                        [
+                            'parts' => [[
+                                'text' => $question .
+                                    "\n\nRespond ONLY in pure JSON format, with either:\n" .
+                                    "1️⃣ A single object: { \"sale\": \"...\", \"donate\": \"...\", \"craft\": \"...\" }\n" .
+                                    "or\n" .
+                                    "2️⃣ An array of objects if multiple items are described: [ { \"sale\": \"...\", \"donate\": \"...\", \"craft\": \"...\" }, ... ]"
+                            ]]
+                        ]
+                    ],
+                    'generationConfig' => [
+                        'responseMimeType' => 'application/json'
+                    ]
+                ]
+            );
 
-            // Return API response as JSON
-            return $response->json();
+            $result = $response->json();
+            $output = $result['candidates'][0]['content']['parts'][0]['text'] ?? null;
+
+            if (!$output) {
+                return response()->json(['error' => 'No valid response from Gemini'], 500);
+            }
+
+            // Decode JSON output safely
+            $parsed = json_decode($output, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json([
+                    'error' => 'Invalid JSON format from Gemini',
+                    'raw' => $output,
+                ], 500);
+            }
+
+            // Normalize structure
+            if (isset($parsed['sale']) && isset($parsed['donate']) && isset($parsed['craft'])) {
+                // Single item
+                return response()->json($parsed);
+            } elseif (isset($parsed[0])) {
+                // Multiple items (array)
+                return response()->json(['items' => $parsed]);
+            } else {
+                return response()->json([
+                    'error' => 'Unexpected format from Gemini',
+                    'raw' => $parsed
+                ], 500);
+            }
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to get recommendation',
-                'message' => $e->getMessage(),
+                'message' => $e->getMessage()
             ], 500);
         }
     }
