@@ -49,8 +49,12 @@ class StatisticsController extends Controller
             ->get();
 
         // Environmental impact
+        // Using accessor getCo2SavedAttribute() from Transformation model
+        $transformations = Transformation::whereNotNull('impact')->get();
+        $totalCo2Saved = $transformations->sum('co2_saved');
+
         $environmentalImpact = [
-            'total_co2_saved' => Transformation::sum('co2_saved') ?? 0,
+            'total_co2_saved' => $totalCo2Saved,
             'waste_reduced_kg' => WasteItem::count() * 2.5,
             'items_recycled' => WasteItem::where('status', '!=', 'available')->count(),
         ];

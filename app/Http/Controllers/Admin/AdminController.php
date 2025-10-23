@@ -27,6 +27,7 @@ class AdminController extends Controller
             'artisans' => User::where('role', 'artisan')->count(),
             'admins' => User::where('role', 'admin')->count(),
             'new_this_month' => User::whereMonth('created_at', now()->month)->count(),
+            'new_this_week' => User::where('created_at', '>=', now()->subWeek())->count(),
         ];
 
         // Content statistics
@@ -40,11 +41,18 @@ class AdminController extends Controller
             'community_events' => CommunityEvent::count(),
             'upcoming_events' => CommunityEvent::where('starts_at', '>', now())->count(),
             'marketplace_items' => MarketplaceItem::count(),
+            'marketplace_available' => MarketplaceItem::where('status', 'available')->count(),
+            'marketplace_sold' => MarketplaceItem::where('status', 'sold')->count(),
         ];
 
         // Environmental impact
+        // Note: impact is a JSON column with structure: {co2_saved: X, waste_reduced: Y}
+        // Using accessor getCo2SavedAttribute() from Transformation model
+        $transformations = Transformation::whereNotNull('impact')->get();
+        $totalCo2Saved = $transformations->sum('co2_saved'); // Using accessor
+
         $environmentalStats = [
-            'total_co2_saved' => Transformation::sum('co2_saved') ?? 0,
+            'total_co2_saved' => $totalCo2Saved,
             'total_waste_reduced' => WasteItem::count() * 2.5, // 2.5kg per item estimation
         ];
 
@@ -61,12 +69,56 @@ class AdminController extends Controller
         ->orderBy('month')
         ->get();
 
+        // Marketplace categories distribution
+        $marketplaceCategories = MarketplaceItem::select('category', DB::raw('count(*) as count'))
+            ->whereNotNull('category')
+            ->groupBy('category')
+            ->orderByDesc('count')
+            ->take(6)
+            ->get();
+
+        // Event participation trend (last 6 months)
+        $eventRegistrations = DB::table('event_registrations')
+            ->join('community_events', 'event_registrations.community_event_id', '=', 'community_events.id')
+            ->select(
+                DB::raw('DATE_FORMAT(community_events.starts_at, "%Y-%m") as month'),
+                DB::raw('count(*) as registrations')
+            )
+            ->where('community_events.starts_at', '>=', now()->subMonths(6))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Recent marketplace items
+        $recentMarketplaceItems = MarketplaceItem::with('seller')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Recent transformations
+        $recentTransformations = Transformation::with('user')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Top artisans by transformations
+        $topArtisans = User::where('role', 'artisan')
+            ->withCount('transformations')
+            ->orderByDesc('transformations_count')
+            ->take(5)
+            ->get();
+
         return view('admin.dashboard', compact(
             'userStats',
             'contentStats',
             'environmentalStats',
             'recentUsers',
-            'userGrowth'
+            'userGrowth',
+            'marketplaceCategories',
+            'eventRegistrations',
+            'recentMarketplaceItems',
+            'recentTransformations',
+            'topArtisans'
         ));
     }
 }

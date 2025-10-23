@@ -4,11 +4,40 @@
 @section('page-title', 'Dashboard Administrateur')
 @section('page-description', 'Vue d\'ensemble de la plateforme Waste2Product')
 
+@push('styles')
+<style>
+    .stat-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+</style>
+@endpush
+
 @section('content')
     <!-- Statistics Overview -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Total Users -->
-        <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500">
+        <div class="stat-card bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500 animate-fade-in-up">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 uppercase font-semibold">Total Utilisateurs</p>
@@ -24,7 +53,7 @@
         </div>
 
         <!-- Waste Items -->
-        <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-500">
+        <div class="stat-card bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-500 animate-fade-in-up" style="animation-delay: 0.1s;">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 uppercase font-semibold">Articles Déchets</p>
@@ -40,7 +69,7 @@
         </div>
 
         <!-- Transformations -->
-        <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purple-500">
+        <div class="stat-card bg-white rounded-lg shadow-lg p-6 border-l-4 border-purple-500 animate-fade-in-up" style="animation-delay: 0.2s;">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 uppercase font-semibold">Transformations</p>
@@ -56,7 +85,7 @@
         </div>
 
         <!-- CO2 Saved -->
-        <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-yellow-500">
+        <div class="stat-card bg-white rounded-lg shadow-lg p-6 border-l-4 border-yellow-500 animate-fade-in-up" style="animation-delay: 0.3s;">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 uppercase font-semibold">CO₂ Économisé</p>
@@ -178,6 +207,111 @@
         </div>
     </div>
 
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- User Growth Chart -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Croissance des Utilisateurs</h3>
+            <div class="chart-container">
+                <canvas id="userGrowthChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Marketplace Categories Chart -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Catégories Marketplace</h3>
+            <div class="chart-container">
+                <canvas id="marketplaceCategoriesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Registrations Chart -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Inscriptions aux Événements</h3>
+        <div class="chart-container">
+            <canvas id="eventRegistrationsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Activity Sections -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Recent Marketplace Items -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Articles Marketplace Récents</h3>
+            <div class="space-y-3">
+                @forelse($recentMarketplaceItems as $item)
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="flex-1">
+                            <p class="font-medium text-sm text-gray-900">{{ Str::limit($item->title, 30) }}</p>
+                            <p class="text-xs text-gray-500">{{ $item->seller->name }}</p>
+                            <span class="text-xs {{ $item->status === 'available' ? 'text-green-600' : 'text-yellow-600' }}">
+                                {{ $item->status === 'available' ? 'Disponible' : 'Vendu' }}
+                            </span>
+                        </div>
+                        <span class="text-sm font-bold text-purple-600">{{ $item->price }}€</span>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-500">Aucun article récent</p>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Recent Transformations -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Transformations Récentes</h3>
+            <div class="space-y-3">
+                @forelse($recentTransformations as $transformation)
+                    <div class="border-b pb-3">
+                        <p class="font-medium text-sm text-gray-900">
+                            {{ Str::limit($transformation->title, 30) }}
+                        </p>
+                        <p class="text-xs text-gray-500">{{ $transformation->user->name }}</p>
+                        <div class="flex items-center mt-1">
+                            <span class="text-xs px-2 py-1 rounded-full
+                                {{ $transformation->status === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                {{ ucfirst($transformation->status) }}
+                            </span>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-500">Aucune transformation récente</p>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Top Artisans -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Artisans</h3>
+            <div class="space-y-3">
+                @forelse($topArtisans as $artisan)
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                                <span class="text-purple-600 font-bold text-sm">
+                                    {{ substr($artisan->name, 0, 1) }}
+                                </span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-sm text-gray-900">{{ $artisan->name }}</p>
+                                <p class="text-xs text-gray-500">
+                                    {{ $artisan->transformations_count }} transformation(s)
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-purple-600">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-500">Aucun artisan</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
     <!-- Recent Users -->
     <div class="bg-white rounded-lg shadow-lg p-6">
         <div class="flex items-center justify-between mb-6">
@@ -245,3 +379,112 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // User Growth Chart
+    const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+    const userGrowthChart = new Chart(userGrowthCtx, {
+        type: 'line',
+        data: {
+            labels: {!! json_encode($userGrowth->pluck('month')) !!},
+            datasets: [{
+                label: 'Nouveaux Utilisateurs',
+                data: {!! json_encode($userGrowth->pluck('count')) !!},
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Marketplace Categories Chart
+    const categoriesCtx = document.getElementById('marketplaceCategoriesChart').getContext('2d');
+    const categoriesChart = new Chart(categoriesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {!! json_encode($marketplaceCategories->pluck('category')) !!},
+            datasets: [{
+                data: {!! json_encode($marketplaceCategories->pluck('count')) !!},
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(251, 191, 36, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(236, 72, 153, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    // Event Registrations Chart
+    const eventCtx = document.getElementById('eventRegistrationsChart').getContext('2d');
+    const eventChart = new Chart(eventCtx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($eventRegistrations->pluck('month')) !!},
+            datasets: [{
+                label: 'Inscriptions',
+                data: {!! json_encode($eventRegistrations->pluck('registrations')) !!},
+                backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                borderColor: 'rgb(139, 92, 246)',
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+</script>
+@endpush
