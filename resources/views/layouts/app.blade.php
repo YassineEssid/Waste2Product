@@ -116,6 +116,9 @@
                     <a href="{{ route('waste-items.index') }}" class="list-group-item bg-light text-muted small fw-bold">
                         <i class="fas fa-recycle me-2"></i>WASTE MANAGEMENT
 </a>
+<a href="{{ route('categories.index') }}" class="list-group-item bg-light text-muted small fw-bold">
+<i class="fas fa-folder me-2"></i> WASTE Category MANAGEMENT
+</a>
                     <a href="{{ route('waste-items.my') }}" class="list-group-item list-group-item-action {{ request()->routeIs('waste-items.my') ? 'active' : '' }}">
                         <i class="fas fa-user me-2"></i>My Items
                     </a>

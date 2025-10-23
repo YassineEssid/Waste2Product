@@ -32,9 +32,12 @@ class WasteItemController extends Controller
         }
 
         // Category filter
-        if ($request->filled('category')) {
-            $query->byCategory($request->category);
-        }
+       if ($request->filled('category')) {
+        $query->whereHas('category', function ($q) use ($request) {
+            $q->where('id', $request->category);
+        });
+    }
+
 
         // Location filter
         if ($request->filled('lat') && $request->filled('lng')) {
@@ -44,10 +47,7 @@ class WasteItemController extends Controller
 
         $wasteItems = $query->orderBy('created_at', 'desc')->paginate(12);
 
-        $categories = WasteItem::distinct('category')
-            ->whereNotNull('category')
-            ->pluck('category')
-            ->sort();
+        $categories = Category::orderBy('name')->get();
 
         return view('waste-items.index', compact('wasteItems', 'categories'));
     }
@@ -119,14 +119,15 @@ return view('waste-items.create', compact('categories'));
     {
         $wasteItem->load('user', 'repairRequests.repairer', 'transformations.user');
         
-        // Get related items from same category
-        $relatedItems = WasteItem::where('category', $wasteItem->category)
-            ->where('id', '!=', $wasteItem->id)
-            ->where('status', 'available')
-            ->with('user')
-            ->latest()
-            ->limit(5)
-            ->get();
+  // Get related items from same category
+$relatedItems = WasteItem::where('category_id', $wasteItem->category_id)
+    ->where('id', '!=', $wasteItem->id)
+    ->where('status', 'available')
+    ->with('user') // eager load the related user
+    ->latest()
+    ->limit(5)
+    ->get();
+
         
         return view('waste-items.show', compact('wasteItem', 'relatedItems'));
     }

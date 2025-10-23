@@ -28,8 +28,8 @@
                             <select name="category" class="form-select">
                                 <option value="">All Categories</option>
                                 @foreach($categories as $category)
-                                    <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>
-                                        {{ ucfirst($category) }}
+                                    <option value="{{ $category->id }}" {{ request('category') == $category ? 'selected' : '' }}>
+                                        {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -80,7 +80,7 @@
                                     </div>
                                     
                                     <p class="text-muted small mb-2">
-                                        <i class="fas fa-tag me-1"></i>{{ ucfirst($item->category) }}
+                                        <i class="fas fa-tag me-1"></i>{{ $item->category->name }}
                                         @if($item->location)
                                             <span class="ms-3"><i class="fas fa-map-marker-alt me-1"></i>{{ $item->location }}</span>
                                         @endif

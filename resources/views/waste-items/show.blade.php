@@ -38,7 +38,7 @@
                         <div>
                             <h1 class="h3 mb-2">{{ $wasteItem->title }}</h1>
                             <div class="d-flex gap-3 text-muted">
-                                <span><i class="fas fa-tag me-1"></i>{{ ucfirst($wasteItem->category) }}</span>
+                                <span><i class="fas fa-tag me-1"></i>{{ $wasteItem->category->name }}</span>
                                 @if($wasteItem->location)
                                     <span><i class="fas fa-map-marker-alt me-1"></i>{{ $wasteItem->location }}</span>
                                 @endif

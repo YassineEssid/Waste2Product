@@ -53,7 +53,12 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        $category->delete();
+         // Delete all related waste items
+    $category->wasteItems()->delete();
+
+    // Delete the category
+    $category->delete();
+
 
         return redirect()->route('categories.index')->with('success', 'Category deleted successfully!');
     }
