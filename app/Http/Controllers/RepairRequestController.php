@@ -4,15 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\RepairRequest;
 use App\Models\WasteItem;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class RepairRequestController extends Controller
 {
-    public function __construct()
+    protected $gamificationService;
+
+    public function __construct(GamificationService $gamificationService)
     {
         $this->middleware('auth');
+        $this->gamificationService = $gamificationService;
     }
 
     public function index(Request $request)
@@ -263,6 +267,14 @@ class RepairRequestController extends Controller
         $validated['completed_at'] = now();
 
         $repair->update($validated);
+
+        // Award points for completing repair
+        $this->gamificationService->awardPoints(
+            Auth::user(),
+            'repair_completed',
+            'Completed repair: ' . $repair->description,
+            $repair
+        );
 
         return redirect()->route('repairs.my', $repair)
             ->with('success', 'Réparation terminée avec succès !');

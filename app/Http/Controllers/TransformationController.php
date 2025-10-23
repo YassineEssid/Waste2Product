@@ -13,9 +13,12 @@ use Illuminate\Support\Facades\Storage;
 
 class TransformationController extends Controller
 {
-    public function __construct()
+    protected $gamificationService;
+
+    public function __construct(GamificationService $gamificationService)
     {
         $this->middleware('auth');
+        $this->gamificationService = $gamificationService;
     }
 
     /**
@@ -90,18 +93,85 @@ class TransformationController extends Controller
 
         $validated = $request->validate([
             'waste_item_id' => 'required|exists:waste_items,id',
-            'product_title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'nullable|numeric|min:0',
-            'time_spent_hours' => 'nullable|integer|min:0',
-            'materials_cost' => 'nullable|numeric|min:0',
-            'co2_saved' => 'nullable|numeric|min:0',
-            'waste_reduced' => 'nullable|numeric|min:0',
+            'product_title' => 'required|string|min:5|max:255',
+            'description' => 'required|string|min:20|max:5000',
+            'price' => 'nullable|numeric|min:0.01|max:999999.99',
+            'time_spent_hours' => 'nullable|integer|min:1|max:1000',
+            'materials_cost' => 'nullable|numeric|min:0|max:999999.99',
+            'co2_saved' => 'nullable|numeric|min:0|max:9999',
+            'waste_reduced' => 'nullable|numeric|min:0|max:9999',
             'before_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'after_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'process_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:planned,in_progress,completed'
+        ], [
+            'waste_item_id.required' => 'You must select a waste item.',
+            'waste_item_id.exists' => 'Selected waste item does not exist.',
+            'product_title.required' => 'Product title is required.',
+            'product_title.min' => 'Title must be at least 5 characters.',
+            'product_title.max' => 'Title cannot exceed 255 characters.',
+            'description.required' => 'Description is required.',
+            'description.min' => 'Description must be at least 20 characters.',
+            'description.max' => 'Description cannot exceed 5000 characters.',
+            'price.numeric' => 'Price must be a valid number.',
+            'price.min' => 'Price must be greater than 0.',
+            'price.max' => 'Price cannot exceed 999999.99 DT.',
+            'time_spent_hours.integer' => 'Time spent must be an integer.',
+            'time_spent_hours.min' => 'Time spent must be at least 1 hour.',
+            'time_spent_hours.max' => 'Time spent cannot exceed 1000 hours.',
+            'materials_cost.numeric' => 'Materials cost must be a valid number.',
+            'materials_cost.max' => 'Materials cost cannot exceed 999999.99 DT.',
+            'co2_saved.numeric' => 'CO2 saved must be a valid number.',
+            'co2_saved.max' => 'CO2 saved cannot exceed 9999 kg.',
+            'waste_reduced.numeric' => 'Waste reduced must be a valid number.',
+            'waste_reduced.max' => 'Waste reduced cannot exceed 9999 kg.',
+            'status.required' => 'Status is required.',
+            'status.in' => 'Selected status is not valid.',
+            'before_images.*.image' => 'File must be an image.',
+            'before_images.*.mimes' => 'Image must be in jpeg, png, jpg or gif format.',
+            'before_images.*.max' => 'Image size cannot exceed 2 MB.',
+            'after_images.*.image' => 'File must be an image.',
+            'after_images.*.mimes' => 'Image must be in jpeg, png, jpg or gif format.',
+            'after_images.*.max' => 'Image size cannot exceed 2 MB.',
+            'process_images.*.image' => 'File must be an image.',
+            'process_images.*.mimes' => 'Image must be in jpeg, png, jpg or gif format.',
+            'process_images.*.max' => 'Image size cannot exceed 2 MB.',
         ]);
+
+        // Additional conditional validations
+        if (strlen(trim($request->product_title)) < 5) {
+            return back()->withErrors([
+                'product_title' => 'Title must contain at least 5 meaningful characters.'
+            ])->withInput();
+        }
+
+        if (strlen(trim($request->description)) < 20) {
+            return back()->withErrors([
+                'description' => 'Description must contain at least 20 meaningful characters.'
+            ])->withInput();
+        }
+
+        // Check that price is consistent with materials cost
+        if ($request->filled('price') && $request->filled('materials_cost')) {
+            if ($request->price < $request->materials_cost) {
+                return back()->withErrors([
+                    'price' => 'Sale price cannot be lower than materials cost.'
+                ])->withInput();
+            }
+        }
+
+        // Check that environmental values are consistent
+        if ($request->filled('waste_reduced') && $request->waste_reduced < 0) {
+            return back()->withErrors([
+                'waste_reduced' => 'Waste reduced cannot be negative.'
+            ])->withInput();
+        }
+
+        if ($request->filled('co2_saved') && $request->co2_saved < 0) {
+            return back()->withErrors([
+                'co2_saved' => 'CO2 saved cannot be negative.'
+            ])->withInput();
+        }
 
         // Prepare data
         $data = [
@@ -148,8 +218,18 @@ class TransformationController extends Controller
         // Update waste item status
         WasteItem::find($validated['waste_item_id'])->update(['status' => 'transformed']);
 
+        // Award points based on status
+        if ($transformation->status === 'completed') {
+            $this->gamificationService->awardPoints(
+                Auth::user(),
+                'transformation_completed',
+                'Completed transformation: ' . $transformation->title,
+                $transformation
+            );
+        }
+
         return redirect()->route('transformations.show', $transformation)
-            ->with('success', 'Transformation créée avec succès !');
+            ->with('success', 'Transformation created successfully!');
     }
 
     /**

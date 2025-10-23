@@ -5,15 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\MarketplaceItem;
 use App\Models\User;
 use App\Models\Conversation;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class MarketplaceItemController extends Controller
 {
-    public function __construct()
+    protected $gamificationService;
+
+    public function __construct(GamificationService $gamificationService)
     {
         $this->middleware('auth');
+        $this->gamificationService = $gamificationService;
     }
 
     /**
@@ -92,13 +96,44 @@ class MarketplaceItemController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category' => 'required|string',
+            'title' => 'required|string|min:5|max:255',
+            'description' => 'required|string|min:20|max:5000',
+            'category' => 'required|string|in:furniture,electronics,clothing,books,toys,tools,decorative,appliances,other',
             'condition' => 'required|in:excellent,good,fair,needs_repair',
-            'price' => 'required|numeric|min:0',
+            'price' => 'required|numeric|min:0.01|max:999999.99',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'title.required' => 'Title is required.',
+            'title.min' => 'Title must be at least 5 characters.',
+            'title.max' => 'Title cannot exceed 255 characters.',
+            'description.required' => 'Description is required.',
+            'description.min' => 'Description must be at least 20 characters.',
+            'description.max' => 'Description cannot exceed 5000 characters.',
+            'category.required' => 'Category is required.',
+            'category.in' => 'Selected category is not valid.',
+            'condition.required' => 'Condition is required.',
+            'condition.in' => 'Selected condition is not valid.',
+            'price.required' => 'Price is required.',
+            'price.min' => 'Price must be greater than 0.',
+            'price.max' => 'Price cannot exceed 999999.99 DT.',
+            'price.numeric' => 'Price must be a valid number.',
+            'images.*.image' => 'File must be an image.',
+            'images.*.mimes' => 'Image must be in jpeg, png, jpg or gif format.',
+            'images.*.max' => 'Image size cannot exceed 2 MB.',
         ]);
+
+        // Additional conditional validation
+        if ($request->price <= 0) {
+            return back()->withErrors(['price' => 'Price must be greater than zero.'])->withInput();
+        }
+
+        if (strlen(trim($request->title)) < 5) {
+            return back()->withErrors(['title' => 'Title must contain at least 5 meaningful characters.'])->withInput();
+        }
+
+        if (strlen(trim($request->description)) < 20) {
+            return back()->withErrors(['description' => 'Description must contain at least 20 meaningful characters.'])->withInput();
+        }
 
         $data = [
             'title' => $request->title, // Colonne title qui est requise
@@ -121,6 +156,14 @@ class MarketplaceItemController extends Controller
                 $item->images()->create(['image_path' => $path]);
             }
         }
+
+        // Award points for listing item
+        $this->gamificationService->awardPoints(
+            Auth::user(),
+            'waste_item_posted',
+            'Listed item on marketplace: ' . $item->title,
+            $item
+        );
 
         return redirect()->route('marketplace.index')->with('success', 'Item listed successfully!');
     }

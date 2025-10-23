@@ -3,15 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\WasteItem;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class WasteItemController extends Controller
 {
-    public function __construct()
+    protected $gamificationService;
+
+    public function __construct(GamificationService $gamificationService)
     {
         $this->middleware('auth')->except(['index', 'show']);
+        $this->gamificationService = $gamificationService;
     }
 
     /**
@@ -92,6 +96,14 @@ class WasteItemController extends Controller
     // Create the waste item
     $wasteItem = WasteItem::create($validated);
 
+    // Award points for posting waste item
+    $this->gamificationService->awardPoints(
+        Auth::user(),
+        'waste_item_posted',
+        'Posted waste item: ' . $wasteItem->title,
+        $wasteItem
+    );
+
     return redirect()->route('waste-items.my')
         ->with('success', 'Waste item listed successfully!');
 }
@@ -102,7 +114,7 @@ class WasteItemController extends Controller
     public function show(WasteItem $wasteItem)
     {
         $wasteItem->load('user', 'repairRequests.repairer', 'transformations.user');
-        
+
         // Get related items from same category
         $relatedItems = WasteItem::where('category', $wasteItem->category)
             ->where('id', '!=', $wasteItem->id)
@@ -111,7 +123,7 @@ class WasteItemController extends Controller
             ->latest()
             ->limit(5)
             ->get();
-        
+
         return view('waste-items.show', compact('wasteItem', 'relatedItems'));
     }
 
@@ -121,7 +133,7 @@ class WasteItemController extends Controller
     public function edit(WasteItem $wasteItem)
     {
         $this->authorize('update', $wasteItem);
-        
+
         return view('waste-items.edit', compact('wasteItem'));
     }
 
