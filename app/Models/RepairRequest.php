@@ -25,12 +25,14 @@ class RepairRequest extends Model
         'started_at',
         'completed_at',
         'urgency',
+        'budget',
     ];
 
     protected $casts = [
         'before_images' => 'array',
         'after_images' => 'array',
         'estimated_cost' => 'decimal:2',
+        'budget' => 'decimal:2',
         'actual_cost' => 'decimal:2',
         'assigned_at' => 'datetime',
         'started_at' => 'datetime',

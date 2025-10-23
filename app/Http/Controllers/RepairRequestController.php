@@ -119,7 +119,7 @@ class RepairRequestController extends Controller
 
         RepairRequest::create($validated);
 
-        return redirect()->route('repairs.index')
+        return redirect()->route('repairs.my')
             ->with('success', 'Demande de réparation créée avec succès !');
     }
 
@@ -263,7 +263,7 @@ class RepairRequestController extends Controller
 
         $repair->update($validated);
 
-        return redirect()->route('repairs.show', $repair)
+        return redirect()->route('repairs.my', $repair)
             ->with('success', 'Réparation terminée avec succès !');
     }
 
