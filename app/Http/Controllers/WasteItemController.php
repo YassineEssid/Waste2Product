@@ -112,13 +112,6 @@ return view('waste-items.create', compact('categories'));
 
     $wasteItem->save();
 
-    return redirect()->route('waste-items.show', $wasteItem)
-        ->with('success', 'Waste item listed successfully!');
-    }
-
-    // Create the waste item
-    $wasteItem = WasteItem::create($validated);
-
     // Award points for posting waste item
     $this->gamificationService->awardPoints(
         Auth::user(),
@@ -127,7 +120,7 @@ return view('waste-items.create', compact('categories'));
         $wasteItem
     );
 
-    return redirect()->route('waste-items.my')
+    return redirect()->route('waste-items.show', $wasteItem)
         ->with('success', 'Waste item listed successfully!');
 }
 

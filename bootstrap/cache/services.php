@@ -35,18 +35,6 @@
     31 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
     32 => 'App\\Providers\\AppServiceProvider',
     33 => 'App\\Providers\\TelescopeServiceProvider',
-    24 => 'Laravel\\Reverb\\ApplicationManagerServiceProvider',
-    25 => 'Laravel\\Reverb\\ReverbServiceProvider',
-    26 => 'Laravel\\Sail\\SailServiceProvider',
-    27 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    28 => 'Laravel\\Telescope\\TelescopeServiceProvider',
-    29 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    30 => 'Carbon\\Laravel\\ServiceProvider',
-    31 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    32 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    33 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
-    34 => 'App\\Providers\\AppServiceProvider',
-    35 => 'App\\Providers\\TelescopeServiceProvider',
   ),
   'eager' => 
   array (
