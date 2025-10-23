@@ -123,3 +123,4 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/waste2product:${{ github.sha }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/waste2product:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/waste2product:buildcache,mode=max
+          
