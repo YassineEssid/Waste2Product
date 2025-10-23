@@ -28,12 +28,10 @@ class CommunityEventFactory extends Factory
             'description' => fake()->paragraph(3),
             'image' => null,
             'location' => fake()->address(),
-            'location_lat' => fake()->latitude(),
-            'location_lng' => fake()->longitude(),
             'starts_at' => $startsAt,
             'ends_at' => fake()->dateTimeBetween($startsAt, $startsAt->format('Y-m-d H:i:s').' +4 hours'),
             'max_participants' => fake()->numberBetween(10, 100),
-            'status' => 'upcoming',
+            'status' => 'published',
         ];
     }
 }

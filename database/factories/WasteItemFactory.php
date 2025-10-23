@@ -32,7 +32,7 @@ class WasteItemFactory extends Factory
             'location_lng' => fake()->longitude(),
             'images' => [],
             'is_available' => true,
-            'status' => 'pending',
+            'status' => 'available',
         ];
     }
 }
