@@ -192,12 +192,8 @@
             @foreach($recentTransformations as $transformation)
             <div class="col-lg-3 col-md-6">
                 <div class="transformation-card">
-                    @php
-                        $afterImages = json_decode($transformation->after_images, true);
-                    @endphp
-
-                    @if($afterImages && count($afterImages) > 0)
-                        <img src="{{ Storage::url($afterImages[0]) }}" alt="{{ $transformation->title }}">
+                    @if($transformation->after_images && count($transformation->after_images) > 0)
+                        <img src="{{ Storage::url($transformation->after_images[0]) }}" alt="{{ $transformation->title }}">
                     @else
                         <div class="transformation-placeholder">
                             <i class="fas fa-palette fa-3x text-muted"></i>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Transformation;
 use App\Models\WasteItem;
 use App\Models\MarketplaceItem;
+use App\Services\TransformationIdeasService;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -30,7 +32,7 @@ class TransformationController extends Controller
 
         // Filter for current user (artisan only)
         if ($request->has('my') && Auth::user()->role === 'artisan') {
-            $query->where('artisan_id', Auth::id());
+            $query->where('user_id', Auth::id());
         }
 
         // Search
@@ -104,18 +106,16 @@ class TransformationController extends Controller
         // Prepare data
         $data = [
             'user_id' => Auth::id(),
-            'artisan_id' => Auth::id(),
             'waste_item_id' => $validated['waste_item_id'],
-            'product_title' => $validated['product_title'],
+            'title' => $validated['product_title'],
             'description' => $validated['description'],
+            'process_description' => $validated['description'],
             'price' => $validated['price'] ?? null,
             'time_spent_hours' => $validated['time_spent_hours'] ?? null,
             'materials_cost' => $validated['materials_cost'] ?? 0,
-            'status' => $validated['status'],
-            'impact' => [
-                'co2_saved' => $validated['co2_saved'] ?? 0,
-                'waste_reduced' => $validated['waste_reduced'] ?? 0,
-            ]
+            'co2_saved' => $validated['co2_saved'] ?? 0,
+            'waste_reduced' => $validated['waste_reduced'] ?? 0,
+            'status' => $validated['status']
         ];
 
         // Handle image uploads
@@ -169,7 +169,7 @@ class TransformationController extends Controller
     public function edit(Transformation $transformation)
     {
         // Check authorization
-        if ($transformation->artisan_id !== Auth::id() && Auth::user()->role !== 'admin') {
+        if ($transformation->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
             abort(403, 'Vous n\'êtes pas autorisé à modifier cette transformation.');
         }
 
@@ -184,7 +184,7 @@ class TransformationController extends Controller
     public function update(Request $request, Transformation $transformation)
     {
         // Check authorization
-        if ($transformation->artisan_id !== Auth::id() && Auth::user()->role !== 'admin') {
+        if ($transformation->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
             abort(403, 'Vous n\'êtes pas autorisé à modifier cette transformation.');
         }
 
@@ -208,16 +208,15 @@ class TransformationController extends Controller
 
         $data = [
             'waste_item_id' => $validated['waste_item_id'],
-            'product_title' => $validated['product_title'],
+            'title' => $validated['product_title'],
             'description' => $validated['description'],
+            'process_description' => $validated['description'],
             'price' => $validated['price'] ?? null,
             'time_spent_hours' => $validated['time_spent_hours'] ?? null,
             'materials_cost' => $validated['materials_cost'] ?? 0,
-            'status' => $validated['status'],
-            'impact' => [
-                'co2_saved' => $validated['co2_saved'] ?? 0,
-                'waste_reduced' => $validated['waste_reduced'] ?? 0,
-            ]
+            'co2_saved' => $validated['co2_saved'] ?? 0,
+            'waste_reduced' => $validated['waste_reduced'] ?? 0,
+            'status' => $validated['status']
         ];
 
         // Handle image removal
@@ -298,7 +297,7 @@ class TransformationController extends Controller
     public function destroy(Transformation $transformation)
     {
         // Check authorization
-        if ($transformation->artisan_id !== Auth::id() && Auth::user()->role !== 'admin') {
+        if ($transformation->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
             abort(403, 'Vous n\'êtes pas autorisé à supprimer cette transformation.');
         }
 
@@ -331,7 +330,7 @@ class TransformationController extends Controller
     public function publish(Transformation $transformation)
     {
         // Check authorization
-        if ($transformation->artisan_id !== Auth::id() && Auth::user()->role !== 'admin') {
+        if ($transformation->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
             abort(403, 'Vous n\'êtes pas autorisé à publier cette transformation.');
         }
 
@@ -351,8 +350,8 @@ class TransformationController extends Controller
     protected function publishToMarketplace(Transformation $transformation)
     {
         // Check if already published
-        $existingItem = MarketplaceItem::where('seller_id', $transformation->artisan_id)
-            ->where('name', $transformation->product_title)
+        $existingItem = MarketplaceItem::where('seller_id', $transformation->user_id)
+            ->where('name', $transformation->title)
             ->where('description', $transformation->description)
             ->first();
 
@@ -361,9 +360,9 @@ class TransformationController extends Controller
         }
 
         $marketplaceData = [
-            'seller_id' => $transformation->artisan_id,
-            'name' => $transformation->product_title,
-            'title' => $transformation->product_title,
+            'seller_id' => $transformation->user_id,
+            'name' => $transformation->title,
+            'title' => $transformation->title,
             'description' => $transformation->description,
             'price' => $transformation->price ?? 0,
             'category' => 'recycled',
@@ -376,12 +375,29 @@ class TransformationController extends Controller
 
         // Add images
         if ($transformation->after_images) {
-            foreach ($transformation->after_images as $index => $imagePath) {
+            foreach ($transformation->after_images as $imagePath) {
                 $marketplaceItem->images()->create([
-                    'image_path' => $imagePath,
-                    'order' => $index
+                    'image_path' => $imagePath
                 ]);
             }
         }
+    }
+
+    /**
+     * Generate transformation ideas using AI
+     */
+    public function generateIdeas(Request $request, TransformationIdeasService $ideasService)
+    {
+        $request->validate([
+            'waste_item_id' => 'required|exists:waste_items,id',
+            'count' => 'nullable|integer|min:3|max:10'
+        ]);
+
+        $wasteItem = WasteItem::findOrFail($request->waste_item_id);
+        $count = $request->input('count', 5);
+
+        $result = $ideasService->generateIdeas($wasteItem, $count);
+
+        return response()->json($result);
     }
 }

@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('community_events', function (Blueprint $table) {
-            $table->dateTime('ends_at')->nullable()->after('starts_at');
+        Schema::create('eco_impact_calculations', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('community_events', function (Blueprint $table) {
-            $table->dropColumn('ends_at');
-        });
+        Schema::dropIfExists('eco_impact_calculations');
     }
 };

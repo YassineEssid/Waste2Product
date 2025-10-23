@@ -451,11 +451,12 @@ document.getElementById('generateDescriptionBtn').addEventListener('click', asyn
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Generating...';
 
     try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const response = await fetch('{{ route("events.ai.generate-description") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': csrfToken
             },
             body: JSON.stringify({ title, type, location })
         });
@@ -514,11 +515,12 @@ async function generateFAQ() {
     document.body.appendChild(notification);
 
     try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const response = await fetch('{{ route("events.ai.generate-faq") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': csrfToken
             },
             body: JSON.stringify({ title, type, description })
         });

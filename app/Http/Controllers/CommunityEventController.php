@@ -117,7 +117,7 @@ class CommunityEventController extends Controller
             'max_participants' => $request->max_participants,
             'starts_at' => $request->event_date,
             'ends_at' => $request->end_date,
-            'status' => 'upcoming'
+            'status' => 'published'
         ];
 
         // Handle image upload

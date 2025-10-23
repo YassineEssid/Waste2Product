@@ -76,7 +76,7 @@
             <div class="card border-0 shadow-sm h-100 bg-success text-white">
                 <div class="card-body text-center">
                     <i class="fas fa-leaf fa-2x mb-2"></i>
-                    <h3 class="mb-0">{{ number_format(\App\Models\Transformation::sum('impact->co2_saved'), 1) }}</h3>
+                    <h3 class="mb-0">{{ number_format(\App\Models\Transformation::sum('co2_saved'), 1) }}</h3>
                     <small>kg CO₂ saved</small>
                 </div>
             </div>
@@ -212,7 +212,7 @@
                             <i class="fas fa-eye me-1"></i>Voir
                         </a>
 
-                        @if(auth()->user()->role === 'artisan' && $transformation->artisan_id === auth()->id())
+                        @if(auth()->user()->role === 'artisan' && $transformation->user_id === auth()->id())
                         <a href="{{ route('transformations.edit', $transformation) }}" class="btn btn-outline-secondary">
                             <i class="fas fa-edit"></i>
                         </a>

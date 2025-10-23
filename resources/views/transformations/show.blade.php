@@ -175,7 +175,7 @@
                     </div>
 
                     <!-- Actions -->
-                    @if(auth()->user()->role === 'artisan' && $transformation->artisan_id === auth()->id())
+                    @if(auth()->user()->role === 'artisan' && $transformation->user_id === auth()->id())
                     <div class="d-grid gap-2 mt-3">
                         <a href="{{ route('transformations.edit', $transformation) }}" class="btn btn-primary">
                             <i class="fas fa-edit me-2"></i>Edit

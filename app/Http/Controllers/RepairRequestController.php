@@ -106,7 +106,7 @@ class RepairRequestController extends Controller
     public function show(RepairRequest $repair)
     {
         $repair->load(['user', 'wasteItem', 'repairer']);
-        
+
         return view('repairs.show', compact('repair'));
     }
 
@@ -150,8 +150,7 @@ class RepairRequestController extends Controller
         if ($request->hasFile('before_images')) {
             // Delete old images
             if ($repair->before_images) {
-                $oldImages = json_decode($repair->before_images, true);
-                foreach ($oldImages as $image) {
+                foreach ($repair->before_images as $image) {
                     Storage::disk('public')->delete($image);
                 }
             }
@@ -161,7 +160,7 @@ class RepairRequestController extends Controller
                 $path = $this->storeImage($image, 'repairs/before');
                 $imagePaths[] = $path;
             }
-            $validated['before_images'] = json_encode($imagePaths);
+            $validated['before_images'] = $imagePaths;
         }
 
         $repair->update($validated);
@@ -182,15 +181,13 @@ class RepairRequestController extends Controller
 
         // Delete images
         if ($repair->before_images) {
-            $beforeImages = json_decode($repair->before_images, true);
-            foreach ($beforeImages as $image) {
+            foreach ($repair->before_images as $image) {
                 Storage::disk('public')->delete($image);
             }
         }
 
         if ($repair->after_images) {
-            $afterImages = json_decode($repair->after_images, true);
-            foreach ($afterImages as $image) {
+            foreach ($repair->after_images as $image) {
                 Storage::disk('public')->delete($image);
             }
         }

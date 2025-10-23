@@ -155,12 +155,21 @@ PROMPT;
         ]);
 
         if (!$response->successful()) {
+            Log::error('Gemini API HTTP Error', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
             throw new \Exception('API request failed: ' . $response->body());
         }
 
         $data = $response->json();
 
         if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+            Log::error('Gemini API Invalid Response Structure', [
+                'response' => $data,
+                'has_candidates' => isset($data['candidates']),
+                'candidates_count' => isset($data['candidates']) ? count($data['candidates']) : 0
+            ]);
             throw new \Exception('Invalid API response structure');
         }
 

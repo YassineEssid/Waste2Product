@@ -68,6 +68,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('transformations', TransformationController::class);
     Route::post('/transformations/{transformation}/publish', [TransformationController::class, 'publish'])->name('transformations.publish');
 
+    // Transformation AI - Generate Ideas
+    Route::post('/transformations/ai/generate-ideas', [TransformationController::class, 'generateIdeas'])->name('transformations.ai.generate-ideas');
+
     // Community Events
     // AI Generation for Events (must be before resource routes to avoid conflicts)
     Route::post('/events/ai/generate-description', [CommunityEventController::class, 'generateDescription'])->name('events.ai.generate-description');

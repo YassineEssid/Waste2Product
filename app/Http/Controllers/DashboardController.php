@@ -121,14 +121,14 @@ class DashboardController extends Controller
 
         // Statistiques de transformation
         $stats = [
-            'my_transformations' => Transformation::where('artisan_id', $user->id)->count(),
-            'pending_transformations' => Transformation::where('artisan_id', $user->id)
+            'my_transformations' => Transformation::where('user_id', $user->id)->count(),
+            'pending_transformations' => Transformation::where('user_id', $user->id)
                 ->where('status', 'pending')
                 ->count(),
-            'in_progress_transformations' => Transformation::where('artisan_id', $user->id)
+            'in_progress_transformations' => Transformation::where('user_id', $user->id)
                 ->where('status', 'in_progress')
                 ->count(),
-            'completed_transformations' => Transformation::where('artisan_id', $user->id)
+            'completed_transformations' => Transformation::where('user_id', $user->id)
                 ->where('status', 'completed')
                 ->count(),
             'marketplace_items' => MarketplaceItem::where('seller_id', $user->id)->count(),
@@ -138,7 +138,7 @@ class DashboardController extends Controller
         ];
 
         // Mes transformations récentes
-        $myTransformations = Transformation::where('artisan_id', $user->id)
+        $myTransformations = Transformation::where('user_id', $user->id)
             ->with('wasteItem')
             ->latest()
             ->limit(6)
