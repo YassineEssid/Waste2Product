@@ -74,7 +74,7 @@ jobs:
           name: codecov-umbrella
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
           path: coverage/
@@ -148,7 +148,7 @@ jobs:
           vendor/bin/phpstan analyse app --level=5 --error-format=checkstyle > phpstan-report.xml || true
 
       - name: Upload analysis results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: code-quality-reports
           path: |
