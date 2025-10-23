@@ -37,11 +37,8 @@ RUN composer dump-autoload --optimize --no-dev
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Copy entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+# Start PHP-FPM
+CMD ["php-fpm"]
