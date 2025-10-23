@@ -1,11 +1,14 @@
 services:
   app:
-    image: ${DOCKER_USERNAME:-ghothmen}/waste2product:latest
+    image: gbothmen/waste2product:latest
     container_name: waste2product_app
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
+      - ./.env:/var/www/html/.env:ro
       - ./storage:/var/www/html/storage
+      - ./database/migrations:/var/www/html/database/migrations:ro
+      - ./app:/var/www/html/app:ro
     depends_on:
       db:
         condition: service_healthy

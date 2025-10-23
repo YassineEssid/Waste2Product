@@ -217,7 +217,10 @@ class MarketplaceItemController extends Controller
         // Delete all images
         if ($marketplace->images) {
             foreach ($marketplace->images as $image) {
-                Storage::disk('public')->delete($image->path);
+                // Only delete if path is not null
+                if ($image->path) {
+                    Storage::disk('public')->delete($image->path);
+                }
             }
         }
 
