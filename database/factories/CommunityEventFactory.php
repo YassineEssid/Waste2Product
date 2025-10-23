@@ -30,7 +30,6 @@ class CommunityEventFactory extends Factory
             'location' => fake()->address(),
             'starts_at' => $startsAt,
             'ends_at' => fake()->dateTimeBetween($startsAt, $startsAt->format('Y-m-d H:i:s').' +4 hours'),
-            'max_participants' => fake()->numberBetween(10, 100),
             'status' => 'published',
         ];
     }

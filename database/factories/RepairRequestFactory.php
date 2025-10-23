@@ -27,7 +27,7 @@ class RepairRequestFactory extends Factory
             'repairer_id' => null,
             'title' => fake()->sentence(4),
             'description' => fake()->paragraph(),
-            'status' => 'pending',
+            'status' => 'waiting',
             'repairer_notes' => null,
             'before_images' => [],
             'after_images' => [],
