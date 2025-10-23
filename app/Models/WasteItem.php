@@ -13,8 +13,7 @@ class WasteItem extends Model
         'user_id',
         'title',
         'description',
-        'category',
-        'quantity',
+         'quantity',
         'condition',
         'location_address',
         'location_lat',
@@ -81,4 +80,8 @@ class WasteItem extends Model
     {
         return $this->images && count($this->images) > 0 ? $this->images[0] : null;
     }
+    public function category()
+{
+    return $this->belongsTo(Category::class);
+}
 }

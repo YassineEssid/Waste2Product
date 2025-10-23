@@ -38,7 +38,7 @@
                         <div>
                             <h1 class="h3 mb-2">{{ $wasteItem->title }}</h1>
                             <div class="d-flex gap-3 text-muted">
-                                <span><i class="fas fa-tag me-1"></i>{{ ucfirst($wasteItem->category) }}</span>
+                                <span><i class="fas fa-tag me-1"></i>{{ $wasteItem->category->name }}</span>
                                 @if($wasteItem->location)
                                     <span><i class="fas fa-map-marker-alt me-1"></i>{{ $wasteItem->location }}</span>
                                 @endif
@@ -233,32 +233,36 @@ function claimItem(itemId) {
 
 document.getElementById('confirmClaim')?.addEventListener('click', function() {
     // Create a form to submit the claim
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/waste-items/{{ $wasteItem->id }}/claim';
-    
-    // Add CSRF token
-    const csrfField = document.createElement('input');
-    csrfField.type = 'hidden';
-    csrfField.name = '_token';
-    csrfField.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    form.appendChild(csrfField);
-    
-    // Add method field for PATCH
-    const methodField = document.createElement('input');
-    methodField.type = 'hidden';
-    methodField.name = '_method';
-    methodField.value = 'PATCH';
-    form.appendChild(methodField);
-    
-    document.body.appendChild(form);
-    form.submit();
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error claiming item. Please try again.');
-    });
-    
-    bootstrap.Modal.getInstance(document.getElementById('claimModal')).hide();
+      const modal = new bootstrap.Modal(document.getElementById('claimModal'));
+    modal.show();
+
+    document.getElementById('confirmClaim')?.addEventListener('click', function() {
+        // Create the form
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/waste-items/${itemId}/claim`;
+
+        // CSRF token
+        const csrfField = document.createElement('input');
+        csrfField.type = 'hidden';
+        csrfField.name = '_token';
+        csrfField.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        form.appendChild(csrfField);
+
+        // Method PATCH
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'PATCH';
+        form.appendChild(methodField);
+
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit(); // No .catch() here because form.submit() is synchronous
+
+        // Hide modal
+        modal.hide();
+    }, { once: true }); // Prevent multiple event listeners
 });
 
 function contactOwner() {
@@ -294,29 +298,23 @@ function toggleAvailability(itemId) {
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = `/waste-items/${itemId}/toggle-availability`;
-    
-    // Add CSRF token
+
+    // CSRF token
     const csrfField = document.createElement('input');
     csrfField.type = 'hidden';
     csrfField.name = '_token';
     csrfField.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     form.appendChild(csrfField);
-    
-    // Add method field for PATCH
+
+    // PATCH method
     const methodField = document.createElement('input');
     methodField.type = 'hidden';
     methodField.name = '_method';
     methodField.value = 'PATCH';
     form.appendChild(methodField);
-    
+
     document.body.appendChild(form);
-    form.submit();
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    })
-    .catch(error => console.error('Error:', error));
+    form.submit(); // Synchronous, no .then() / .catch()
 }
 
 // Initialize map if coordinates are available
