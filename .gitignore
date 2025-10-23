@@ -3,6 +3,7 @@
 .env
 .env.backup
 .env.production
+.env.testing
 .phpactor.json
 .phpunit.result.cache
 /.fleet
@@ -22,3 +23,37 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Coverage reports
+coverage/
+*.clover
+.scannerwork/
+
+# Test output
+tests/_output/
+tests/_support/_generated/
+
+# Docker volumes
+db_data/
+sonarqube_data/
+sonarqube_extensions/
+sonarqube_logs/
+prometheus_data/
+grafana_data/
+
+# Temporary files
+test_*.php
+*_debug.php
+composer.phar
+
+# Laravel optimization files
+bootstrap/cache/*.php
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+
+# Keep important directories
+!storage/app/.gitignore
+!storage/framework/.gitignore
+!storage/logs/.gitignore

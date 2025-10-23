@@ -1,0 +1,69 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+DEVOPS_GUIDE.md
+DOCKER_TESTS.md
+INSTALL_SQLITE.md
+SUMMARY.md
+TESTING.md
+TESTS_RECAP.md
+WHY_SQLITE.md
+
+# CI/CD
+.github
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+phpunit.xml
+.phpunit.cache
+.phpunit.result.cache
+coverage/
+.scannerwork/
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Laravel
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+.env.testing
+.env.backup
+.env.local
+
+# Composer
+composer.lock
+vendor/
+
+# Build artifacts
+*.log
+.scannerwork/
+sonar-project.properties
+prometheus.yml
+run-tests.ps1
+run-tests.sh
+
+# Docker
+docker-compose.yml
+Dockerfile
+nginx.conf

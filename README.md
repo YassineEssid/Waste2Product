@@ -11,10 +11,17 @@
 <p align="center">
   <a href="#-fonctionnalités">Fonctionnalités</a> •
   <a href="#-technologies">Technologies</a> •
-  <a href="#-installation">Installation</a> •
+  <a href="#-installation-docker">Installation</a> •
   <a href="#-utilisation">Utilisation</a> •
-  <a href="#-captures-décran">Captures</a> •
-  <a href="#-contributeurs">Contributeurs</a>
+  <a href="#-devops">DevOps</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-11.x-red?style=for-the-badge&logo=laravel" alt="Laravel">
+  <img src="https://img.shields.io/badge/PHP-8.2-blue?style=for-the-badge&logo=php" alt="PHP">
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker" alt="Docker">
+  <img src="https://github.com/YassineEssid/Waste2Product/actions/workflows/tests.yml/badge.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=github-actions" alt="CI/CD">
 </p>
 
 ---
@@ -29,6 +36,41 @@
 - ♻️ **Économie circulaire** : Transformer les déchets en ressources
 - 🤝 **Communauté** : Créer un réseau d'entraide locale
 - 💡 **Innovation** : Encourager la créativité et le recyclage
+
+---
+
+## 🚀 Installation Docker (Recommandée)
+
+### Prérequis
+- Docker Desktop installé
+- Git installé
+
+### Installation en 3 étapes
+
+```bash
+# 1. Cloner le projet
+git clone https://github.com/YassineEssid/Waste2Product.git
+cd Waste2Product
+
+# 2. Copier la configuration
+cp .env.example .env
+
+# 3. Démarrer avec Docker
+docker-compose up -d --build
+```
+
+**C'est tout !** 🎉 L'application sera disponible sur **http://localhost:8080**
+
+### URLs des services
+
+| Service | URL | Identifiants |
+|---------|-----|-------------|
+| Application | http://localhost:8080 | - |
+| SonarQube | http://localhost:9000 | admin/admin |
+| Grafana | http://localhost:3000 | admin/admin |
+| Prometheus | http://localhost:9090 | - |
+
+📖 **Guide complet** : Voir [QUICKSTART.md](QUICKSTART.md)
 
 ---
 
@@ -327,6 +369,46 @@ Waste2Product/
 
 ### Événements Communautaires
 ![Events](docs/screenshots/events.png)
+
+---
+
+## 🧪 DevOps & CI/CD
+
+### Tests Automatisés
+
+Le projet utilise **GitHub Actions** pour l'intégration continue :
+
+- ✅ **Tests automatiques** à chaque push/PR
+- ✅ **Analyse de qualité** avec SonarCloud
+- ✅ **Couverture de code** avec Codecov
+- ✅ **Analyse statique** (PHPStan, PHP_CodeSniffer)
+
+### Workflow CI/CD
+
+```yaml
+Push/PR → Tests Unitaires → SonarCloud → Quality Gate → ✅ Merge
+```
+
+### Services DevOps (Docker)
+
+| Service | URL | Utilité |
+|---------|-----|---------|
+| **SonarQube** | http://localhost:9000 | Analyse qualité du code |
+| **Prometheus** | http://localhost:9090 | Monitoring métriques |
+| **Grafana** | http://localhost:3000 | Dashboards visuels |
+
+### Commandes utiles
+
+```bash
+# Lancer les tests
+docker-compose exec app vendor/bin/phpunit
+
+# Voir les logs
+docker-compose logs -f app
+
+# Redémarrer les services
+docker-compose restart
+```
 
 ---
 
