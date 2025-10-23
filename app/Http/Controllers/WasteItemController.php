@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\WasteItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -56,8 +57,9 @@ class WasteItemController extends Controller
      */
     public function create()
     {
-        
-        return view('waste-items.create');
+        $categories = Category::all();
+
+return view('waste-items.create', compact('categories'));
     }
 
     /**
@@ -65,34 +67,49 @@ class WasteItemController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category' => 'required|string|max:100',
-            'quantity' => 'required|integer|min:1',
-            'condition' => 'required|in:poor,fair,good,excellent',
-            'location_address' => 'nullable|string',
-            'location_lat' => 'nullable|numeric|between:-90,90',
-            'location_lng' => 'nullable|numeric|between:-180,180',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ]);
+      
+    if (!Auth::check()) {
+        return redirect()->route('login')->with('error', 'You must be logged in to add a waste item.');
+    }
 
-        $validated['user_id'] = Auth::id();
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'category_id' => 'required|exists:categories,id',
+        'quantity' => 'required|integer|min:1',
+        'condition' => 'required|in:poor,fair,good,excellent',
+        'location_address' => 'nullable|string',
+        'location_lat' => 'nullable|numeric|between:-90,90',
+        'location_lng' => 'nullable|numeric|between:-180,180',
+        'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+    ]);
 
-        // Handle image uploads
-        if ($request->hasFile('images')) {
-            $imagePaths = [];
-            foreach ($request->file('images') as $image) {
-                $path = $this->storeImage($image, 'waste-items');
-                $imagePaths[] = $path;
-            }
-            $validated['images'] = $imagePaths;
+    $wasteItem = new WasteItem();
+    $wasteItem->title = $validated['title'];
+    $wasteItem->description = $validated['description'];
+    $wasteItem->quantity = $validated['quantity'];
+    $wasteItem->condition = $validated['condition'];
+    $wasteItem->location_address = $validated['location_address'] ?? null;
+    $wasteItem->location_lat = $validated['location_lat'] ?? null;
+    $wasteItem->location_lng = $validated['location_lng'] ?? null;
+    $wasteItem->user_id = Auth::id(); // sûr maintenant
+    $wasteItem->is_available = $request->has('is_available') ? 1 : 0;
+
+    if ($request->hasFile('images')) {
+        $imagePaths = [];
+        foreach ($request->file('images') as $image) {
+            $imagePaths[] = $this->storeImage($image, 'waste-items');
         }
+        $wasteItem->images = $imagePaths;
+    }
 
-        $wasteItem = WasteItem::create($validated);
+    $category = Category::findOrFail($validated['category_id']);
+    $wasteItem->category()->associate($category);
 
-        return redirect()->route('waste-items.show', $wasteItem)
-            ->with('success', 'Waste item listed successfully!');
+    $wasteItem->save();
+
+    return redirect()->route('waste-items.show', $wasteItem)
+        ->with('success', 'Waste item listed successfully!');
     }
 
     /**

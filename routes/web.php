@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WasteItemController;
 use App\Http\Controllers\RepairRequestController;
@@ -52,6 +53,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-items', [WasteItemController::class, 'my'])->name('waste-items.my');
     Route::patch('/waste-items/{wasteItem}/claim', [WasteItemController::class, 'claim'])->name('waste-items.claim');
     Route::patch('/waste-items/{wasteItem}/toggle-availability', [WasteItemController::class, 'toggleAvailability'])->name('waste-items.toggle-availability');
+   // Categories Routes
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     // Repair Requests
     Route::resource('repairs', RepairRequestController::class);

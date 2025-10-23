@@ -28,20 +28,22 @@
                             </div>
                             
                             <div class="col-md-4 mb-3">
-                                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
-                                <select class="form-select @error('category') is-invalid @enderror" 
-                                        id="category" name="category" required>
-                                    <option value="">Select Category</option>
-                                    <option value="electronics" {{ old('category') == 'electronics' ? 'selected' : '' }}>Electronics</option>
-                                    <option value="furniture" {{ old('category') == 'furniture' ? 'selected' : '' }}>Furniture</option>
-                                    <option value="clothing" {{ old('category') == 'clothing' ? 'selected' : '' }}>Clothing</option>
-                                    <option value="appliances" {{ old('category') == 'appliances' ? 'selected' : '' }}>Appliances</option>
-                                    <option value="toys" {{ old('category') == 'toys' ? 'selected' : '' }}>Toys</option>
-                                    <option value="books" {{ old('category') == 'books' ? 'selected' : '' }}>Books</option>
-                                    <option value="decorative" {{ old('category') == 'decorative' ? 'selected' : '' }}>Decorative Items</option>
-                                    <option value="tools" {{ old('category') == 'tools' ? 'selected' : '' }}>Tools</option>
-                                    <option value="other" {{ old('category') == 'other' ? 'selected' : '' }}>Other</option>
-                                </select>
+                                
+    <label for="category" class="form-label">Category</label>
+   <label for="category" class="form-label">Category</label>
+<select name="category_id" class="form-select @error('category_id') is-invalid @enderror" required>
+    <option value="">Select Category</option>
+    @foreach($categories as $category)
+        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+            {{ $category->name }}
+        </option>
+    @endforeach
+</select>
+@error('category_id')
+    <div class="invalid-feedback">{{ $message }}</div>
+@enderror
+
+</div>
                                 @error('category')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
