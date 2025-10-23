@@ -19,6 +19,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if Telescope is disabled (e.g., in tests)
+        if (config('telescope.enabled') === false) {
+            return;
+        }
+
         $schema = Schema::connection($this->getConnection());
 
         $schema->create('telescope_entries', function (Blueprint $table) {
@@ -61,6 +66,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Skip if Telescope is disabled (e.g., in tests)
+        if (config('telescope.enabled') === false) {
+            return;
+        }
+
         $schema = Schema::connection($this->getConnection());
 
         $schema->dropIfExists('telescope_entries_tags');
