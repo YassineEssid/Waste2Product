@@ -50,21 +50,6 @@ services:
     networks:
       - waste2product
 
-  sonarqube:
-    image: sonarqube:latest
-    container_name: sonarqube
-    restart: unless-stopped
-    ports:
-      - "9000:9000"
-    environment:
-      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
-    networks:
-      - waste2product
-
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -95,13 +80,10 @@ services:
 
 volumes:
   db_data:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_logs:
   prometheus_data:
   grafana_data:
 
 networks:
   waste2product:
     driver: bridge
-    
+
