@@ -24,7 +24,7 @@ class TransformationFactory extends Factory
         return [
             'user_id' => User::factory(),
             'waste_item_id' => WasteItem::factory(),
-            'product_title' => fake()->sentence(3),
+            'title' => fake()->sentence(3),
             'description' => fake()->paragraph(),
             'impact' => fake()->paragraph(2),
             'price' => fake()->randomFloat(2, 10, 500),
