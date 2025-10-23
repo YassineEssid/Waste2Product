@@ -27,6 +27,8 @@ return new class extends Migration
             $table->timestamp('assigned_at')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
+            $table->enum('urgency', ['low', 'medium', 'high'])->default('medium');
+
             $table->timestamps();
         });
     }

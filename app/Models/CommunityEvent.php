@@ -15,8 +15,11 @@ class CommunityEvent extends Model
         'description',
         'image',
         'location',
+        'location_lat',
+        'location_lng',
         'starts_at',
         'ends_at',
+        'max_participants',
         'status'
     ];
 
@@ -36,15 +39,20 @@ class CommunityEvent extends Model
         return $this->hasMany(EventRegistration::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(EventComment::class);
+    }
+
     // Accessors pour simuler les données manquantes
     public function getCreatorNameAttribute()
     {
         return 'Community Organizer';
     }
 
-    public function getLocationAttribute()
+    public function getLocationAttribute($value)
     {
-        return 'Location not specified';
+        return $value ?? 'Location not specified';
     }
 
     public function getAttendeesCountAttribute()

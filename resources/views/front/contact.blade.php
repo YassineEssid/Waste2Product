@@ -8,9 +8,9 @@
     <div class="container">
         <div class="row align-items-center min-vh-50">
             <div class="col-lg-8 mx-auto text-center">
-                <h1 class="display-4 fw-bold text-white mb-4">Contactez-nous</h1>
+                <h1 class="display-4 fw-bold text-white mb-4">Contact Us</h1>
                 <p class="lead text-white-50">
-                    Une question ? Une suggestion ? Nous sommes là pour vous aider
+                    A question? A suggestion? We are here to help you
                 </p>
             </div>
         </div>
@@ -24,34 +24,34 @@
             <!-- Contact Form -->
             <div class="col-lg-7">
                 <div class="contact-form-wrapper">
-                    <h3 class="mb-4">Envoyez-nous un message</h3>
-                    
+                    <h3 class="mb-4">Send us a message</h3>
+
                     <form>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Nom complet</label>
-                                <input type="text" class="form-control" placeholder="Jean Dupont" required>
+                                <label class="form-label">Full name</label>
+                                <input type="text" class="form-control" placeholder="John Doe" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control" placeholder="jean@example.com" required>
+                                <input type="email" class="form-control" placeholder="john@example.com" required>
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Sujet</label>
+                                <label class="form-label">Subject</label>
                                 <select class="form-select">
-                                    <option>Question générale</option>
-                                    <option>Support technique</option>
-                                    <option>Partenariat</option>
-                                    <option>Autre</option>
+                                    <option>General question</option>
+                                    <option>Technical support</option>
+                                    <option>Partnership</option>
+                                    <option>Other</option>
                                 </select>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Message</label>
-                                <textarea class="form-control" rows="6" placeholder="Votre message..." required></textarea>
+                                <textarea class="form-control" rows="6" placeholder="Your message..." required></textarea>
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-success btn-lg w-100">
-                                    <i class="fas fa-paper-plane me-2"></i>Envoyer le message
+                                    <i class="fas fa-paper-plane me-2"></i>Send message
                                 </button>
                             </div>
                         </div>
@@ -62,8 +62,8 @@
             <!-- Contact Info -->
             <div class="col-lg-5">
                 <div class="contact-info-wrapper">
-                    <h3 class="mb-4">Informations de contact</h3>
-                    
+                    <h3 class="mb-4">Contact information</h3>
+
                     <div class="contact-info-item">
                         <div class="info-icon bg-success">
                             <i class="fas fa-envelope text-white"></i>
@@ -79,7 +79,7 @@
                             <i class="fas fa-phone text-white"></i>
                         </div>
                         <div>
-                            <h5 class="mb-1">Téléphone</h5>
+                            <h5 class="mb-1">Phone</h5>
                             <p class="text-muted mb-0">+216 XX XXX XXX</p>
                         </div>
                     </div>
@@ -89,8 +89,8 @@
                             <i class="fas fa-map-marker-alt text-white"></i>
                         </div>
                         <div>
-                            <h5 class="mb-1">Adresse</h5>
-                            <p class="text-muted mb-0">Tunis, Tunisie</p>
+                            <h5 class="mb-1">Address</h5>
+                            <p class="text-muted mb-0">Tunis, Tunisia</p>
                         </div>
                     </div>
 
@@ -99,14 +99,14 @@
                             <i class="fas fa-clock text-white"></i>
                         </div>
                         <div>
-                            <h5 class="mb-1">Horaires</h5>
-                            <p class="text-muted mb-0">Lun-Ven: 9h-18h</p>
+                            <h5 class="mb-1">Hours</h5>
+                            <p class="text-muted mb-0">Mon-Fri: 9am-6pm</p>
                         </div>
                     </div>
 
                     <!-- Social Media -->
                     <div class="mt-5">
-                        <h5 class="mb-3">Suivez-nous</h5>
+                        <h5 class="mb-3">Follow us</h5>
                         <div class="d-flex gap-3">
                             <a href="#" class="social-btn">
                                 <i class="fab fa-facebook-f"></i>
@@ -129,8 +129,8 @@
         <!-- FAQ Section -->
         <div class="row mt-5 pt-5">
             <div class="col-12 text-center mb-5">
-                <h2 class="fw-bold">Questions fréquentes</h2>
-                <p class="text-muted">Trouvez rapidement des réponses</p>
+                <h2 class="fw-bold">Frequently Asked Questions</h2>
+                <p class="text-muted">Find answers quickly</p>
             </div>
 
             <div class="col-lg-10 mx-auto">
@@ -138,13 +138,13 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                                Comment puis-je m'inscrire ?
+                                How can I register?
                             </button>
                         </h2>
                         <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                             <div class="accordion-body">
-                                L'inscription est gratuite et simple. Cliquez sur le bouton "Inscription" en haut de la page, 
-                                remplissez le formulaire et vous êtes prêt à commencer !
+                                Registration is free and simple. Click the "Sign up" button at the top of the page,
+                                fill out the form and you're ready to get started!
                             </div>
                         </div>
                     </div>
@@ -152,13 +152,13 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                                Comment fonctionne la réparation ?
+                                How does repair work?
                             </button>
                         </h2>
                         <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body">
-                                Publiez votre objet à réparer avec photos et description. Les réparateurs de votre région 
-                                pourront voir votre demande et vous proposer leurs services avec un devis.
+                                Post your item to repair with photos and description. Repairers in your area
+                                will be able to see your request and offer their services with a quote.
                             </div>
                         </div>
                     </div>
@@ -166,13 +166,13 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                                Puis-je vendre mes créations ?
+                                Can I sell my creations?
                             </button>
                         </h2>
                         <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body">
-                                Oui ! Si vous êtes artisan, vous pouvez créer des transformations et les vendre 
-                                sur notre marketplace. C'est gratuit et simple.
+                                Yes! If you're an artisan, you can create transformations and sell them
+                                on our marketplace. It's free and simple.
                             </div>
                         </div>
                     </div>
@@ -180,13 +180,13 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                                Y a-t-il des frais ?
+                                Are there any fees?
                             </button>
                         </h2>
                         <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body">
-                                L'inscription et l'utilisation de base de la plateforme sont entièrement gratuites. 
-                                Seules les transactions sur la marketplace peuvent inclure une petite commission.
+                                Registration and basic use of the platform are completely free.
+                                Only transactions on the marketplace may include a small commission.
                             </div>
                         </div>
                     </div>

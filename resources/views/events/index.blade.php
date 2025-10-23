@@ -167,21 +167,21 @@
                         <div class="event-card card h-100 shadow-sm">
                             <!-- Event Image -->
                             @if($event->image)
-                                <img src="{{ Storage::url($event->image) }}" 
-                                     class="card-img-top" 
+                                <img src="{{ Storage::url($event->image) }}"
+                                     class="card-img-top"
                                      alt="{{ $event->title }}"
                                      style="height: 200px; object-fit: cover;">
                             @else
-                                <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center" 
+                                <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center"
                                      style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                                     <i class="fas fa-calendar-alt fa-4x text-white opacity-50"></i>
                                 </div>
                             @endif
-                            
+
                             <div class="card-body">
                                 <!-- Event Status Badge -->
                                 <div class="mb-2">
-                                    <span class="badge 
+                                    <span class="badge
                                         @if($event->is_upcoming) bg-success
                                         @elseif($event->is_ongoing) bg-primary
                                         @else bg-secondary @endif">
@@ -197,7 +197,7 @@
 
                                 <h5 class="card-title">{{ $event->title }}</h5>
                                 <p class="card-text">{{ Str::limit($event->description, 100) }}</p>
-                                
+
                                 <div class="event-meta">
                                     <small class="text-muted">
                                         <i class="fas fa-calendar me-1"></i>
@@ -220,18 +220,20 @@
                                     View Details
                                 </a>
                                 @auth
-                                    <div class="mt-2">
-                                        <a href="{{ route('events.edit', $event) }}" class="btn btn-outline-secondary btn-sm">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form method="POST" action="{{ route('events.destroy', $event) }}" style="display:inline;" onsubmit="return confirm('Are you sure?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+                                    @if($event->user_id === auth()->id() || auth()->user()->role === 'admin')
+                                        <div class="mt-2">
+                                            <a href="{{ route('events.edit', $event) }}" class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="POST" action="{{ route('events.destroy', $event) }}" style="display:inline;" onsubmit="return confirm('Are you sure?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @endif
                                 @endauth
                             </div>
                         </div>
@@ -344,24 +346,24 @@
     .hero-section {
         border-radius: 0 0 20px 20px;
     }
-    
+
     .hero-section .display-4 {
         font-size: 2rem;
     }
-    
+
     .status-filters {
         justify-content: center;
     }
-    
+
     .event-card {
         margin-bottom: 1rem;
     }
-    
+
     .results-count {
         text-align: center;
         margin-bottom: 1rem;
     }
-    
+
     .sort-options {
         width: 100%;
         display: flex;

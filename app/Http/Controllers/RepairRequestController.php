@@ -47,6 +47,43 @@ class RepairRequestController extends Controller
         return view('repairs.index', compact('repairs', 'stats'));
     }
 
+    public function my(Request $request)
+{
+    $query = RepairRequest::with(['user', 'wasteItem', 'repairer'])
+        ->where(function($q) {
+            $q->where('user_id', Auth::id())
+              ->orWhere('repairer_id', Auth::id());
+        });
+
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    $sortBy = $request->get('sort', 'created_at');
+    $sortOrder = $request->get('order', 'desc');
+    $query->orderBy($sortBy, $sortOrder);
+
+    $repairs = $query->paginate(12);
+
+    $stats = [
+        'total' => RepairRequest::where('user_id', Auth::id())->orWhere('repairer_id', Auth::id())->count(),
+        'waiting' => RepairRequest::where(function($q) {
+            $q->where('user_id', Auth::id())
+              ->orWhere('repairer_id', Auth::id());
+        })->where('status', 'waiting')->count(),
+        'in_progress' => RepairRequest::where(function($q) {
+            $q->where('user_id', Auth::id())
+              ->orWhere('repairer_id', Auth::id());
+        })->where('status', 'in_progress')->count(),
+        'completed' => RepairRequest::where(function($q) {
+            $q->where('user_id', Auth::id())
+              ->orWhere('repairer_id', Auth::id());
+        })->where('status', 'completed')->count(),
+    ];
+
+    return view('repairs.index', compact('repairs', 'stats'));
+}
+
     public function create()
     {
         $wasteItems = WasteItem::where('user_id', Auth::id())
@@ -177,10 +214,10 @@ class RepairRequestController extends Controller
 
         $repair->update([
             'repairer_id' => Auth::id(),
-            'status' => 'assigned'
+            'status' => 'in_progress'
         ]);
 
-        return redirect()->route('repairs.show', $repair)
+        return redirect()->route('dashboard')
             ->with('success', 'Vous avez accepté cette demande de réparation !');
     }
 
@@ -209,7 +246,7 @@ class RepairRequestController extends Controller
 
         $validated = $request->validate([
             'actual_cost' => 'required|numeric|min:0',
-            'completion_notes' => 'nullable|string|max:1000',
+            'repairer_notes' => 'nullable|string|max:1000',
             'after_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 

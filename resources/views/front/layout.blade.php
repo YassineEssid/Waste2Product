@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Waste2Product - Transformez vos déchets en ressources')</title>
-    
+    <title>@yield('title', 'Waste2Product - Transform your waste into resources')</title>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary-color: #10b981;
@@ -301,22 +301,22 @@
                 <img src="{{ asset('images/waste2product_logo.png') }}" alt="Waste2Product">
                 <span>Waste2Product</span>
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     style="background: white; border: none;">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('front.home') }}">
-                            <i class="fas fa-home me-1"></i>Accueil
+                            <i class="fas fa-home me-1"></i>Home
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('front.events') }}">
-                            <i class="fas fa-calendar-alt me-1"></i>Événements
+                            <i class="fas fa-calendar-alt me-1"></i>Events
                         </a>
                     </li>
                     <li class="nav-item">
@@ -326,12 +326,12 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('front.about') }}">
-                            <i class="fas fa-info-circle me-1"></i>À propos
+                            <i class="fas fa-info-circle me-1"></i>About
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('front.how-it-works') }}">
-                            <i class="fas fa-question-circle me-1"></i>Comment ça marche
+                            <i class="fas fa-question-circle me-1"></i>How it works
                         </a>
                     </li>
                     <li class="nav-item">
@@ -339,16 +339,16 @@
                             <i class="fas fa-envelope me-1"></i>Contact
                         </a>
                     </li>
-                    
+
                     @guest
                         <li class="nav-item ms-3">
                             <a href="{{ route('login') }}" class="btn btn-custom-outline btn-sm">
-                                <i class="fas fa-sign-in-alt me-1"></i>Connexion
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
                             </a>
                         </li>
                         <li class="nav-item ms-2">
                             <a href="{{ route('register') }}" class="btn btn-custom-primary btn-sm">
-                                <i class="fas fa-user-plus me-1"></i>Inscription
+                                <i class="fas fa-user-plus me-1"></i>Sign up
                             </a>
                         </li>
                     @else
@@ -375,8 +375,8 @@
                 <div class="col-lg-4 mb-4">
                     <h5><i class="fas fa-leaf me-2"></i>Waste2Product</h5>
                     <p class="text-muted">
-                        Transformez vos déchets en ressources précieuses. 
-                        Rejoignez notre communauté pour un avenir plus durable.
+                        Transform your waste into valuable resources.
+                        Join our community for a more sustainable future.
                     </p>
                     <div class="social-links mt-3">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -385,18 +385,18 @@
                         <a href="#"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h5>Navigation</h5>
-                    <a href="{{ route('front.home') }}">Accueil</a>
-                    <a href="{{ route('front.events') }}">Événements</a>
+                    <a href="{{ route('front.home') }}">Home</a>
+                    <a href="{{ route('front.events') }}">Events</a>
                     <a href="{{ route('front.marketplace') }}">Marketplace</a>
-                    <a href="{{ route('front.about') }}">À propos</a>
+                    <a href="{{ route('front.about') }}">About</a>
                 </div>
-                
+
                 <div class="col-lg-2 col-md-6 mb-4">
-                    <h5>Informations</h5>
-                    <a href="{{ route('front.how-it-works') }}">Comment ça marche</a>
+                    <h5>Information</h5>
+                    <a href="{{ route('front.how-it-works') }}">How it works</a>
                     <a href="{{ route('front.contact') }}">Contact</a>
                     @guest
                         <a href="{{ route('login') }}">Connexion</a>
@@ -405,7 +405,7 @@
                         <a href="{{ route('dashboard') }}">Dashboard</a>
                     @endguest
                 </div>
-                
+
                 <div class="col-lg-4 mb-4">
                     <h5>Newsletter</h5>
                     <p class="text-muted">Inscrivez-vous pour recevoir nos actualités</p>
@@ -417,9 +417,9 @@
                     </form>
                 </div>
             </div>
-            
+
             <hr style="border-color: rgba(255, 255, 255, 0.1); margin: 40px 0 20px;">
-            
+
             <div class="row">
                 <div class="col-md-6 text-center text-md-start">
                     <p class="text-muted mb-0">
@@ -441,7 +441,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Scroll to top functionality -->
     <script>
         // Show/hide scroll to top button

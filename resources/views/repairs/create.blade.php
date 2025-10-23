@@ -128,9 +128,9 @@
                             <a href="{{ route('repairs.index') }}" class="btn btn-outline-secondary btn-lg">
                                 <i class="fas fa-arrow-left me-2"></i>Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-tools me-2"></i>Create Repair Request
-                            </button>
+<button type="submit" class="btn btn-info btn-lg text-white" style="background-color: #5bc0de; border: none;">
+    <i class="fas fa-tools me-2"></i>Create Repair Request
+</button>
                         </div>
                     </div>
                 </form>
@@ -198,6 +198,15 @@
     text-align: center;
     cursor: pointer;
 }
+<style>
+.btn-info {
+    background-color: #5bc0de !important; /* Light blue */
+    border: none;
+}
+.btn-info:hover {
+    background-color: #31b0d5 !important; /* Slightly darker blue on hover */
+}
+</style>
 </style>
 
 <script>

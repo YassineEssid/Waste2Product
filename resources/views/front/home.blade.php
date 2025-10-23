@@ -1,6 +1,6 @@
 @extends('front.layout')
 
-@section('title', 'Waste2Product - Transformez vos déchets en ressources')
+@section('title', 'Waste2Product - Transform your waste into resources')
 
 @section('content')
 <!-- Hero Section -->
@@ -9,27 +9,27 @@
         <div class="row align-items-center min-vh-100">
             <div class="col-lg-6 fade-in-up">
                 <h1 class="display-3 fw-bold mb-4">
-                    Transformez vos <span class="text-gradient">déchets</span> en <span class="text-gradient">ressources</span>
+                    Transform your <span class="text-gradient">waste</span> into <span class="text-gradient">resources</span>
                 </h1>
                 <p class="lead mb-4">
-                    Rejoignez notre communauté et donnez une seconde vie à vos objets. 
-                    Réparez, transformez, partagez pour un avenir plus durable.
+                    Join our community and give your items a second life.
+                    Repair, transform, share for a more sustainable future.
                 </p>
                 <div class="d-flex gap-3">
                     <a href="{{ route('register') }}" class="btn btn-success btn-lg px-4">
-                        <i class="fas fa-rocket me-2"></i>Commencer gratuitement
+                        <i class="fas fa-rocket me-2"></i>Start for free
                     </a>
                     <a href="#how-it-works" class="btn btn-outline-success btn-lg px-4">
-                        <i class="fas fa-play-circle me-2"></i>Comment ça marche
+                        <i class="fas fa-play-circle me-2"></i>How it works
                     </a>
                 </div>
-                
+
                 <!-- Stats -->
                 <div class="row mt-5">
                     <div class="col-4">
                         <div class="stat-item">
                             <h3 class="fw-bold text-success mb-0">{{ number_format($stats['total_items']) }}+</h3>
-                            <p class="text-muted small mb-0">Articles</p>
+                            <p class="text-muted small mb-0">Items</p>
                         </div>
                     </div>
                     <div class="col-4">
@@ -41,26 +41,26 @@
                     <div class="col-4">
                         <div class="stat-item">
                             <h3 class="fw-bold text-success mb-0">{{ number_format($stats['community_members']) }}+</h3>
-                            <p class="text-muted small mb-0">Membres</p>
+                            <p class="text-muted small mb-0">Members</p>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-lg-6 fade-in-up">
                 <div class="hero-image-wrapper">
                     <img src="{{ asset('images/hero-bg.jpg') }}" alt="Hero" class="img-fluid rounded-4 shadow-lg">
                     <div class="floating-card card-1">
                         <i class="fas fa-recycle fa-2x text-success"></i>
-                        <p class="mb-0 mt-2"><strong>Recyclez</strong></p>
+                        <p class="mb-0 mt-2"><strong>Recycle</strong></p>
                     </div>
                     <div class="floating-card card-2">
                         <i class="fas fa-tools fa-2x text-primary"></i>
-                        <p class="mb-0 mt-2"><strong>Réparez</strong></p>
+                        <p class="mb-0 mt-2"><strong>Repair</strong></p>
                     </div>
                     <div class="floating-card card-3">
                         <i class="fas fa-palette fa-2x text-warning"></i>
-                        <p class="mb-0 mt-2"><strong>Créez</strong></p>
+                        <p class="mb-0 mt-2"><strong>Create</strong></p>
                     </div>
                 </div>
             </div>
@@ -72,46 +72,46 @@
 <section class="features-section py-5 bg-light" id="how-it-works">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold">Comment ça marche ?</h2>
-            <p class="lead text-muted">Trois étapes simples pour commencer</p>
+            <h2 class="display-5 fw-bold">How does it work?</h2>
+            <p class="lead text-muted">Three simple steps to get started</p>
         </div>
-        
+
         <div class="row g-4">
             <div class="col-lg-4 col-md-6">
                 <div class="feature-card">
                     <div class="icon-wrapper bg-success">
                         <i class="fas fa-box-open fa-2x"></i>
                     </div>
-                    <h4 class="mt-4 mb-3">1. Publiez vos articles</h4>
+                    <h4 class="mt-4 mb-3">1. Post your items</h4>
                     <p class="text-muted">
-                        Ajoutez vos objets inutilisés avec photos et description. 
-                        Que ce soit pour donner, réparer ou transformer.
+                        Add your unused items with photos and description.
+                        Whether to give away, repair or transform.
                     </p>
                 </div>
             </div>
-            
+
             <div class="col-lg-4 col-md-6">
                 <div class="feature-card">
                     <div class="icon-wrapper bg-primary">
                         <i class="fas fa-users fa-2x"></i>
                     </div>
-                    <h4 class="mt-4 mb-3">2. Connectez-vous</h4>
+                    <h4 class="mt-4 mb-3">2. Connect</h4>
                     <p class="text-muted">
-                        Trouvez des réparateurs, artisans ou autres membres de la communauté 
-                        pour donner une nouvelle vie à vos objets.
+                        Find repairers, artisans or other community members
+                        to give your items a new life.
                     </p>
                 </div>
             </div>
-            
+
             <div class="col-lg-4 col-md-6">
                 <div class="feature-card">
                     <div class="icon-wrapper bg-warning">
                         <i class="fas fa-magic fa-2x"></i>
                     </div>
-                    <h4 class="mt-4 mb-3">3. Transformez</h4>
+                    <h4 class="mt-4 mb-3">3. Transform</h4>
                     <p class="text-muted">
-                        Réparez, transformez en création unique et vendez sur notre marketplace.
-                        Contribuez à un monde plus durable.
+                        Repair, transform into unique creations and sell on our marketplace.
+                        Contribute to a more sustainable world.
                     </p>
                 </div>
             </div>
@@ -125,20 +125,20 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold">Articles récents</h2>
-                <p class="text-muted">Découvrez les derniers objets partagés</p>
+                <h2 class="fw-bold">Recent items</h2>
+                <p class="text-muted">Discover the latest shared items</p>
             </div>
             @auth
                 <a href="{{ route('waste-items.index') }}" class="btn btn-outline-success">
-                    Voir tout <i class="fas fa-arrow-right ms-2"></i>
+                    View all <i class="fas fa-arrow-right ms-2"></i>
                 </a>
             @else
-                <a href="{{ route('login') }}" class="btn btn-outline-success" title="Connectez-vous pour accéder à tous les articles">
-                    Voir tout <i class="fas fa-arrow-right ms-2"></i>
+                <a href="{{ route('login') }}" class="btn btn-outline-success" title="Sign in to access all items">
+                    View all <i class="fas fa-arrow-right ms-2"></i>
                 </a>
             @endauth
         </div>
-        
+
         <div class="row g-4">
             @foreach($recentItems as $item)
             <div class="col-lg-4 col-md-6">
@@ -185,23 +185,23 @@
                             <i class="fas fa-image fa-3x text-muted"></i>
                         </div>
                     @endif
-                    
+
                     <div class="p-3">
                         <span class="badge bg-success mb-2">{{ $item->category }}</span>
                         <h5 class="mb-2">{{ $item->title }}</h5>
                         <p class="text-muted small mb-3">{{ Str::limit($item->description, 80) }}</p>
-                        
+
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">
                                 <i class="fas fa-user me-1"></i>{{ $item->user->name }}
                             </small>
                             @auth
                                 <a href="{{ route('waste-items.show', $item) }}" class="btn btn-sm btn-success">
-                                    Voir <i class="fas fa-arrow-right ms-1"></i>
+                                    View <i class="fas fa-arrow-right ms-1"></i>
                                 </a>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-sm btn-success" title="Connectez-vous pour voir les détails">
-                                    Voir <i class="fas fa-arrow-right ms-1"></i>
+                                <a href="{{ route('login') }}" class="btn btn-sm btn-success" title="Sign in to view details">
+                                    View <i class="fas fa-arrow-right ms-1"></i>
                                 </a>
                             @endauth
                         </div>
@@ -219,10 +219,10 @@
 <section class="transformations-section py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold">Transformations inspirantes</h2>
-            <p class="text-muted">Découvrez comment nos artisans transforment les déchets</p>
+            <h2 class="fw-bold">Inspiring transformations</h2>
+            <p class="text-muted">Discover how our artisans transform waste</p>
         </div>
-        
+
         <div class="row g-4">
             @foreach($recentTransformations as $transformation)
             <div class="col-lg-3 col-md-6">
@@ -230,7 +230,7 @@
                     @php
                         $afterImages = json_decode($transformation->after_images, true);
                     @endphp
-                    
+
                     @if($afterImages && count($afterImages) > 0)
                         <img src="{{ Storage::url($afterImages[0]) }}" alt="{{ $transformation->title }}">
                     @else
@@ -238,17 +238,17 @@
                             <i class="fas fa-palette fa-3x text-muted"></i>
                         </div>
                     @endif
-                    
+
                     <div class="transformation-overlay">
                         <h5 class="text-white mb-2">{{ $transformation->title }}</h5>
-                        <p class="text-white-50 small mb-3">Par {{ $transformation->user->name }}</p>
+                        <p class="text-white-50 small mb-3">By {{ $transformation->user->name }}</p>
                         @auth
                             <a href="{{ route('transformations.show', $transformation) }}" class="btn btn-sm btn-light">
-                                Voir détails
+                                View details
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="btn btn-sm btn-light" title="Connectez-vous pour voir les détails">
-                                Voir détails
+                            <a href="{{ route('login') }}" class="btn btn-sm btn-light" title="Sign in to view details">
+                                View details
                             </a>
                         @endauth
                     </div>
@@ -266,20 +266,20 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold">Événements à venir</h2>
-                <p class="text-muted">Rejoignez notre communauté</p>
+                <h2 class="fw-bold">Upcoming events</h2>
+                <p class="text-muted">Join our community</p>
             </div>
             @auth
                 <a href="{{ route('events.index') }}" class="btn btn-outline-success">
-                    Tous les événements <i class="fas fa-arrow-right ms-2"></i>
+                    All events <i class="fas fa-arrow-right ms-2"></i>
                 </a>
             @else
-                <a href="{{ route('login') }}" class="btn btn-outline-success" title="Connectez-vous pour voir tous les événements">
-                    Tous les événements <i class="fas fa-arrow-right ms-2"></i>
+                <a href="{{ route('login') }}" class="btn btn-outline-success" title="Sign in to view all events">
+                    All events <i class="fas fa-arrow-right ms-2"></i>
                 </a>
             @endauth
         </div>
-        
+
         <div class="row g-4">
             @foreach($upcomingEvents as $event)
             <div class="col-lg-4">
@@ -291,7 +291,7 @@
                             <i class="fas fa-calendar-alt fa-3x text-white"></i>
                         </div>
                     @endif
-                    
+
                     <div class="p-4">
                         <div class="d-flex gap-2 mb-3">
                             <span class="badge bg-success">
@@ -301,19 +301,19 @@
                                 <i class="fas fa-clock me-1"></i>{{ $event->starts_at->format('H:i') }}
                             </span>
                         </div>
-                        
+
                         <h5 class="mb-3">{{ $event->title }}</h5>
                         <p class="text-muted small mb-3">
-                            <i class="fas fa-map-marker-alt me-1"></i>{{ $event->location ?? 'En ligne' }}
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ $event->location ?? 'Online' }}
                         </p>
-                        
+
                         @auth
                             <a href="{{ route('events.show', $event) }}" class="btn btn-success w-100">
-                                En savoir plus
+                                Learn more
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="btn btn-success w-100" title="Connectez-vous pour participer">
-                                En savoir plus
+                            <a href="{{ route('login') }}" class="btn btn-success w-100" title="Sign in to participate">
+                                Learn more
                             </a>
                         @endauth
                     </div>
@@ -330,14 +330,14 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h2 class="text-white fw-bold mb-3">Prêt à faire la différence ?</h2>
+                <h2 class="text-white fw-bold mb-3">Ready to make a difference?</h2>
                 <p class="text-white-50 mb-0">
-                    Rejoignez des milliers de personnes qui transforment déjà leurs déchets en opportunités
+                    Join thousands of people already transforming their waste into opportunities
                 </p>
             </div>
             <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
                 <a href="{{ route('register') }}" class="btn btn-light btn-lg px-5">
-                    <i class="fas fa-user-plus me-2"></i>S'inscrire gratuitement
+                    <i class="fas fa-user-plus me-2"></i>Sign up for free
                 </a>
             </div>
         </div>

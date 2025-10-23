@@ -6,6 +6,8 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Gate;
 use App\Models\MarketplaceItem;
 use App\Policies\MarketplaceItemPolicy;
+use App\Models\Conversation;
+use App\Policies\ConversationPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         MarketplaceItem::class => MarketplaceItemPolicy::class,
+        Conversation::class => ConversationPolicy::class,
     ];
 
     /**

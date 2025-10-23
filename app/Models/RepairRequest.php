@@ -23,7 +23,8 @@ class RepairRequest extends Model
         'actual_cost',
         'assigned_at',
         'started_at',
-        'completed_at'
+        'completed_at',
+        'urgency',
     ];
 
     protected $casts = [
@@ -34,6 +35,7 @@ class RepairRequest extends Model
         'assigned_at' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'urgency' => 'string',
     ];
 
     // Relationships

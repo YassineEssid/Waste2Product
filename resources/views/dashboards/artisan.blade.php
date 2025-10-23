@@ -9,12 +9,12 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-1">Dashboard Artisan 🎨</h1>
-                    <p class="text-muted">Bienvenue {{ $user->name }}, transformez et créez ici</p>
+                    <h1 class="h3 mb-1">Artisan Dashboard 🎨</h1>
+                    <p class="text-muted">Welcome {{ $user->name }}, transform and create here</p>
                 </div>
                 <div>
                     <span class="badge bg-purple px-3 py-2">
-                        <i class="fas fa-palette me-2"></i>Artisan Créateur
+                        <i class="fas fa-palette me-2"></i>Creative Artisan
                     </span>
                 </div>
             </div>
@@ -42,10 +42,10 @@
                 <div class="card-body text-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h3 class="mb-0">{{ $stats['published_items'] }}</h3>
-                            <p class="mb-0 small">Articles publiés</p>
+                            <h3 class="mb-0">{{ $stats['completed_transformations'] }}</h3>
+                            <p class="mb-0 small">Completed Transformations</p>
                         </div>
-                        <i class="fas fa-boxes fa-2x opacity-50"></i>
+                        <i class="fas fa-check-circle fa-2x opacity-50"></i>
                     </div>
                 </div>
             </div>
@@ -56,8 +56,8 @@
                 <div class="card-body text-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h3 class="mb-0">{{ $stats['sold_items'] }}</h3>
-                            <p class="mb-0 small">Articles vendus</p>
+                            <h3 class="mb-0">{{ $stats['marketplace_items'] }}</h3>
+                            <p class="mb-0 small">Marketplace Items</p>
                         </div>
                         <i class="fas fa-shopping-cart fa-2x opacity-50"></i>
                     </div>
@@ -71,7 +71,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h3 class="mb-0">{{ number_format($stats['total_revenue'], 2) }}€</h3>
-                            <p class="mb-0 small">Revenus totaux</p>
+                            <p class="mb-0 small">Total Revenue</p>
                         </div>
                         <i class="fas fa-coins fa-2x opacity-50"></i>
                     </div>
@@ -87,9 +87,9 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-purple text-white">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-magic me-2"></i>Mes transformations</h5>
+                        <h5 class="mb-0"><i class="fas fa-magic me-2"></i>My Transformations</h5>
                         <a href="{{ route('transformations.create') }}" class="btn btn-sm btn-light">
-                            <i class="fas fa-plus me-1"></i>Nouvelle transformation
+                            <i class="fas fa-plus me-1"></i>New Transformation
                         </a>
                     </div>
                 </div>
@@ -101,19 +101,60 @@
                                 <div class="card h-100 border-start border-purple border-4">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <h6 class="mb-1">{{ $transformation->title }}</h6>
-                                            <span class="badge bg-purple">
-                                                {{ ucfirst($transformation->status) }}
+                                            <h6 class="mb-1">{{ $transformation->product_title }}</h6>
+                                            <span class="badge bg-{{
+                                                $transformation->status === 'published' ? 'success' :
+                                                ($transformation->status === 'completed' ? 'primary' :
+                                                ($transformation->status === 'in_progress' ? 'warning' : 'info'))
+                                            }}">
+                                                @switch($transformation->status)
+                                                    @case('planned') Planned @break
+                                                    @case('in_progress') In Progress @break
+                                                    @case('completed') Completed @break
+                                                    @case('published') Published @break
+                                                    @default {{ ucfirst($transformation->status) }}
+                                                @endswitch
                                             </span>
                                         </div>
                                         <p class="mb-2 small text-muted">{{ Str::limit($transformation->description, 80) }}</p>
+
+                                        @if($transformation->price)
+                                        <div class="mb-2">
+                                            <strong class="text-primary">{{ number_format($transformation->price, 2) }} DT</strong>
+                                        </div>
+                                        @endif
+
+                                        @if($transformation->impact && (isset($transformation->impact['co2_saved']) || isset($transformation->impact['waste_reduced'])))
+                                        <div class="row g-1 mb-2">
+                                            @if(isset($transformation->impact['co2_saved']) && $transformation->impact['co2_saved'] > 0)
+                                            <div class="col-6">
+                                                <small class="text-success">
+                                                    <i class="fas fa-leaf"></i> {{ $transformation->impact['co2_saved'] }}kg CO₂
+                                                </small>
+                                            </div>
+                                            @endif
+                                            @if(isset($transformation->impact['waste_reduced']) && $transformation->impact['waste_reduced'] > 0)
+                                            <div class="col-6">
+                                                <small class="text-info">
+                                                    <i class="fas fa-recycle"></i> {{ $transformation->impact['waste_reduced'] }}kg waste
+                                                </small>
+                                            </div>
+                                            @endif
+                                        </div>
+                                        @endif
+
                                         <div class="d-flex justify-content-between align-items-center">
                                             <small class="text-muted">
                                                 <i class="fas fa-calendar me-1"></i>{{ $transformation->created_at->format('d/m/Y') }}
                                             </small>
-                                            <a href="{{ route('transformations.show', $transformation) }}" class="btn btn-sm btn-outline-purple">
-                                                <i class="fas fa-eye me-1"></i>Voir
-                                            </a>
+                                            <div>
+                                                <a href="{{ route('transformations.show', $transformation) }}" class="btn btn-sm btn-outline-purple me-1">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('transformations.edit', $transformation) }}" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -135,7 +176,7 @@
             <!-- Available Waste Items -->
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-box-open me-2"></i>Matériaux disponibles pour transformation</h5>
+                    <h5 class="mb-0"><i class="fas fa-box-open me-2"></i>Available Materials for Transformation</h5>
                 </div>
                 <div class="card-body">
                     @if($availableWasteItems->count() > 0)
@@ -166,7 +207,7 @@
                             @endforeach
                         </div>
                     @else
-                        <p class="text-muted text-center mb-0">Aucun matériau disponible actuellement</p>
+                        <p class="text-muted text-center mb-0">No materials available at the moment</p>
                     @endif
                 </div>
             </div>
@@ -177,14 +218,14 @@
             <!-- Profile Card -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0"><i class="fas fa-user-circle text-purple me-2"></i>Mon profil</h5>
+                    <h5 class="mb-0"><i class="fas fa-user-circle text-purple me-2"></i>My Profile</h5>
                 </div>
                 <div class="card-body text-center">
                     @if($user->avatar)
-                        <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" 
+                        <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}"
                              class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
                     @else
-                        <div class="rounded-circle bg-purple bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" 
+                        <div class="rounded-circle bg-purple bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3"
                              style="width: 100px; height: 100px;">
                             <span class="fs-1 text-purple fw-bold">{{ substr($user->name, 0, 1) }}</span>
                         </div>
@@ -192,10 +233,10 @@
                     <h5>{{ $user->name }}</h5>
                     <p class="text-muted mb-3">{{ $user->email }}</p>
                     <a href="{{ route('profile.show') }}" class="btn btn-outline-purple w-100 mb-2">
-                        <i class="fas fa-user me-2"></i>Voir mon profil
+                        <i class="fas fa-user me-2"></i>View my profile
                     </a>
                     <a href="{{ route('profile.edit') }}" class="btn btn-outline-secondary w-100">
-                        <i class="fas fa-edit me-2"></i>Modifier
+                        <i class="fas fa-edit me-2"></i>Edit
                     </a>
                 </div>
             </div>
@@ -203,18 +244,18 @@
             <!-- Quick Actions -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0"><i class="fas fa-bolt text-warning me-2"></i>Actions rapides</h5>
+                    <h5 class="mb-0"><i class="fas fa-bolt text-warning me-2"></i>Quick Actions</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <a href="{{ route('transformations.create') }}" class="btn btn-purple">
-                            <i class="fas fa-magic me-2"></i>Nouvelle transformation
+                            <i class="fas fa-magic me-2"></i>New Transformation
                         </a>
                         <a href="{{ route('marketplace.create') }}" class="btn btn-outline-success">
-                            <i class="fas fa-plus-circle me-2"></i>Publier sur la marketplace
+                            <i class="fas fa-plus-circle me-2"></i>Publish on Marketplace
                         </a>
                         <a href="{{ route('waste-items.index') }}" class="btn btn-outline-info">
-                            <i class="fas fa-search me-2"></i>Trouver des matériaux
+                            <i class="fas fa-search me-2"></i>Find Materials
                         </a>
                     </div>
                 </div>
@@ -223,7 +264,7 @@
             <!-- My Marketplace Items -->
             <div class="card shadow-sm">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-store me-2"></i>Mes articles en vente</h5>
+                    <h5 class="mb-0"><i class="fas fa-store me-2"></i>My Items for Sale</h5>
                 </div>
                 <div class="card-body">
                     @if($myMarketplaceItems->count() > 0)
@@ -235,13 +276,13 @@
                                     <small class="text-success fw-bold">{{ number_format($item->price, 2) }}€</small>
                                 </div>
                                 <span class="badge {{ $item->status === 'sold' ? 'bg-success' : 'bg-primary' }}">
-                                    {{ $item->status === 'sold' ? 'Vendu' : 'Disponible' }}
+                                    {{ $item->status === 'sold' ? 'Sold' : 'Available' }}
                                 </span>
                             </div>
                         </div>
                         @endforeach
                     @else
-                        <p class="text-muted text-center mb-0 small">Aucun article en vente</p>
+                        <p class="text-muted text-center mb-0 small">No items for sale</p>
                     @endif
                 </div>
             </div>
