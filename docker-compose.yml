@@ -21,7 +21,7 @@ services:
       - waste2product
 
   db:
-    image: mysql:8
+    image: gbothmen/waste2product-db:latest
     container_name: waste2product_db
     restart: unless-stopped
     environment:

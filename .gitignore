@@ -42,6 +42,7 @@ prometheus_data/
 grafana_data/
 
 # Temporary files
+backup.sql
 test_*.php
 *_debug.php
 composer.phar
