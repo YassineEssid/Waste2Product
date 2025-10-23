@@ -121,7 +121,7 @@ class User extends Authenticatable
 
     public function marketplaceItems()
     {
-        return $this->hasMany(MarketplaceItem::class);
+        return $this->hasMany(MarketplaceItem::class, 'seller_id');
     }
 
     public function eventComments()
