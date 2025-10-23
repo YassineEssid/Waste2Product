@@ -95,6 +95,14 @@ class Transformation extends Model
     }
 
     // Accessors
+    public function getImpactAttribute()
+    {
+        return [
+            'co2_saved' => $this->co2_saved,
+            'waste_reduced' => $this->waste_reduced,
+        ];
+    }
+
     public function getTotalEnvironmentalImpactAttribute()
     {
         return [
