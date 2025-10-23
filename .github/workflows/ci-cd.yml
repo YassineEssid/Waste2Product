@@ -38,13 +38,13 @@ jobs:
           extensions: mbstring, xml, ctype, json, pdo, pdo_mysql, dom, curl, libxml, zip
           coverage: xdebug
 
-      - name: Copy .env
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Copy .env and generate key
         run: |
           cp .env.example .env
           php artisan key:generate
-
-      - name: Install Dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Execute tests with coverage
         run: php artisan test --coverage --coverage-clover=coverage/clover.xml --coverage-html=coverage/html

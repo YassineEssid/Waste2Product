@@ -54,7 +54,7 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Copy .env
+      - name: Copy .env and generate key
         run: |
           cp .env.example .env
           php artisan key:generate
