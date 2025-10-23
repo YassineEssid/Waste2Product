@@ -45,6 +45,7 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+          php artisan config:clear
 
       - name: Execute tests with coverage
         run: php artisan test --coverage --coverage-clover=coverage/clover.xml --coverage-html=coverage/html

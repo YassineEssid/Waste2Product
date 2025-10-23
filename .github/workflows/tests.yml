@@ -58,6 +58,7 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+          php artisan config:clear
 
       - name: Run PHPUnit Tests
         run: |
