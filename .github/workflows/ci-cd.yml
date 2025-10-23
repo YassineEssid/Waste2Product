@@ -44,7 +44,7 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.example .env
-          php artisan key:generate
+          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
 
       - name: Execute tests with coverage
         run: php artisan test --coverage --coverage-clover=coverage/clover.xml --coverage-html=coverage/html

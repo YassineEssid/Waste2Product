@@ -57,7 +57,7 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.example .env
-          php artisan key:generate
+          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
 
       - name: Run PHPUnit Tests
         run: |
@@ -101,6 +101,11 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
 
       - name: Generate coverage report
         run: |
