@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('badge_id')->constrained()->onDelete('cascade');
-            $table->timestamp('earned_at')->useCurrent();
+            $table->timestamp('earned_at')->nullable(); // NULL when in progress, timestamp when earned
             $table->boolean('is_displayed')->default(true); // Show on profile
             $table->integer('progress')->default(0); // Progress towards earning
             $table->timestamps();

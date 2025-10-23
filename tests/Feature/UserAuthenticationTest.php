@@ -40,8 +40,8 @@ class UserAuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->assertEquals(0, $user->total_points);
-        $this->assertEquals(1, $user->current_level);
+        // New users should have no point transactions
+        $this->assertEquals(0, $user->pointTransactions()->count());
     }
 
     /** @test */

@@ -25,6 +25,7 @@ class GamificationService
         'marketplace_item_sold' => 40,
         'transformation_completed' => 60,
         'repair_completed' => 50,
+        'achievement' => 100, // Badge achievement bonus
     ];
 
     // Level configuration
@@ -182,6 +183,7 @@ class GamificationService
             [
                 'progress' => 0,
                 'is_displayed' => true,
+                'earned_at' => null, // Explicitly set to null for in-progress badges
             ]
         );
 

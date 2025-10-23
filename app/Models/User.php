@@ -51,8 +51,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'location_lat' => 'decimal:8',
-            'location_lng' => 'decimal:8',
+            'location_lat' => 'float',
+            'location_lng' => 'float',
         ];
     }
 
