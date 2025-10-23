@@ -64,18 +64,28 @@ jobs:
             coverage/clover.xml
             coverage/html
 
+  sonarqube:
+    name: Analyse SonarQube
+    runs-on: self-hosted  # Runner auto-hébergé pour accéder à SonarQube local
+    needs: tests
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.projectKey=waste2product
-            -Dsonar.sources=app
-            -Dsonar.tests=tests
-            -Dsonar.php.coverage.reportPaths=coverage/clover.xml
-            -Dsonar.exclusions=vendor/**,storage/**,node_modules/**,bootstrap/cache/**,public/**
 
       - name: Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@master

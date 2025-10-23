@@ -81,7 +81,7 @@ jobs:
 
   sonarqube:
     name: SonarQube Analysis
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Runner auto-hébergé pour accéder à SonarQube local
     needs: tests
     
     steps:
