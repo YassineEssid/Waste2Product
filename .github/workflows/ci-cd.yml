@@ -65,8 +65,8 @@ jobs:
             coverage/html
 
   sonarqube:
-    name: Analyse SonarQube
-    runs-on: self-hosted  # Runner auto-hébergé pour accéder à SonarQube local
+    name: Analyse SonarCloud
+    runs-on: ubuntu-latest
     needs: tests
     
     steps:
@@ -81,18 +81,11 @@ jobs:
           name: coverage-report
           path: coverage/
 
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@master
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-      - name: Quality Gate Check
-        uses: SonarSource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   docker:
     name: Build et Push Docker Image
