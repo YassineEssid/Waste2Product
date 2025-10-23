@@ -54,11 +54,10 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Copy .env and generate key
+      - name: Prepare environment
         run: |
           cp .env.example .env
           php artisan key:generate
-          php artisan config:clear
 
       - name: Run PHPUnit Tests
         run: |
@@ -66,6 +65,8 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
+          BROADCAST_CONNECTION: log
+          QUEUE_CONNECTION: sync
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -107,6 +108,8 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
+          BROADCAST_CONNECTION: log
+          QUEUE_CONNECTION: sync
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
