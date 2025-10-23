@@ -70,47 +70,47 @@ class DashboardController extends Controller
      * Dashboard pour les réparateurs
      */
     protected function repairerDashboard()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        // Statistiques de réparation
-        $stats = [
-            'pending_repairs' => RepairRequest::where('status', 'pending')->count(),
-            'my_accepted_repairs' => RepairRequest::where('repairer_id', $user->id)
-                ->where('status', 'accepted')
-                ->count(),
-            'my_completed_repairs' => RepairRequest::where('repairer_id', $user->id)
-                ->where('status', 'completed')
-                ->count(),
-            'total_earnings' => RepairRequest::where('repairer_id', $user->id)
-                ->where('status', 'completed')
-                ->sum('actual_cost') ?? 0,
-        ];
-
-        // Demandes en attente
-        $pendingRepairs = RepairRequest::where('status', 'pending')
-            ->with('user', 'wasteItem')
-            ->latest()
-            ->limit(10)
-            ->get();
-
-        // Mes réparations en cours
-        $myActiveRepairs = RepairRequest::where('repairer_id', $user->id)
-            ->whereIn('status', ['accepted', 'in_progress'])
-            ->with('user', 'wasteItem')
-            ->latest()
-            ->get();
-
-        // Historique de mes réparations
-        $myCompletedRepairs = RepairRequest::where('repairer_id', $user->id)
+    // Statistiques de réparation
+    $stats = [
+        'pending_repairs' => RepairRequest::where('status', 'waiting')->count(), // was 'pending'
+        'my_accepted_repairs' => RepairRequest::where('repairer_id', $user->id)
+            ->where('status', 'assigned') // count assigned repairs
+            ->count(),
+        'my_completed_repairs' => RepairRequest::where('repairer_id', $user->id)
             ->where('status', 'completed')
-            ->with('user', 'wasteItem')
-            ->latest()
-            ->limit(5)
-            ->get();
+            ->count(),
+        'total_earnings' => RepairRequest::where('repairer_id', $user->id)
+            ->where('status', 'completed')
+            ->sum('actual_cost'),
+    ];
 
-        return view('dashboards.repairer', compact('stats', 'pendingRepairs', 'myActiveRepairs', 'myCompletedRepairs', 'user'));
-    }
+    // Demandes en attente (waiting)
+    $pendingRepairs = RepairRequest::where('status', 'waiting')
+        ->with('user', 'wasteItem')
+        ->latest()
+        ->limit(10)
+        ->get();
+
+    // Mes réparations en cours (assigned + in_progress)
+    $myActiveRepairs = RepairRequest::where('repairer_id', $user->id)
+        ->whereIn('status', ['assigned', 'in_progress'])
+        ->with('user', 'wasteItem')
+        ->latest()
+        ->get();
+
+    // Historique de mes réparations
+    $myCompletedRepairs = RepairRequest::where('repairer_id', $user->id)
+        ->where('status', 'completed')
+        ->with('user', 'wasteItem')
+        ->latest()
+        ->limit(5)
+        ->get();
+
+    return view('dashboards.repairer', compact('stats', 'pendingRepairs', 'myActiveRepairs', 'myCompletedRepairs', 'user'));
+}
 
     /**
      * Dashboard pour les artisans

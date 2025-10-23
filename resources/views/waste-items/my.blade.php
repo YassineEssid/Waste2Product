@@ -63,18 +63,18 @@
     @foreach($wasteItems as $item)
     <div class="col-lg-4 col-md-6 mb-4">
         <div class="card h-100 shadow-sm">
-            @if($item->image_path)
-                <div class="position-relative">
-                    <img src="{{ asset('storage/' . $item->image_path) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ $item->title }}">
-                    <span class="position-absolute top-0 end-0 badge bg-{{ $item->status === 'available' ? 'success' : ($item->status === 'claimed' ? 'warning' : 'secondary') }} m-2">
-                        {{ ucfirst($item->status) }}
-                    </span>
-                </div>
-            @else
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                    <i class="fas fa-image text-muted fa-3x"></i>
-                </div>
-            @endif
+            @if($item->images && count($item->images) > 0)
+    <div class="position-relative">
+        <img src="{{ asset('storage/' . $item->images[0]) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ $item->title }}">
+        <span class="position-absolute top-0 end-0 badge bg-{{ $item->status === 'available' ? 'success' : ($item->status === 'claimed' ? 'warning' : 'secondary') }} m-2">
+            {{ ucfirst($item->status) }}
+        </span>
+    </div>
+@else
+    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+        <i class="fas fa-image text-muted fa-3x"></i>
+    </div>
+@endif
             
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title">{{ $item->title }}</h5>

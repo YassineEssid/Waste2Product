@@ -62,36 +62,39 @@ class WasteItemController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category' => 'required|string|max:100',
-            'quantity' => 'required|integer|min:1',
-            'condition' => 'required|in:poor,fair,good,excellent',
-            'location_address' => 'nullable|string',
-            'location_lat' => 'nullable|numeric|between:-90,90',
-            'location_lng' => 'nullable|numeric|between:-180,180',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ]);
+{
+    // Validate the form inputs
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'category' => 'required|string|max:100',
+        'condition' => 'nullable|in:poor,fair,good,excellent',
+        'location' => 'nullable|string|max:255',
+        'dimensions' => 'nullable|string|max:255',
+        'weight' => 'nullable|string|max:100',
+        'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'is_available' => 'nullable|boolean',
+    ]);
 
-        $validated['user_id'] = Auth::id();
+    // Add additional fields
+    $validated['user_id'] = auth()->id();
+    $validated['is_available'] = $request->has('is_available') ? 1 : 0;
 
-        // Handle image uploads
-        if ($request->hasFile('images')) {
-            $imagePaths = [];
-            foreach ($request->file('images') as $image) {
-                $path = $this->storeImage($image, 'waste-items');
-                $imagePaths[] = $path;
-            }
-            $validated['images'] = $imagePaths;
+    // Handle uploaded images
+    if ($request->hasFile('images')) {
+        $imagePaths = [];
+        foreach ($request->file('images') as $image) {
+            $imagePaths[] = $image->store('waste_items', 'public');
         }
-
-        $wasteItem = WasteItem::create($validated);
-
-        return redirect()->route('waste-items.show', $wasteItem)
-            ->with('success', 'Waste item listed successfully!');
+        $validated['images'] = $imagePaths; // Store as JSON automatically
     }
+
+    // Create the waste item
+    $wasteItem = WasteItem::create($validated);
+
+    return redirect()->route('waste-items.my')
+        ->with('success', 'Waste item listed successfully!');
+}
 
     /**
      * Display the specified resource.

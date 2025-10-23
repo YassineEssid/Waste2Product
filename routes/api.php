@@ -15,6 +15,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     
     // Waste Items API
-    Route::apiResource('waste-items', WasteItemController::class);
-    Route::get('/waste-items/nearby/{lat}/{lng}', [WasteItemController::class, 'nearby']);
+
 });

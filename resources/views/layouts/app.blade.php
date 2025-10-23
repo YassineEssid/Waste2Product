@@ -266,18 +266,24 @@
                     <a href="{{ route('gamification.points-info') }}" class="list-group-item list-group-item-action {{ request()->routeIs('gamification.points-info') ? 'active' : '' }}">
                         <i class="fas fa-coins me-2"></i>Points Info
                     </a>
+                       </a>
 
+@if(auth()->user()->role === 'user')
+                        <a href="{{ route('repairs.my') }}" class="list-group-item list-group-item-action {{ request()->routeIs('repairs.my') ? 'active' : '' }}">
+    <i class="fas fa-clipboard-list me-2"></i>My Repair Requests
+</a>
+@endif
                     @if(auth()->user()->role === 'repairer')
                         <!-- Repairer Section -->
                         <div class="list-group-item bg-light text-muted small fw-bold mt-2">
                             <i class="fas fa-tools me-2"></i>REPAIR SERVICES
                         </div>
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <i class="fas fa-wrench me-2"></i>Repair Requests
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <i class="fas fa-clipboard-list me-2"></i>My Repairs
-                        </a>
+                       <a href="{{ route('repairs.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('repairs.index') ? 'active' : '' }}">
+        <i class="fas fa-wrench me-2"></i>Repair Requests
+    </a>
+                        <a href="{{ route('repairs.my') }}" class="list-group-item list-group-item-action {{ request()->routeIs('repairs.my') ? 'active' : '' }}">
+    <i class="fas fa-clipboard-list me-2"></i>My Repairs
+</a>
                     @endif
 
                     @if(auth()->user()->role === 'artisan')
