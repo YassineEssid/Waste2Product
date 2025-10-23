@@ -113,9 +113,9 @@
                     </a>
                     
                     <!-- Waste Items Section -->
-                    <div class="list-group-item bg-light text-muted small fw-bold">
+                    <a href="{{ route('waste-items.index') }}" class="list-group-item bg-light text-muted small fw-bold">
                         <i class="fas fa-recycle me-2"></i>WASTE MANAGEMENT
-                    </div>
+</a>
                     <a href="{{ route('waste-items.my') }}" class="list-group-item list-group-item-action {{ request()->routeIs('waste-items.my') ? 'active' : '' }}">
                         <i class="fas fa-user me-2"></i>My Items
                     </a>
@@ -130,6 +130,7 @@
                     <a href="{{ route('marketplace.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('marketplace.*') ? 'active' : '' }}">
                         <i class="fas fa-store me-2"></i>Marketplace
                     </a>
+                  
                     
                     @if(auth()->user()->role === 'repairer')
                         <!-- Repairer Section -->

@@ -28,7 +28,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Public routes (no authentication required)
 Route::get('/waste-items', [WasteItemController::class, 'index'])->name('waste-items.index');
-Route::get('/waste-items/{wasteItem}', [WasteItemController::class, 'show'])->name('waste-items.show');
 
 // Protected routes
 Route::middleware('auth')->group(function () {
@@ -45,6 +44,8 @@ Route::middleware('auth')->group(function () {
     // Waste Items (authenticated actions only)
     Route::get('/waste-items/create', [WasteItemController::class, 'create'])->name('waste-items.create');
     Route::post('/waste-items', [WasteItemController::class, 'store'])->name('waste-items.store');
+    Route::post('/waste-items/gemini-flash', [WasteItemController::class, 'getRecommendation']);
+
     Route::get('/waste-items/{wasteItem}/edit', [WasteItemController::class, 'edit'])->name('waste-items.edit');
     Route::put('/waste-items/{wasteItem}', [WasteItemController::class, 'update'])->name('waste-items.update');
     Route::delete('/waste-items/{wasteItem}', [WasteItemController::class, 'destroy'])->name('waste-items.destroy');
@@ -73,6 +74,7 @@ Route::get('/marketplace/create', [MarketplaceItemController::class, 'create'])-
     // Marketplace (protected)
     Route::resource('marketplace', MarketplaceItemController::class)->except(['create']);
 });
+Route::get('/waste-items/{wasteItem}', [WasteItemController::class, 'show'])->name('waste-items.show');
 
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

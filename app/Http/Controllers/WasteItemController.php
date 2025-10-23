@@ -6,6 +6,7 @@ use App\Models\WasteItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class WasteItemController extends Controller
 {
@@ -55,6 +56,7 @@ class WasteItemController extends Controller
      */
     public function create()
     {
+        
         return view('waste-items.create');
     }
 
@@ -117,8 +119,7 @@ class WasteItemController extends Controller
      */
     public function edit(WasteItem $wasteItem)
     {
-        $this->authorize('update', $wasteItem);
-        
+         
         return view('waste-items.edit', compact('wasteItem'));
     }
 
@@ -127,8 +128,7 @@ class WasteItemController extends Controller
      */
     public function update(Request $request, WasteItem $wasteItem)
     {
-        $this->authorize('update', $wasteItem);
-
+ 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -169,8 +169,7 @@ class WasteItemController extends Controller
      */
     public function destroy(WasteItem $wasteItem)
     {
-        $this->authorize('delete', $wasteItem);
-
+ 
         // Delete images
         if ($wasteItem->images) {
             foreach ($wasteItem->images as $image) {
@@ -244,5 +243,38 @@ class WasteItemController extends Controller
         Storage::disk('public')->putFileAs($folder, $image, $filename);
 
         return $path;
+    }
+
+    
+public function getRecommendation(Request $request)
+    {
+        $request->validate([
+            'question' => 'required|string',
+        ]);
+
+        $question = $request->input('question');
+
+        try {
+            // Call Gemini Flash 2.5 API
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . config('services.gemini.api_key'),
+                'Content-Type' => 'application/json',
+            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', [
+                'prompt' => [
+                    'text' => $question
+                ],
+                'temperature' => 0.7,
+                'candidate_count' => 1,
+                'max_output_tokens' => 500
+            ]);
+
+            // Return API response as JSON
+            return $response->json();
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to get recommendation',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

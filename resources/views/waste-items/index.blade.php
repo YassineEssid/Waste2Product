@@ -56,6 +56,13 @@
                     @foreach($wasteItems as $item)
                         <div class="col-lg-4 col-md-6 mb-4">
                             <div class="card h-100 shadow-sm border-0">
+                                <div class="form-check m-2">
+    <input class="form-check-input waste-checkbox" type="checkbox" value="{{ $item->id }}" id="waste-{{ $item->id }}">
+    <label class="form-check-label" for="waste-{{ $item->id }}">
+        Select this waste
+    </label>
+</div>
+
                                 @if($item->images && count($item->images) > 0)
                                     <img src="{{ asset('storage/' . $item->images[0]) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ $item->title }}">
                                 @else
@@ -121,6 +128,13 @@
                         </div>
                     @endforeach
                 </div>
+@auth
+<div class="d-flex justify-content-end mt-3">
+    <button class="btn btn-primary" id="getRecommendations" disabled>
+        <i class="fas fa-lightbulb me-1"></i> Get Recommendations
+    </button>
+</div>
+@endauth
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-center mt-4">
@@ -213,6 +227,50 @@ document.getElementById('confirmClaim').addEventListener('click', function() {
         form.submit();
     }
 });
+const checkboxes = document.querySelectorAll('.waste-checkbox');
+const getRecommendationsBtn = document.getElementById('getRecommendations');
+
+checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+        const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+        getRecommendationsBtn.disabled = !anyChecked;
+    });
+});
+
+document.getElementById('getRecommendations').addEventListener('click', async function() {
+  const selected = Array.from(checkboxes)
+                          .filter(cb => cb.checked)
+                          .map(cb => cb.value);
+
+    if (selected.length === 0) return; // safety check
+
+    // For each selected waste item, send a request to Gemini Flash API
+        const products = selected.map(itemId => {
+        const card = document.querySelector(`#waste-${itemId}`).closest('.card');
+        const itemTitle = card.querySelector('.card-title').innerText;
+        const itemDescription = card.querySelector('.card-text').innerText;
+        return `- ${itemTitle}: ${itemDescription}`;
+    });
+    const question = `For the following waste items, which products can be created? Provide 3 plans (sale, donate, craft) for each item:\n${products.join('\n')}`;
+
+        try {
+            const response = await fetch('/waste-items/gemini-flash', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ question })
+            });
+
+            const data = await response.json();
+            alert(`Recommendations : Sale: ${data.sale}\nDonate: ${data.donate}\nCraft: ${data.craft}`);
+        } catch (error) {
+            console.error('Error fetching recommendations:', error);
+        }
+    
+});
+
 </script>
 @endpush
 @endsection

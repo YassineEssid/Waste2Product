@@ -63,9 +63,9 @@
     @foreach($wasteItems as $item)
     <div class="col-lg-4 col-md-6 mb-4">
         <div class="card h-100 shadow-sm">
-            @if($item->image_path)
-                <div class="position-relative">
-                    <img src="{{ asset('storage/' . $item->image_path) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ $item->title }}">
+          @if($item->images && count($item->images) > 0)
+                  <div class="position-relative">
+                    <img src="{{ asset('storage/' . $item->images[0]) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ $item->title }}">
                     <span class="position-absolute top-0 end-0 badge bg-{{ $item->status === 'available' ? 'success' : ($item->status === 'claimed' ? 'warning' : 'secondary') }} m-2">
                         {{ ucfirst($item->status) }}
                     </span>
