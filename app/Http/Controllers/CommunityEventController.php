@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\CommunityEvent;
 use App\Services\GamificationService;
-use App\Services\GeminiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -13,13 +12,11 @@ use Carbon\Carbon;
 class CommunityEventController extends Controller
 {
     protected $gamificationService;
-    protected $geminiService;
 
-    public function __construct(GamificationService $gamificationService, GeminiService $geminiService)
+    public function __construct(GamificationService $gamificationService)
     {
         $this->middleware('auth');
         $this->gamificationService = $gamificationService;
-        $this->geminiService = $geminiService;
     }
 
     /**
@@ -100,21 +97,69 @@ class CommunityEventController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'title' => 'required|string|min:5|max:255',
+            'description' => 'required|string|min:20|max:5000',
             'location' => 'nullable|string|max:255',
-            'max_participants' => 'nullable|integer|min:1',
             'event_date' => 'required|date|after:now',
             'end_date' => 'required|date|after:event_date',
+            'max_participants' => 'nullable|integer|min:1|max:1000',
+            'event_type' => 'nullable|in:workshop,cleanup,recycling,education,community,other',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ], [
+            'title.required' => 'Title is required.',
+            'title.min' => 'Title must be at least 5 characters.',
+            'title.max' => 'Title cannot exceed 255 characters.',
+            'description.required' => 'Description is required.',
+            'description.min' => 'Description must be at least 20 characters.',
+            'description.max' => 'Description cannot exceed 5000 characters.',
+            'event_date.required' => 'Start date is required.',
+            'event_date.after' => 'Start date must be in the future.',
+            'end_date.required' => 'End date is required.',
+            'end_date.after' => 'End date must be after start date.',
+            'max_participants.integer' => 'Number of participants must be an integer.',
+            'max_participants.min' => 'Minimum number of participants is 1.',
+            'max_participants.max' => 'Maximum number of participants cannot exceed 1000.',
+            'event_type.in' => 'Selected event type is not valid.',
+            'image.image' => 'File must be an image.',
+            'image.mimes' => 'Image must be in jpeg, png, jpg or gif format.',
+            'image.max' => 'Image size cannot exceed 2 MB.',
         ]);
+
+        // Additional conditional validations
+        if (strlen(trim($request->title)) < 5) {
+            return back()->withErrors([
+                'title' => 'Title must contain at least 5 meaningful characters.'
+            ])->withInput();
+        }
+
+        if (strlen(trim($request->description)) < 20) {
+            return back()->withErrors([
+                'description' => 'Description must contain at least 20 meaningful characters.'
+            ])->withInput();
+        }
+
+        // Check that event duration is reasonable (max 30 days)
+        $startDate = \Carbon\Carbon::parse($request->event_date);
+        $endDate = \Carbon\Carbon::parse($request->end_date);
+        $durationInDays = $startDate->diffInDays($endDate);
+
+        if ($durationInDays > 30) {
+            return back()->withErrors([
+                'end_date' => 'Event duration cannot exceed 30 days.'
+            ])->withInput();
+        }
+
+        if ($durationInDays < 0) {
+            return back()->withErrors([
+                'end_date' => 'End date must be after start date.'
+            ])->withInput();
+        }
 
         $data = [
             'user_id' => Auth::id(),
             'title' => $request->title,
             'description' => $request->description,
             'location' => $request->location,
-            'max_participants' => $request->max_participants,
             'starts_at' => $request->event_date,
             'ends_at' => $request->end_date,
             'status' => 'published'
@@ -128,16 +173,16 @@ class CommunityEventController extends Controller
 
         $event = CommunityEvent::create($data);
 
-        // Award points for creating event
+        // Award points for event creation
         $this->gamificationService->awardPoints(
             Auth::user(),
             'event_created',
-            "Created event: {$event->title}",
+            'Created event: ' . $event->title,
             $event
         );
 
         return redirect()->route('events.index')
-            ->with('success', 'Événement créé avec succès ! Vous avez gagné 50 points !');
+            ->with('success', 'Event created successfully!');
     }
 
     /**
@@ -160,11 +205,6 @@ class CommunityEventController extends Controller
      */
     public function edit(CommunityEvent $event)
     {
-        // Check if user owns the event or is admin
-        if ($event->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
-            abort(403, 'Vous n\'êtes pas autorisé à modifier cet événement.');
-        }
-
         return view('events.edit', compact('event'));
     }
 
@@ -173,15 +213,10 @@ class CommunityEventController extends Controller
      */
     public function update(Request $request, CommunityEvent $event)
     {
-        // Check if user owns the event or is admin
-        if ($event->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
-            abort(403, 'Vous n\'êtes pas autorisé à modifier cet événement.');
-        }
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'location' => 'nullable|string|max:255',
-            'max_participants' => 'nullable|integer|min:1',
             'event_date' => 'required|date',
             'end_date' => 'required|date|after:event_date',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
@@ -191,7 +226,6 @@ class CommunityEventController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'location' => $request->location,
-            'max_participants' => $request->max_participants,
             'starts_at' => $request->event_date,
             'ends_at' => $request->end_date,
         ];
@@ -217,11 +251,6 @@ class CommunityEventController extends Controller
      */
     public function destroy(CommunityEvent $event)
     {
-        // Check if user owns the event or is admin
-        if ($event->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
-            abort(403, 'Vous n\'êtes pas autorisé à supprimer cet événement.');
-        }
-
         // Delete image if exists
         if ($event->image && Storage::disk('public')->exists($event->image)) {
             Storage::disk('public')->delete($event->image);
@@ -238,43 +267,15 @@ class CommunityEventController extends Controller
      */
     public function register(CommunityEvent $event)
     {
-        // Check if user is already registered
-        if ($event->registrations()->where('user_id', Auth::id())->exists()) {
-            return redirect()->back()->with('error', 'You are already registered for this event.');
-        }
-
-        // Register user
-        $event->registrations()->create([
-            'user_id' => Auth::id(),
-        ]);
-
-        // Award points for attending event
-        $this->gamificationService->awardPoints(
-            Auth::user(),
-            'event_attended',
-            "Registered for event: {$event->title}",
-            $event
-        );
-
-        return redirect()->back()->with('success', 'Registration successful! You earned 30 points!');
+        return redirect()->back()->with('info', 'Registration system is temporarily disabled.');
     }
 
     /**
-     * Unregister user from event.
+     * Unregister user from event (feature disabled temporarily).
      */
     public function unregister(CommunityEvent $event)
     {
-        // Check if user is registered
-        $registration = $event->registrations()->where('user_id', Auth::id())->first();
-
-        if (!$registration) {
-            return redirect()->back()->with('error', 'You are not registered for this event.');
-        }
-
-        // Delete registration
-        $registration->delete();
-
-        return redirect()->back()->with('success', 'Registration cancelled successfully.');
+        return redirect()->back()->with('info', 'Registration system is temporarily disabled.');
     }
 
     /**
@@ -311,45 +312,5 @@ class CommunityEventController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
-    }
-
-    /**
-     * Generate event description using AI
-     */
-    public function generateDescription(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|string|in:workshop,conference,cleanup,exhibition,training,networking',
-            'location' => 'nullable|string|max:255',
-        ]);
-
-        $result = $this->geminiService->generateEventDescription(
-            $request->title,
-            $request->type,
-            $request->location
-        );
-
-        return response()->json($result);
-    }
-
-    /**
-     * Generate event FAQ using AI
-     */
-    public function generateFAQ(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|string|in:workshop,conference,cleanup,exhibition,training,networking',
-            'description' => 'required|string',
-        ]);
-
-        $result = $this->geminiService->generateEventFAQ(
-            $request->title,
-            $request->type,
-            $request->description
-        );
-
-        return response()->json($result);
     }
 }

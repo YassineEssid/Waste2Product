@@ -6,25 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('community_events', function (Blueprint $table) {
-            $table->string('image')->nullable()->after('description');
-            $table->string('location')->nullable()->after('image');
-            $table->foreignId('user_id')->nullable()->after('id')->constrained()->onDelete('cascade');
+            if (!Schema::hasColumn('community_events', 'image')) {
+                $table->string('image')->nullable()->after('description');
+            }
+
+            if (!Schema::hasColumn('community_events', 'user_id')) {
+                $table->foreignId('user_id')->nullable()->after('id')->constrained()->onDelete('cascade');
+            }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('community_events', function (Blueprint $table) {
-            $table->dropColumn(['image', 'location', 'user_id']);
+            if (Schema::hasColumn('community_events', 'image')) {
+                $table->dropColumn('image');
+            }
+            if (Schema::hasColumn('community_events', 'user_id')) {
+                $table->dropForeign(['user_id']); // drop foreign key first
+                $table->dropColumn('user_id');
+            }
         });
     }
 };

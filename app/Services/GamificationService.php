@@ -24,6 +24,7 @@ class GamificationService
         'waste_item_posted' => 15,
         'marketplace_item_sold' => 40,
         'transformation_completed' => 60,
+        'transformation_published' => 75,
         'repair_completed' => 50,
         'achievement' => 100, // Badge achievement bonus
     ];

@@ -14,7 +14,7 @@ class CreateCommunityEventsTable extends Migration
             $table->text('description')->nullable();
             $table->timestamp('starts_at');
             $table->timestamp('ends_at')->nullable();
-            $table->enum('status', ['published', 'draft', 'archived'])->default('draft');
+            $table->enum('status', ['published', 'draft', 'archived', 'upcoming'])->default('draft');
             $table->timestamps();
         });
     }

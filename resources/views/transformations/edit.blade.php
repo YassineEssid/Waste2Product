@@ -15,7 +15,7 @@
                         </a>
                         <div>
                             <h2 class="mb-1"><i class="fas fa-edit me-2"></i>Edit Transformation</h2>
-                            <p class="mb-0 opacity-75">{{ $transformation->product_title }}</p>
+                            <p class="mb-0 opacity-75">{{ $transformation->title }}</p>
                         </div>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
 
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Product Title <span class="text-danger">*</span></label>
-                                <input type="text" name="product_title" class="form-control @error('product_title') is-invalid @enderror" value="{{ old('product_title', $transformation->product_title) }}" placeholder="Ex: Decorative vase from recycled glass" required>
+                                <input type="text" name="product_title" class="form-control @error('product_title') is-invalid @enderror" value="{{ old('product_title', $transformation->title) }}" placeholder="Ex: Decorative vase from recycled glass" required>
                                 @error('product_title')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -70,7 +70,7 @@
                                 @error('price')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted">Leave empty if price is not defined yet</small>
+                                <small class="text-muted">Required for marketplace publication</small>
                             </div>
 
                             <div class="col-md-6">
@@ -100,7 +100,7 @@
                                 <label class="form-label fw-bold">
                                     <i class="fas fa-cloud text-success me-1"></i>CO₂ Saved (kg)
                                 </label>
-                                <input type="number" step="0.01" name="co2_saved" class="form-control @error('co2_saved') is-invalid @enderror" value="{{ old('co2_saved', $transformation->impact['co2_saved'] ?? 0) }}" placeholder="0.00">
+                                <input type="number" step="0.01" name="co2_saved" class="form-control @error('co2_saved') is-invalid @enderror" value="{{ old('co2_saved', $transformation->co2_saved ?? 0) }}" placeholder="0.00">
                                 @error('co2_saved')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -110,7 +110,7 @@
                                 <label class="form-label fw-bold">
                                     <i class="fas fa-trash-alt text-info me-1"></i>Waste Reduced (kg)
                                 </label>
-                                <input type="number" step="0.01" name="waste_reduced" class="form-control @error('waste_reduced') is-invalid @enderror" value="{{ old('waste_reduced', $transformation->impact['waste_reduced'] ?? 0) }}" placeholder="0.00">
+                                <input type="number" step="0.01" name="waste_reduced" class="form-control @error('waste_reduced') is-invalid @enderror" value="{{ old('waste_reduced', $transformation->waste_reduced ?? 0) }}" placeholder="0.00">
                                 @error('waste_reduced')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

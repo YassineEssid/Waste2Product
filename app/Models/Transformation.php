@@ -11,31 +11,31 @@ class Transformation extends Model
 
     protected $fillable = [
         'user_id',
-        'artisan_id',
         'waste_item_id',
-        'product_title',
+        'title',
         'description',
-        'impact',
+        'process_description',
         'price',
-        'before_image',
         'before_images',
-        'after_image',
         'after_images',
         'process_images',
         'time_spent_hours',
         'materials_cost',
+        'co2_saved',
+        'waste_reduced',
         'status',
         'is_featured',
         'views_count'
     ];
 
     protected $casts = [
-        'impact' => 'array',
         'before_images' => 'array',
         'after_images' => 'array',
         'process_images' => 'array',
         'price' => 'decimal:2',
         'materials_cost' => 'decimal:2',
+        'co2_saved' => 'decimal:2',
+        'waste_reduced' => 'decimal:2',
         'is_featured' => 'boolean',
     ];
 
@@ -95,16 +95,6 @@ class Transformation extends Model
     }
 
     // Accessors
-    public function getCo2SavedAttribute()
-    {
-        return $this->impact['co2_saved'] ?? 0;
-    }
-
-    public function getWasteReducedAttribute()
-    {
-        return $this->impact['waste_reduced'] ?? 0;
-    }
-
     public function getTotalEnvironmentalImpactAttribute()
     {
         return [
