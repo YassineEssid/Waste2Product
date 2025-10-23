@@ -11,16 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('messages', function (Blueprint $table) {
-            // Rename user_id to sender_id
-            $table->renameColumn('user_id', 'sender_id');
+        // Skip if table doesn't exist yet
+        if (!Schema::hasTable('messages')) {
+            return;
+        }
 
-            // Rename body to message
-            $table->renameColumn('body', 'message');
+        Schema::table('messages', function (Blueprint $table) {
+            // Rename user_id to sender_id only if column exists
+            if (Schema::hasColumn('messages', 'user_id')) {
+                $table->renameColumn('user_id', 'sender_id');
+            }
+
+            // Rename body to message only if column exists
+            if (Schema::hasColumn('messages', 'body')) {
+                $table->renameColumn('body', 'message');
+            }
 
             // Drop read_at and add is_read
-            $table->dropColumn('read_at');
-            $table->boolean('is_read')->default(false)->after('message');
+            if (Schema::hasColumn('messages', 'read_at')) {
+                $table->dropColumn('read_at');
+            }
+            
+            if (!Schema::hasColumn('messages', 'is_read')) {
+                $table->boolean('is_read')->default(false)->after('message');
+            }
         });
     }
 
@@ -29,12 +43,28 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Skip if table doesn't exist
+        if (!Schema::hasTable('messages')) {
+            return;
+        }
+
         Schema::table('messages', function (Blueprint $table) {
-            // Revert the changes
-            $table->renameColumn('sender_id', 'user_id');
-            $table->renameColumn('message', 'body');
-            $table->dropColumn('is_read');
-            $table->timestamp('read_at')->nullable()->after('body');
+            // Revert the changes only if columns exist
+            if (Schema::hasColumn('messages', 'sender_id')) {
+                $table->renameColumn('sender_id', 'user_id');
+            }
+            
+            if (Schema::hasColumn('messages', 'message')) {
+                $table->renameColumn('message', 'body');
+            }
+            
+            if (Schema::hasColumn('messages', 'is_read')) {
+                $table->dropColumn('is_read');
+            }
+            
+            if (!Schema::hasColumn('messages', 'read_at')) {
+                $table->timestamp('read_at')->nullable()->after('body');
+            }
         });
     }
 };
