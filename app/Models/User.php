@@ -123,4 +123,64 @@ class User extends Authenticatable
     {
         return $this->hasMany(MarketplaceItem::class);
     }
+
+    public function eventComments()
+    {
+        return $this->hasMany(EventComment::class);
+    }
+
+    // Gamification Relationships
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+                    ->withTimestamps()
+                    ->withPivot(['earned_at', 'is_displayed', 'progress']);
+    }
+
+    public function earnedBadges()
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+                    ->whereNotNull('user_badges.earned_at')
+                    ->withTimestamps()
+                    ->withPivot(['earned_at', 'is_displayed', 'progress']);
+    }
+
+    public function userBadges()
+    {
+        return $this->hasMany(UserBadge::class);
+    }
+
+    public function pointTransactions()
+    {
+        return $this->hasMany(PointTransaction::class);
+    }
+
+    // Gamification Methods
+    public function getLevelTitleAttribute()
+    {
+        return match(true) {
+            $this->current_level >= 50 => 'Eco Legend',
+            $this->current_level >= 40 => 'Sustainability Master',
+            $this->current_level >= 30 => 'Green Champion',
+            $this->current_level >= 20 => 'Environmental Expert',
+            $this->current_level >= 10 => 'Eco Enthusiast',
+            $this->current_level >= 5 => 'Green Contributor',
+            default => 'Eco Beginner'
+        };
+    }
+
+    public function getProgressToNextLevelAttribute()
+    {
+        if ($this->points_to_next_level <= 0) {
+            return 100;
+        }
+        $pointsInCurrentLevel = $this->total_points % $this->points_to_next_level;
+        return ($pointsInCurrentLevel / $this->points_to_next_level) * 100;
+    }
+
+    public function hasBadge($badgeSlug)
+    {
+        return $this->earnedBadges()->where('slug', $badgeSlug)->exists();
+    }
 }
+
