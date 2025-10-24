@@ -19,6 +19,7 @@ class EventCommentController extends Controller
     {
         $this->middleware('auth');
         $this->gamificationService = $gamificationService;
+        
     }
 
     /**
