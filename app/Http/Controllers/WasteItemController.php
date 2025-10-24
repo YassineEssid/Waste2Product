@@ -25,7 +25,9 @@ class WasteItemController extends Controller
      */
     public function index(Request $request)
     {
-        $query = WasteItem::with('user')->available();
+        $query = WasteItem::with(['user', 'categoryModel'])
+            ->where('status', 'available')
+            ->where('is_available', true);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -35,13 +37,13 @@ class WasteItemController extends Controller
             });
         }
 
-        // Category filter
-       if ($request->filled('category')) {
-        $query->whereHas('category', function ($q) use ($request) {
-            $q->where('id', $request->category);
-        });
-    }
-
+        // Category filter - using category name (string) instead of ID
+        if ($request->filled('category')) {
+            $category = Category::find($request->category);
+            if ($category) {
+                $query->where('category', $category->name);
+            }
+        }
 
         // Location filter
         if ($request->filled('lat') && $request->filled('lng')) {
@@ -71,7 +73,7 @@ return view('waste-items.create', compact('categories'));
      */
     public function store(Request $request)
     {
-      
+
     if (!Auth::check()) {
         return redirect()->route('login')->with('error', 'You must be logged in to add a waste item.');
     }
@@ -107,8 +109,9 @@ return view('waste-items.create', compact('categories'));
         $wasteItem->images = $imagePaths;
     }
 
+    // Get category name from the selected category
     $category = Category::findOrFail($validated['category_id']);
-    $wasteItem->category()->associate($category);
+    $wasteItem->category = $category->name; // Store category name as string
 
     $wasteItem->save();
 
@@ -129,18 +132,18 @@ return view('waste-items.create', compact('categories'));
      */
     public function show(WasteItem $wasteItem)
     {
-        $wasteItem->load('user', 'repairRequests.repairer', 'transformations.user');
-        
-  // Get related items from same category
-$relatedItems = WasteItem::where('category_id', $wasteItem->category_id)
-    ->where('id', '!=', $wasteItem->id)
-    ->where('status', 'available')
-    ->with('user') // eager load the related user
-    ->latest()
-    ->limit(5)
-    ->get();
+        $wasteItem->load('user', 'categoryModel', 'repairRequests.repairer', 'transformations.user');
 
-        
+        // Get related items from same category
+        $relatedItems = WasteItem::where('category', $wasteItem->category)
+            ->where('id', '!=', $wasteItem->id)
+            ->where('status', 'available')
+            ->with(['user', 'categoryModel'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+
         return view('waste-items.show', compact('wasteItem', 'relatedItems'));
     }
 
@@ -149,7 +152,7 @@ $relatedItems = WasteItem::where('category_id', $wasteItem->category_id)
      */
     public function edit(WasteItem $wasteItem)
     {
-         
+
         return view('waste-items.edit', compact('wasteItem'));
     }
 
@@ -158,7 +161,7 @@ $relatedItems = WasteItem::where('category_id', $wasteItem->category_id)
      */
     public function update(Request $request, WasteItem $wasteItem)
     {
- 
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -199,7 +202,7 @@ $relatedItems = WasteItem::where('category_id', $wasteItem->category_id)
      */
     public function destroy(WasteItem $wasteItem)
     {
- 
+
         // Delete images
         if ($wasteItem->images) {
             foreach ($wasteItem->images as $image) {

@@ -70,7 +70,7 @@
                                         <i class="fas fa-image text-muted fs-1"></i>
                                     </div>
                                 @endif
-                                
+
                                 <div class="card-body d-flex flex-column">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <h5 class="card-title mb-0">{{ $item->title }}</h5>
@@ -78,16 +78,16 @@
                                             {{ ucfirst($item->status) }}
                                         </span>
                                     </div>
-                                    
+
                                     <p class="text-muted small mb-2">
-                                        <i class="fas fa-tag me-1"></i>{{ $item->category->name }}
+                                        <i class="fas fa-tag me-1"></i>{{ $item->categoryModel?->name ?? ucfirst($item->category) }}
                                         @if($item->location)
                                             <span class="ms-3"><i class="fas fa-map-marker-alt me-1"></i>{{ $item->location }}</span>
                                         @endif
                                     </p>
-                                    
+
                                     <p class="card-text flex-grow-1">{{ Str::limit($item->description, 100) }}</p>
-                                    
+
                                     <div class="mt-auto">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <small class="text-muted">
@@ -95,7 +95,7 @@
                                             </small>
                                             <small class="text-muted">{{ $item->created_at->diffForHumans() }}</small>
                                         </div>
-                                        
+
                                         <div class="d-flex gap-2 mt-3">
                                             <a href="{{ route('waste-items.show', $item) }}" class="btn btn-outline-primary btn-sm flex-fill">
                                                 <i class="fas fa-eye me-1"></i>View Details
@@ -108,7 +108,7 @@
                                                 @endif
                                             @endauth
                                         </div>
-                                        
+
                                         @auth
                                             @if($item->status === 'available' && $item->user_id !== auth()->id())
                                                 <button class="btn btn-success btn-sm w-100 mt-2" onclick="claimItem({{ $item->id }})">
@@ -221,21 +221,21 @@ document.getElementById('confirmClaim').addEventListener('click', function() {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/waste-items/${currentItemId}/claim`;
-        
+
         // Add CSRF token
         const csrfField = document.createElement('input');
         csrfField.type = 'hidden';
         csrfField.name = '_token';
         csrfField.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         form.appendChild(csrfField);
-        
+
         // Add method field for PATCH
         const methodField = document.createElement('input');
         methodField.type = 'hidden';
         methodField.name = '_method';
         methodField.value = 'PATCH';
         form.appendChild(methodField);
-        
+
         document.body.appendChild(form);
         form.submit();
     }
@@ -293,14 +293,14 @@ document.getElementById('getRecommendations').addEventListener('click', async fu
                 html += `
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="heading${i}">
-                        <button class="accordion-button ${i > 0 ? 'collapsed' : ''}" 
-                                type="button" data-bs-toggle="collapse" 
-                                data-bs-target="#collapse${i}" aria-expanded="${i === 0}" 
+                        <button class="accordion-button ${i > 0 ? 'collapsed' : ''}"
+                                type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse${i}" aria-expanded="${i === 0}"
                                 aria-controls="collapse${i}">
                             🗑️ Item ${i + 1}
                         </button>
                     </h2>
-                    <div id="collapse${i}" class="accordion-collapse collapse ${i === 0 ? 'show' : ''}" 
+                    <div id="collapse${i}" class="accordion-collapse collapse ${i === 0 ? 'show' : ''}"
                          aria-labelledby="heading${i}" data-bs-parent="#recommendationAccordion">
                         <div class="accordion-body">
                             <p><strong>💰 Sale:</strong> ${item.sale}</p>
@@ -311,17 +311,17 @@ document.getElementById('getRecommendations').addEventListener('click', async fu
                 </div>`;
             });
             html += `</div>`;
-        } 
+        }
         else if (data.sale && data.donate && data.craft) {
             html = `
                 <p><strong>💰 Sale:</strong> ${data.sale}</p>
                 <p><strong>🎁 Donate:</strong> ${data.donate}</p>
                 <p><strong>🎨 Craft:</strong> ${data.craft}</p>
             `;
-        } 
+        }
         else if (data.error) {
             html = `<div class="alert alert-danger">${data.error}</div>`;
-        } 
+        }
         else {
             html = `<div class="alert alert-warning">Unexpected response format from Gemini.</div>`;
         }
@@ -332,7 +332,7 @@ document.getElementById('getRecommendations').addEventListener('click', async fu
         } catch (error) {
             console.error('Error fetching recommendations:', error);
         }
-    
+
 });
 
 </script>

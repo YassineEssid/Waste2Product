@@ -4,6 +4,12 @@ services:
     container_name: waste2product_app
     restart: unless-stopped
     working_dir: /var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=waste2product
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
     volumes:
       - ./.env:/var/www/html/.env:ro
       - ./storage:/var/www/html/storage

@@ -68,8 +68,8 @@ class WasteItem extends Model
             ->whereNotNull('location_lng')
             ->whereRaw("
                 6371 * acos(
-                    cos(radians(?)) * cos(radians(location_lat)) * 
-                    cos(radians(location_lng) - radians(?)) + 
+                    cos(radians(?)) * cos(radians(location_lat)) *
+                    cos(radians(location_lng) - radians(?)) +
                     sin(radians(?)) * sin(radians(location_lat))
                 ) < ?
             ", [$lat, $lng, $lat, $radius]);
@@ -80,8 +80,14 @@ class WasteItem extends Model
     {
         return $this->images && count($this->images) > 0 ? $this->images[0] : null;
     }
-    public function category()
-{
-    return $this->belongsTo(Category::class);
-}
+
+    /**
+     * Get the category model for this waste item
+     * Note: category column is stored as a string (name), not a foreign key
+     * We use categoryModel() to avoid conflict with the category attribute
+     */
+    public function categoryModel()
+    {
+        return $this->belongsTo(Category::class, 'category', 'name');
+    }
 }
