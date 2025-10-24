@@ -2,6 +2,11 @@
 
 @section('title', $event->title)
 
+@php
+    // Ensure $isRegistered is always defined
+    $isRegistered = $isRegistered ?? false;
+@endphp
+
 @section('content')
 <div class="container-fluid">
     <!-- Create Event button at the top -->
@@ -144,11 +149,7 @@
                     <div class="action-buttons">
                         @if($event->starts_at && $event->starts_at->gt(now()))
                             @auth
-                                @php
-                                    $isRegistered = $event->registrations()->where('user_id', auth()->id())->exists();
-                                @endphp
-
-                                @if($isRegistered)
+                                @if(isset($isRegistered) && $isRegistered === true)
                                     <div class="alert alert-success mb-2">
                                         <i class="fas fa-check-circle me-2"></i>You are registered for this event!
                                     </div>

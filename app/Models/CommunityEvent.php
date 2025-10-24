@@ -57,7 +57,8 @@ class CommunityEvent extends Model
 
     public function getAttendeesCountAttribute()
     {
-        return 0;
+        // Count only active registrations (not cancelled)
+        return $this->registrations()->whereIn('status', ['registered', 'confirmed', 'attended'])->count();
     }
 
     // Scopes

@@ -16,6 +16,7 @@ class GamificationService
     const POINTS = [
         'event_created' => 50,
         'event_attended' => 30,
+        'event_registered' => 15, // Points for registering to an event
         'comment_posted' => 10,
         'comment_approved' => 5,
         'rating_given' => 5,

@@ -134,11 +134,7 @@ PROMPT;
      */
     protected function callGeminiAPI(string $prompt): string
     {
-        $response = Http::withOptions([
-            'verify' => false, // Disable SSL verification for local development
-        ])->withHeaders([
-            'Content-Type' => 'application/json',
-        ])->post($this->apiUrl . '?key=' . $this->apiKey, [
+        $response = Http::timeout(60)->post($this->apiUrl . '?key=' . $this->apiKey, [
             'contents' => [
                 [
                     'parts' => [
@@ -150,7 +146,7 @@ PROMPT;
                 'temperature' => 0.7,
                 'topK' => 40,
                 'topP' => 0.95,
-                'maxOutputTokens' => 2048, // Increased for FAQ generation
+                'maxOutputTokens' => 8192, // Increased to handle longer responses
             ],
         ]);
 
@@ -164,16 +160,34 @@ PROMPT;
 
         $data = $response->json();
 
-        if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+        // Check if we have candidates
+        if (!isset($data['candidates']) || empty($data['candidates'])) {
+            Log::error('Gemini API No Candidates', ['response' => $data]);
+            throw new \Exception('No response candidates from API');
+        }
+
+        $candidate = $data['candidates'][0];
+
+        // Check finish reason
+        if (isset($candidate['finishReason']) && $candidate['finishReason'] === 'MAX_TOKENS') {
+            Log::warning('Gemini API MAX_TOKENS reached', [
+                'usageMetadata' => $data['usageMetadata'] ?? null
+            ]);
+            // Continue anyway and try to extract partial content
+        }
+
+        // Try to extract text from content
+        if (!isset($candidate['content']['parts'][0]['text'])) {
             Log::error('Gemini API Invalid Response Structure', [
                 'response' => $data,
                 'has_candidates' => isset($data['candidates']),
-                'candidates_count' => isset($data['candidates']) ? count($data['candidates']) : 0
+                'candidates_count' => count($data['candidates']),
+                'finish_reason' => $candidate['finishReason'] ?? 'unknown'
             ]);
             throw new \Exception('Invalid API response structure');
         }
 
-        return trim($data['candidates'][0]['content']['parts'][0]['text']);
+        return trim($candidate['content']['parts'][0]['text']);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CommunityEvent;
 use App\Services\GamificationService;
+use App\Services\GeminiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -12,11 +13,13 @@ use Carbon\Carbon;
 class CommunityEventController extends Controller
 {
     protected $gamificationService;
+    protected $geminiService;
 
-    public function __construct(GamificationService $gamificationService)
+    public function __construct(GamificationService $gamificationService, GeminiService $geminiService)
     {
         $this->middleware('auth');
         $this->gamificationService = $gamificationService;
+        $this->geminiService = $geminiService;
     }
 
     /**
@@ -188,8 +191,11 @@ class CommunityEventController extends Controller
     /**
      * Display the specified event.
      */
-    public function show(CommunityEvent $event)
+    public function show($id)
     {
+        // Force reload from database by using ID instead of model binding
+        $event = CommunityEvent::findOrFail($id);
+
         // Get related events (excluding current event)
         $relatedEvents = CommunityEvent::where('id', '!=', $event->id)
                                      ->where('starts_at', '>', Carbon::now())
@@ -197,7 +203,27 @@ class CommunityEventController extends Controller
                                      ->limit(3)
                                      ->get();
 
-        return view('events.show', compact('event', 'relatedEvents'));
+        // Check if current user is registered (active registration only)
+        // Query directly from database to avoid any caching issues
+        $isRegistered = false;
+        if (auth()->check()) {
+            $isRegistered = \App\Models\EventRegistration::where('community_event_id', $event->id)
+                ->where('user_id', auth()->id())
+                ->whereIn('status', ['registered', 'confirmed', 'attended'])
+                ->exists();
+
+            // Debug: log the registration status
+            \Log::info('Event Registration Check', [
+                'event_id' => $event->id,
+                'user_id' => auth()->id(),
+                'isRegistered' => $isRegistered,
+                'query_result' => \App\Models\EventRegistration::where('community_event_id', $event->id)
+                    ->where('user_id', auth()->id())
+                    ->first()
+            ]);
+        }
+
+        return view('events.show', compact('event', 'relatedEvents', 'isRegistered'));
     }
 
     /**
@@ -263,19 +289,87 @@ class CommunityEventController extends Controller
     }
 
     /**
-     * Register user for event (feature disabled temporarily).
+     * Register user for event.
      */
     public function register(CommunityEvent $event)
     {
-        return redirect()->back()->with('info', 'Registration system is temporarily disabled.');
+        $user = Auth::user();
+
+        // Check if already registered (and not cancelled)
+        $existingRegistration = $event->registrations()
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['registered', 'confirmed', 'attended'])
+            ->first();
+
+        if ($existingRegistration) {
+            return redirect()->back()->with('info', 'You are already registered for this event.');
+        }
+
+        // Check if event is full (count only active registrations)
+        $activeRegistrations = $event->registrations()
+            ->whereIn('status', ['registered', 'confirmed', 'attended'])
+            ->count();
+
+        if ($event->max_participants && $activeRegistrations >= $event->max_participants) {
+            return redirect()->back()->with('error', 'This event is full.');
+        }
+
+        // Check if user has a cancelled registration
+        $cancelledRegistration = $event->registrations()
+            ->where('user_id', $user->id)
+            ->where('status', 'cancelled')
+            ->first();
+
+        if ($cancelledRegistration) {
+            // Reactivate the cancelled registration
+            $cancelledRegistration->update([
+                'status' => 'registered',
+                'registered_at' => now(),
+            ]);
+        } else {
+            // Create new registration
+            $event->registrations()->create([
+                'user_id' => $user->id,
+                'status' => 'registered',
+                'registered_at' => now(),
+            ]);
+        }
+
+        // Award points for event registration
+        $this->gamificationService->awardPoints(
+            $user,
+            'event_registered',
+            'Registered for event: ' . $event->title,
+            $event
+        );
+
+        return redirect()->route('events.show', $event->id)
+            ->with('success', 'You have successfully registered for this event!')
+            ->with('_refresh', time());
     }
 
     /**
-     * Unregister user from event (feature disabled temporarily).
+     * Unregister user from event.
      */
     public function unregister(CommunityEvent $event)
     {
-        return redirect()->back()->with('info', 'Registration system is temporarily disabled.');
+        $user = Auth::user();
+
+        $registration = $event->registrations()
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['registered', 'confirmed', 'attended'])
+            ->first();
+
+        if (!$registration) {
+            return redirect()->back()->with('error', 'You are not registered for this event.');
+        }
+
+        // Cancel registration
+        $registration->update(['status' => 'cancelled']);
+
+        return redirect()->route('events.show', $event->id)
+            ->with('success', 'You have successfully unregistered from this event!')
+            ->with('_refresh', time());
     }
 
     /**
@@ -312,5 +406,35 @@ class CommunityEventController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Generate AI description for event
+     */
+    public function generateDescription(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'required|string',
+            'location' => 'nullable|string',
+        ]);
+
+        $result = $this->geminiService->generateEventDescription(
+            $request->title,
+            $request->type,
+            $request->location
+        );
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'description' => $result['description']
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'error' => $result['error'] ?? 'Failed to generate description'
+        ], 500);
     }
 }
