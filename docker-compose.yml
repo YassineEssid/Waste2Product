@@ -8,15 +8,13 @@ services:
       - ./.env:/var/www/html/.env:ro
       - ./storage:/var/www/html/storage
       - ./database/migrations:/var/www/html/database/migrations:ro
+      - ./database/factories:/var/www/html/database/factories:ro
+      - ./phpunit.xml:/var/www/html/phpunit.xml:ro
+      - ./tests:/var/www/html/tests:ro
       - ./app:/var/www/html/app:ro
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      - DB_HOST=db
-      - DB_DATABASE=waste2product
-      - DB_USERNAME=root
-      - DB_PASSWORD=root
     networks:
       - waste2product
 
