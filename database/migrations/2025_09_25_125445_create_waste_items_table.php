@@ -16,8 +16,9 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->text('description');
-            $table->string('category');
             $table->integer('quantity')->default(1);
+                        $table->foreignId('category_id')->constrained()->cascadeOnDelete(); // link to categories
+
             $table->string('condition')->default('fair'); // poor, fair, good, excellent
             $table->text('location_address')->nullable();
             $table->decimal('location_lat', 10, 8)->nullable();

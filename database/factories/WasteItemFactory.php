@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use App\Models\User;
 use App\Models\WasteItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,7 +25,7 @@ class WasteItemFactory extends Factory
             'user_id' => User::factory(),
             'title' => fake()->sentence(3),
             'description' => fake()->paragraph(),
-            'category' => fake()->randomElement(['electronics', 'furniture', 'clothing', 'metal', 'plastic', 'glass', 'paper', 'organic', 'other']),
+            'category_id' => Category::factory(),
             'quantity' => fake()->numberBetween(1, 100),
             'condition' => fake()->randomElement(['new', 'good', 'fair', 'poor', 'broken']),
             'location_address' => fake()->address(),

@@ -12,25 +12,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Vérifier si la clé étrangère existe avant de la supprimer
-        $foreignKeys = DB::select("
-            SELECT CONSTRAINT_NAME
-            FROM information_schema.KEY_COLUMN_USAGE
-            WHERE TABLE_NAME = 'marketplace_items'
-              AND REFERENCED_TABLE_NAME = 'users'
-              AND COLUMN_NAME = 'user_id'
-              AND CONSTRAINT_SCHEMA = DATABASE()
-        ");
-
-        if (!empty($foreignKeys)) {
+        // Supprimer la clé étrangère si la table existe et si la colonne existe
+        if (Schema::hasTable('marketplace_items') && Schema::hasColumn('marketplace_items', 'user_id')) {
             Schema::table('marketplace_items', function (Blueprint $table) {
-                $table->dropForeign(['user_id']);
-            });
-        }
-
-        // Supprimer la colonne si elle existe
-        if (Schema::hasColumn('marketplace_items', 'user_id')) {
-            Schema::table('marketplace_items', function (Blueprint $table) {
+                // Pour SQLite, Laravel gère automatiquement la suppression des foreign keys
+                // Pour MySQL, on essaie de supprimer la foreign key si elle existe
+                try {
+                    $table->dropForeign(['user_id']);
+                } catch (\Exception $e) {
+                    // Ignorer l'erreur si la foreign key n'existe pas
+                }
+                
                 $table->dropColumn('user_id');
             });
         }

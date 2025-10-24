@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WasteItemController;
 use App\Http\Controllers\RepairRequestController;
@@ -32,6 +33,8 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Public routes (no authentication required)
+Route::get('/waste-items', [WasteItemController::class, 'index'])->name('waste-items.index');
 
 // Protected routes
 Route::middleware('auth')->group(function () {
@@ -48,12 +51,21 @@ Route::middleware('auth')->group(function () {
     // Waste Items (authenticated actions only)
     Route::get('/waste-items/create', [WasteItemController::class, 'create'])->name('waste-items.create');
     Route::post('/waste-items', [WasteItemController::class, 'store'])->name('waste-items.store');
+    Route::post('/waste-items/gemini-flash', [WasteItemController::class, 'getRecommendation']);
+
     Route::get('/waste-items/{wasteItem}/edit', [WasteItemController::class, 'edit'])->name('waste-items.edit');
     Route::put('/waste-items/{wasteItem}', [WasteItemController::class, 'update'])->name('waste-items.update');
     Route::delete('/waste-items/{wasteItem}', [WasteItemController::class, 'destroy'])->name('waste-items.destroy');
     Route::get('/my-items', [WasteItemController::class, 'my'])->name('waste-items.my');
     Route::patch('/waste-items/{wasteItem}/claim', [WasteItemController::class, 'claim'])->name('waste-items.claim');
     Route::patch('/waste-items/{wasteItem}/toggle-availability', [WasteItemController::class, 'toggleAvailability'])->name('waste-items.toggle-availability');
+   // Categories Routes
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     // Repair Requests
     
@@ -134,6 +146,7 @@ Route::get('/marketplace/create', [MarketplaceItemController::class, 'create'])-
     Route::post('/messages/{conversation}', [MessageController::class, 'store'])->name('messages.store');
     Route::post('/marketplace/{item}/contact', [MarketplaceItemController::class, 'startConversation'])->name('marketplace.contact');
 });
+Route::get('/waste-items/{wasteItem}', [WasteItemController::class, 'show'])->name('waste-items.show');
 
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

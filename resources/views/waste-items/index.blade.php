@@ -28,8 +28,8 @@
                             <select name="category" class="form-select">
                                 <option value="">All Categories</option>
                                 @foreach($categories as $category)
-                                    <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>
-                                        {{ ucfirst($category) }}
+                                    <option value="{{ $category->id }}" {{ request('category') == $category ? 'selected' : '' }}>
+                                        {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -56,6 +56,13 @@
                     @foreach($wasteItems as $item)
                         <div class="col-lg-4 col-md-6 mb-4">
                             <div class="card h-100 shadow-sm border-0">
+                                <div class="form-check m-2">
+    <input class="form-check-input waste-checkbox" type="checkbox" value="{{ $item->id }}" id="waste-{{ $item->id }}">
+    <label class="form-check-label" for="waste-{{ $item->id }}">
+        Select this waste
+    </label>
+</div>
+
                                 @if($item->images && count($item->images) > 0)
                                     <img src="{{ asset('storage/' . $item->images[0]) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ $item->title }}">
                                 @else
@@ -73,7 +80,7 @@
                                     </div>
                                     
                                     <p class="text-muted small mb-2">
-                                        <i class="fas fa-tag me-1"></i>{{ ucfirst($item->category) }}
+                                        <i class="fas fa-tag me-1"></i>{{ $item->category->name }}
                                         @if($item->location)
                                             <span class="ms-3"><i class="fas fa-map-marker-alt me-1"></i>{{ $item->location }}</span>
                                         @endif
@@ -121,6 +128,26 @@
                         </div>
                     @endforeach
                 </div>
+@auth
+<div class="d-flex justify-content-end mt-3">
+    <button class="btn btn-primary" id="getRecommendations" disabled>
+        <i class="fas fa-lightbulb me-1"></i> Get Recommendations
+    </button>
+</div>
+@endauth
+<!-- Recommendation Results Zone -->
+<div class="container mt-5" id="recommendationZone" style="display: none;">
+    <div class="card shadow-sm border-success">
+        <div class="card-header bg-success text-white d-flex align-items-center">
+            <i class="fas fa-lightbulb me-2"></i>
+            <h5 class="mb-0">AI Recommendations</h5>
+        </div>
+        <div class="card-body" id="recommendationContent">
+            <p class="text-muted mb-0">Loading recommendations...</p>
+        </div>
+    </div>
+</div>
+
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-center mt-4">
@@ -213,6 +240,101 @@ document.getElementById('confirmClaim').addEventListener('click', function() {
         form.submit();
     }
 });
+const checkboxes = document.querySelectorAll('.waste-checkbox');
+const getRecommendationsBtn = document.getElementById('getRecommendations');
+
+checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+        const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+        getRecommendationsBtn.disabled = !anyChecked;
+    });
+});
+
+document.getElementById('getRecommendations').addEventListener('click', async function() {
+  const selected = Array.from(checkboxes)
+                          .filter(cb => cb.checked)
+                          .map(cb => cb.value);
+
+    if (selected.length === 0) return; // safety check
+
+    // For each selected waste item, send a request to Gemini Flash API
+        const products = selected.map(itemId => {
+        const card = document.querySelector(`#waste-${itemId}`).closest('.card');
+        const itemTitle = card.querySelector('.card-title').innerText;
+        const itemDescription = card.querySelector('.card-text').innerText;
+        return `- ${itemTitle}: ${itemDescription}`;
+    });
+    const zone = document.getElementById('recommendationZone');
+    const content = document.getElementById('recommendationContent');
+    zone.style.display = 'block';
+    content.innerHTML = `<div class="text-center py-3">
+        <div class="spinner-border text-success" role="status"></div>
+        <p class="text-muted mt-2 mb-0">Generating recommendations...</p>
+    </div>`;
+
+    const question = `For the following waste items, which products can be created? Provide 3 plans (sale, donate, craft) for each item:\n${products.join('\n')}`;
+
+        try {
+            const response = await fetch('/waste-items/gemini-flash', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ question })
+            });
+
+            const data = await response.json();
+ let html = '';
+
+        if (data.items && Array.isArray(data.items)) {
+            html += `<div class="accordion" id="recommendationAccordion">`;
+            data.items.forEach((item, i) => {
+                html += `
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading${i}">
+                        <button class="accordion-button ${i > 0 ? 'collapsed' : ''}" 
+                                type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#collapse${i}" aria-expanded="${i === 0}" 
+                                aria-controls="collapse${i}">
+                            🗑️ Item ${i + 1}
+                        </button>
+                    </h2>
+                    <div id="collapse${i}" class="accordion-collapse collapse ${i === 0 ? 'show' : ''}" 
+                         aria-labelledby="heading${i}" data-bs-parent="#recommendationAccordion">
+                        <div class="accordion-body">
+                            <p><strong>💰 Sale:</strong> ${item.sale}</p>
+                            <p><strong>🎁 Donate:</strong> ${item.donate}</p>
+                            <p><strong>🎨 Craft:</strong> ${item.craft}</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+        } 
+        else if (data.sale && data.donate && data.craft) {
+            html = `
+                <p><strong>💰 Sale:</strong> ${data.sale}</p>
+                <p><strong>🎁 Donate:</strong> ${data.donate}</p>
+                <p><strong>🎨 Craft:</strong> ${data.craft}</p>
+            `;
+        } 
+        else if (data.error) {
+            html = `<div class="alert alert-danger">${data.error}</div>`;
+        } 
+        else {
+            html = `<div class="alert alert-warning">Unexpected response format from Gemini.</div>`;
+        }
+
+        // Display final results
+        content.innerHTML = html;
+
+        } catch (error) {
+            console.error('Error fetching recommendations:', error);
+        }
+    
+});
+
 </script>
 @endpush
 @endsection
